@@ -203,5 +203,50 @@
       "thumbnailUrl": "/uploads/epaper-thumbnail-1780771542892.png",
       "createdAt": "2026-06-06T18:45:42.898Z"
     }
-  ]
+  ],
+  "advertisements": [
+    {
+      "_id": "ad_1781263746941g9c7m",
+      "title": "City Samachar Premium Digital Subscription",
+      "linkUrl": "https://example.com/premium",
+      "mediaType": "image",
+      "mediaUrl": "https://images.unsplash.com/photo-1546074177-ffedd79d494d?auto=format&fit=crop&w=800&q=80",
+      "slot": "sidebar",
+      "isActive": true,
+      "createdAt": "2026-06-12T11:29:06.941Z",
+      "updatedAt": "2026-06-12T11:29:06.941Z"
+    },
+    {
+      "_id": "ad_17812637469422dkhf",
+      "title": "Sant Kabir Nagar Industrial Trade Fair 2026",
+      "linkUrl": "https://example.com/fair",
+      "mediaType": "image",
+      "mediaUrl": "https://images.unsplash.com/photo-1561489396-888724a1543d?auto=format&fit=crop&w=1200&q=80",
+      "slot": "top",
+      "isActive": true,
+      "createdAt": "2026-06-12T11:29:06.942Z",
+      "updatedAt": "2026-06-12T11:29:06.942Z"
+    }
+  ],
+  "polls": [
+    {
+      "_id": "poll_default_1",
+      "questionEn": "Will the new digital library under construction in Khalilabad be highly beneficial for students?",
+      "questionHi": "क्या खलीलाबाद में बन रही नई डिजिटल लाइब्रेरी छात्रों के लिए बहुत मददगार होगी?",
+      "option1En": "Yes, absolutely",
+      "option1Hi": "हाँ, बिल्कुल",
+      "option2En": "No, not helpful",
+      "option2Hi": "नहीं, उपयोगी नहीं है",
+      "option3En": "Can't say",
+      "option3Hi": "कह नहीं सकते",
+      "votesOption1": 72,
+      "votesOption2": 18,
+      "votesOption3": 10,
+      "createdAt": "2026-06-12T11:29:06.937Z",
+      "updatedAt": "2026-06-12T11:29:06.938Z"
+    }
+  ],
+  "stats": {
+    "totalWebsiteViews": 0
+  }
 }

@@ -78,29 +78,7 @@ const seedData = async () => {
       console.log('[SEED] Default categories seeded.');
     }
 
-    const adCount = await Advertisement.countDocuments({});
-    if (adCount === 0) {
-      const defaultAds = [
-        {
-          title: 'City Samachar Premium Digital Subscription',
-          linkUrl: 'https://example.com/premium',
-          mediaType: 'image',
-          mediaUrl: 'https://images.unsplash.com/photo-1546074177-ffedd79d494d?auto=format&fit=crop&w=800&q=80',
-          slot: 'sidebar',
-          isActive: true
-        },
-        {
-          title: 'Sant Kabir Nagar Industrial Trade Fair 2026',
-          linkUrl: 'https://example.com/fair',
-          mediaType: 'image',
-          mediaUrl: 'https://images.unsplash.com/photo-1561489396-888724a1543d?auto=format&fit=crop&w=1200&q=80',
-          slot: 'top',
-          isActive: true
-        }
-      ];
-      await Advertisement.insertMany(defaultAds);
-      console.log('[SEED] Default advertisements seeded.');
-    }
+
   } catch (error) {
     console.error('Error seeding data:', error);
   }
