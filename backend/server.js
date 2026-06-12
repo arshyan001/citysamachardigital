@@ -60,6 +60,26 @@ app.get('/', (req, res) => {
   res.send('News Channel API is running...');
 });
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    mongodb: global.useJsonDb ? 'JSON Database' : 'MongoDB Atlas',
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
+// API status endpoint
+app.get('/api/status', (req, res) => {
+  res.json({
+    message: 'API is working',
+    version: '1.0.0',
+    mongodb: global.useJsonDb ? 'JSON Database (Fallback)' : 'MongoDB Atlas',
+    time: new Date().toISOString()
+  });
+});
+
 // Seed admin and categories if needed
 const seedData = async () => {
   try {
