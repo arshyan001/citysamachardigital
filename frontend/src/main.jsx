@@ -3,25 +3,24 @@ import ReactDOM from 'react-dom/client';
 import App from './App.jsx';
 import './index.css';
 
-// Global API URL configuration
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-window.API_BASE_URL = API_URL;
+// Configure API URL for production
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+console.log('🔗 API Base URL:', API_BASE_URL);
 
-// Intercept fetch to add API URL prefix for relative paths
+// Global fetch interceptor - prepend API URL to relative paths
 const originalFetch = window.fetch;
 window.fetch = function(...args) {
-  let url = args[0];
+  let [resource, config] = args;
   
-  // If it's a relative path starting with /api or /uploads, prepend the API URL
-  if (typeof url === 'string' && (url.startsWith('/api') || url.startsWith('/uploads'))) {
-    url = `${API_URL}${url}`;
-    args[0] = url;
+  // If resource is a relative path starting with /api or /uploads, prepend the API URL
+  if (typeof resource === 'string' && (resource.startsWith('/api') || resource.startsWith('/uploads'))) {
+    resource = `${API_BASE_URL}${resource}`;
+    args[0] = resource;
   }
   
+  console.log(`📡 Fetch: ${resource}`);
   return originalFetch.apply(this, args);
 };
-
-console.log('✅ API Base URL configured:', API_URL);
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
