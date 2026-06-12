@@ -1,0 +1,130 @@
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext';
+import NewsCard from '../components/NewsCard';
+import { MapPin, Info } from 'lucide-react';
+
+export default function CityNews() {
+  const { subdivision } = useParams();
+  const { language, t } = useLanguage();
+
+  const [news, setNews] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCityNews = async () => {
+      try {
+        setLoading(true);
+        let url = '/api/news';
+        if (subdivision && subdivision !== 'All') {
+          url += `?subdivision=${subdivision}`;
+        }
+        
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          setNews(data);
+        }
+      } catch (err) {
+        console.error('Error fetching subdivision news:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCityNews();
+  }, [subdivision]);
+
+  // Dynamic titles
+  const getPageTitle = () => {
+    if (!subdivision || subdivision === 'All') {
+      return language === 'en' 
+        ? 'Sant Kabir Nagar - District News' 
+        : 'संत कबीर नगर - ज़िला समाचार';
+    }
+    
+    const subTranslation = t(subdivision.toLowerCase());
+    return language === 'en' 
+      ? `Local Updates - ${subdivision}`
+      : `स्थानीय समाचार - ${subTranslation}`;
+  };
+
+  const getPageDesc = () => {
+    if (!subdivision || subdivision === 'All') {
+      return language === 'en'
+        ? 'All local reports and headlines compiled from the Sant Kabir Nagar district.'
+        : 'संत कबीर नगर जिले से संकलित सभी स्थानीय रिपोर्ट और सुर्खियां।';
+    }
+    const subTranslation = t(subdivision.toLowerCase());
+    return language === 'en'
+      ? `Ground reports, video bulletins and stories directly from the ${subdivision} subdivision area.`
+      : `सीधे ${subTranslation} उपखंड क्षेत्र से ग्राउंड रिपोर्ट, वीडियो बुलेटिन और कहानियां।`;
+  };
+
+  return (
+    <div className="container" style={{ marginTop: '30px' }}>
+      
+      {/* City Header Panel */}
+      <div 
+        className="glass" 
+        style={{ 
+          padding: '30px', 
+          borderRadius: 'var(--border-radius-md)', 
+          marginBottom: '40px',
+          borderLeft: '5px solid var(--color-primary)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '20px'
+        }}
+      >
+        <div>
+          <h2 style={{ fontSize: '28px', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <MapPin size={24} style={{ color: 'var(--color-primary)' }} />
+            {getPageTitle()}
+          </h2>
+          <p style={{ color: 'var(--color-text-secondary)', marginTop: '8px', fontSize: '15px' }}>
+            {getPageDesc()}
+          </p>
+        </div>
+        
+        <span 
+          className="live-badge" 
+          style={{ 
+            background: 'var(--color-secondary)',
+            fontSize: '11px',
+            padding: '5px 12px',
+            borderRadius: '4px'
+          }}
+        >
+          {news.length} {language === 'en' ? 'articles' : 'समाचार'}
+        </span>
+      </div>
+
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: '100px 0', fontSize: '18px', color: 'var(--color-text-secondary)' }}>
+          {t('loading')}
+        </div>
+      ) : (
+        <>
+          {news.length === 0 ? (
+            <div className="glass" style={{ textAlign: 'center', padding: '60px 20px', borderRadius: 'var(--border-radius-md)', color: 'var(--color-text-secondary)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
+              <Info size={40} style={{ color: 'var(--color-secondary)' }} />
+              <div>
+                <h3 style={{ color: '#fff', marginBottom: '8px' }}>{language === 'en' ? 'No News Found' : 'कोई समाचार नहीं मिला'}</h3>
+                <p>{language === 'en' ? 'We haven\'t published any stories for this subdivision yet. Check back soon!' : 'हमने अभी तक इस उपखंड के लिए कोई समाचार प्रकाशित नहीं किया है। कृपया जल्द ही दोबारा जांचें!'}</p>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-3">
+              {news.map((n) => (
+                <NewsCard key={n._id} news={n} />
+              ))}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}

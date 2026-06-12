@@ -1,0 +1,207 @@
+{
+  "users": [
+    {
+      "_id": "admin_user_id_1",
+      "username": "admin",
+      "password": "$2a$10$BH7pjYxdMTUXEkbFj5rdHuapTUFJ7O6BuiTJ6DfSVWy0anha97mna",
+      "createdAt": "2026-06-05T17:53:42.505Z"
+    }
+  ],
+  "categories": [
+    {
+      "_id": "cat_1",
+      "nameEn": "Politics",
+      "nameHi": "राजनीति",
+      "createdAt": "2026-06-05T17:53:42.507Z"
+    },
+    {
+      "_id": "cat_2",
+      "nameEn": "National",
+      "nameHi": "राष्ट्रीय",
+      "createdAt": "2026-06-05T17:53:42.507Z"
+    },
+    {
+      "_id": "cat_3",
+      "nameEn": "Local News",
+      "nameHi": "स्थानीय समाचार",
+      "createdAt": "2026-06-05T17:53:42.507Z"
+    },
+    {
+      "_id": "cat_4",
+      "nameEn": "Sports",
+      "nameHi": "खेल",
+      "createdAt": "2026-06-05T17:53:42.507Z"
+    },
+    {
+      "_id": "cat_5",
+      "nameEn": "Entertainment",
+      "nameHi": "मनोरंजन",
+      "createdAt": "2026-06-05T17:53:42.507Z"
+    },
+    {
+      "_id": "cat_6",
+      "nameEn": "Crime",
+      "nameHi": "अपराध",
+      "createdAt": "2026-06-05T17:53:42.507Z"
+    }
+  ],
+  "news": [
+    {
+      "_id": "news_skn_heatwave",
+      "titleEn": "Red Alert: Severe Heatwave Warning Issued for Sant Kabir Nagar and Purvanchal Districts",
+      "titleHi": "रेड अलर्ट: संत कबीर नगर सहित पूर्वांचल के जिलों में भीषण लू (हीटवेव) की चेतावनी जारी",
+      "contentEn": "The District Magistrate of Sant Kabir Nagar has issued a severe heat wave advisory for all residents. With temperatures expected to soar above 45 degrees Celsius over the next few days, citizens are advised to take necessary precautions.\n\nHealth officials have urged people to stay hydrated, avoid stepping outdoors between 12:00 PM and 4:00 PM, and keep check on the elderly and children. Water distribution stations are being set up near prominent public areas including Khalilabad Railway Station and municipal markets to offer relief to commuters.\n\nAll government primary schools have also adjusted their timings, scheduling classes in the morning from 7:00 AM to 11:30 AM. Local hospitals have established dedicated heat stroke wards with necessary medicines and cooling facilities. The administration has requested NGOs and local leaders to spread awareness in the rural pockets of Mehdawal and Dhanghata subdivisions. Citizens should carry water bottles and wet towels if traveling is unavoidable.",
+      "contentHi": "संत कबीर नगर के जिलाधिकारी ने सभी निवासियों के लिए गंभीर लू (हीट वेव) की सलाह जारी की है। अगले कुछ दिनों में तापमान 45 डिग्री सेल्सियस से ऊपर जाने की आशंका को देखते हुए नागरिकों को आवश्यक सावधानी बरतने की सलाह दी गई है।\n\nस्वास्थ्य अधिकारियों ने लोगों से पर्याप्त मात्रा में पानी पीने, दोपहर 12:00 बजे से शाम 4:00 बजे के बीच घर से बाहर निकलने से बचने और बुजुर्गों व बच्चों का विशेष ध्यान रखने का आग्रह किया है। यात्रियों को राहत देने के लिए खलीलाबाद रेलवे स्टेशन और नगर पालिका बाजारों सहित प्रमुख सार्वजनिक क्षेत्रों के पास जल वितरण केंद्र स्थापित किए जा रहे हैं।\n\nसभी सरकारी प्राथमिक स्कूलों के समय में भी बदलाव किया गया है, जिसके तहत कक्षाएं सुबह 7:00 बजे से 11:30 बजे तक संचालित होंगी। स्थानीय अस्पतालों में आवश्यक दवाओं और शीतलन सुविधाओं से लैस समर्पित हीट स्ट्रोक वार्ड बनाए गए हैं। प्रशासन ने स्वयंसेवी संस्थाओं और स्थानीय नेताओं से मेहदावल और धनघटा उपखंडों के ग्रामीण इलाकों में जागरूकता फैलाने का अनुरोध किया है। यात्रा के समय पानी की बोतलें और गीले तौलिये साथ रखने की अपील की गई है।",
+      "summaryEn": "District administration advises residents to stay indoors and drink plenty of water as temperatures cross 45 degrees in Purvanchal.",
+      "summaryHi": "पूर्वांचल में तापमान 45 डिग्री के पार जाने पर जिला प्रशासन ने निवासियों को घरों में रहने और पर्याप्त पानी पीने की सलाह दी।",
+      "images": [
+        "https://images.unsplash.com/photo-1504370805625-d32c54b16100?auto=format&fit=crop&w=800&q=80"
+      ],
+      "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "categories": [
+        "cat_2",
+        "cat_3"
+      ],
+      "district": "Sant Kabir Nagar",
+      "subdivision": "None",
+      "isBreaking": true,
+      "views": 412,
+      "createdAt": "2026-06-06T17:10:00.000Z",
+      "updatedAt": "2026-06-06T17:10:00.000Z"
+    },
+    {
+      "_id": "news_skn_sports",
+      "titleEn": "Mehdawal Sports Academy Beats Basti in Thrilling Final to Win District Cricket Cup",
+      "titleHi": "रोमांचक मुकाबले में बस्ती को हराकर मेहदावल स्पोर्ट्स एकेडमी ने जिला क्रिकेट कप जीता",
+      "contentEn": "In a thrilling finish, the Mehdawal Sports Academy defeated the Basti District Academy by 3 wickets to lift the District Championship Cup. The finals, played at the Khalilabad sports ground, attracted a huge crowd of enthusiastic local supporters.\n\nChasing a target of 168 runs, Mehdawal was struggling at 92/5, but a match-winning partnership of 64 runs for the 6th wicket anchored the team to victory. The star batsman was awarded Player of the Match for scoring 58 runs off 42 balls, which included four sixes. The captain credited their rigorous practice sessions at the Mehdawal facility for this achievement.\n\nThe sports ministry has announced a cash prize of Rs 50,000 for the winning team and promised upgrades to the local practice pitches and training equipment to encourage rural youth. MLA of Mehdawal congratulated the players and promised support for future tournaments.",
+      "contentHi": "एक रोमांचक मुकाबले में, मेहदावल स्पोर्ट्स एकेडमी ने बस्ती जिला एकेडमी को 3 विकेट से हराकर जिला चैंपियनशिप कप जीता। खलीलाबाद खेल मैदान पर खेले गए फाइनल मैच में उत्साही स्थानीय समर्थकों की भारी भीड़ उमड़ी।\n\n168 रनों के लक्ष्य का पीछा करते हुए मेहदावल की टीम 92/5 पर संघर्ष कर रही थी, लेकिन छठे विकेट के लिए 64 रनों की मैच जिताऊ साझेदारी ने टीम को जीत दिलाई। स्टार बल्लेबाज को 42 गेंदों में 58 रन बनाने के लिए 'प्लेयर ऑफ द मैच' चुना गया, जिसमें चार छक्के शामिल थे। कप्तान ने इस सफलता का श्रेय मेहदावल केंद्र में उनके कठिन अभ्यास सत्रों को दिया।\n\nखेल मंत्रालय ने विजेता टीम के लिए 50,000 रुपये के नकद पुरस्कार की घोषणा की है और ग्रामीण युवाओं को प्रोत्साहित करने के लिए स्थानीय अभ्यास पिचों और प्रशिक्षण उपकरणों को अपग्रेड करने का वादा किया है। मेहदावल के विधायक ने खिलाड़ियों को बधाई दी और भविष्य के टूर्नामेंट के लिए समर्थन का आश्वासन दिया।",
+      "summaryEn": "Mehdawal beats Basti by 3 wickets in a dramatic final chase to secure the district sports trophy in Khalilabad.",
+      "summaryHi": "मेहदावल ने एक रोमांचक फाइनल मुकाबले में बस्ती को 3 विकेट से हराकर खलीलाबाद में जिला खेल ट्रॉफी पर कब्जा किया।",
+      "images": [
+        "https://images.unsplash.com/photo-1531415074968-036ba1b575da?auto=format&fit=crop&w=800&q=80"
+      ],
+      "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "categories": [
+        "cat_4"
+      ],
+      "district": "Sant Kabir Nagar",
+      "subdivision": "Mehdawal",
+      "isBreaking": true,
+      "views": 245,
+      "createdAt": "2026-06-06T16:20:00.000Z",
+      "updatedAt": "2026-06-06T16:20:00.000Z"
+    },
+    {
+      "_id": "news_skn_library",
+      "titleEn": "New Modern Digital Library and Public Park to be Built in Khalilabad",
+      "titleHi": "खलीलाबाद में बनेगा नया आधुनिक डिजिटल पुस्तकालय और सार्वजनिक पार्क",
+      "contentEn": "Residents of Khalilabad will soon have access to a state-of-the-art public park equipped with an open gymnasium and a modern digital library. The development project, approved by the local municipal corporation, aims to provide better recreational and educational spaces for children and youth.\n\nThe park will feature walking tracks, green areas with native trees, children's play zones, and solar-powered lighting. The adjoining digital library will house over 50 computer systems, high-speed Wi-Fi, and access to academic journals and e-books. A seating capacity of 150 readers will be set up to assist students preparing for competitive exams.\n\nWork is expected to begin next month and is scheduled to be completed within six months, using a dedicated budget allocation. Local officials inspected the site near the bypass road and instructed engineers to ensure top-notch quality standards.",
+      "contentHi": "खलीलाबाद के निवासियों को जल्द ही एक अत्याधुनिक सार्वजनिक पार्क मिलेगा, जिसमें एक ओपन जिम और एक आधुनिक डिजिटल लाइब्रेरी होगी। स्थानीय नगर पालिका द्वारा स्वीकृत इस विकास परियोजना का उद्देश्य बच्चों और युवाओं को बेहतर मनोरंजन और शैक्षिक स्थान प्रदान करना है।\n\nपार्क में वॉकिंग ट्रैक, स्थानीय पेड़ों वाले हरे-भरे क्षेत्र, बच्चों के खेलने के क्षेत्र और सौर ऊर्जा से चलने वाली लाइटें होंगी। पुस्तकालय में 50 से अधिक कंप्यूटर सिस्टम, हाई-स्पीड वाई-फाई और शैक्षणिक पत्रिकाओं व ई-पुस्तकों तक पहुंच होगी। प्रतियोगी परीक्षाओं की तैयारी कर रहे छात्रों की सहायता के लिए 150 पाठकों की बैठने की क्षमता स्थापित की जाएगी।\n\nअगले महीने काम शुरू होने की उम्मीद है और बजट आवंटन का उपयोग करते हुए इसे छह महीने के भीतर पूरा करने का कार्यक्रम है। स्थानीय अधिकारियों ने बाईपास रोड के पास साइट का निरीक्षण किया और इंजीनियरों को सर्वोत्तम गुणवत्ता मानकों को सुनिश्चित करने का निर्देश दिया।",
+      "summaryEn": "Local municipality approves a modern park with open gymnasium and high-speed digital library in Khalilabad.",
+      "summaryHi": "स्थानीय नगर पालिका ने खलीलाबाद में ओपन जिम और हाई-स्पीड डिजिटल लाइब्रेरी के साथ एक आधुनिक पार्क को मंजूरी दी।",
+      "images": [
+        "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=800&q=80"
+      ],
+      "videoUrl": "",
+      "categories": [
+        "cat_3"
+      ],
+      "district": "Sant Kabir Nagar",
+      "subdivision": "Khalilabad",
+      "isBreaking": false,
+      "views": 120,
+      "createdAt": "2026-06-06T15:45:00.000Z",
+      "updatedAt": "2026-06-06T15:45:00.000Z"
+    },
+    {
+      "_id": "news_skn_politics",
+      "titleEn": "UP Minister Reviews Local Development Projects in Sant Kabir Nagar District Meet",
+      "titleHi": "उत्तर प्रदेश के कैबिनेट मंत्री ने संत कबीर नगर जिला समीक्षा बैठक में विकास कार्यों का जायजा लिया",
+      "contentEn": "In a high-level review meeting held at the Sant Kabir Nagar collectorate office, Uttar Pradesh's Cabinet Minister assessed the progress of multiple developmental schemes. The minister emphasized timely completion of roads, tap water connections, and rural electrification projects.\n\nLocal MLAs and administrative officers submitted report cards of their respective areas. The minister instructed the district magistrate to resolve sewage and drainage problems in Khalilabad municipal area immediately before the monsoon. A special fund of Rs 15 crore was proposed for bypass expansion and road repairs in Mehdawal and Dhanghata subdivisions.\n\nAddressing the media, the minister stated that the state government is committed to the overall progress of eastern Uttar Pradesh. Local citizens met the minister to submit memorandums regarding municipal issues and pending bridges.",
+      "contentHi": "संत कबीर नगर कलेक्ट्रेट कार्यालय में आयोजित एक उच्च स्तरीय समीक्षा बैठक में उत्तर प्रदेश के कैबिनेट मंत्री ने कई विकास योजनाओं की प्रगति का जायजा लिया। मंत्री ने सड़कों के निर्माण, नल-जल कनेक्शन और ग्रामीण विद्युतीकरण परियोजनाओं को समय पर पूरा करने पर जोर दिया।\n\nस्थानीय विधायकों और प्रशासनिक अधिकारियों ने अपने-अपने क्षेत्रों का रिपोर्ट कार्ड प्रस्तुत किया। मंत्री ने जिलाधिकारी को मानसून से पहले खलीलाबाद नगर क्षेत्र में सीवरेज और जल निकासी की समस्याओं का तुरंत समाधान करने के निर्देश दिए। मेहदावल और धनघटा उपखंडों में बाईपास विस्तार और सड़क मरम्मत के लिए 15 करोड़ रुपये के विशेष कोष का प्रस्ताव किया गया।\n\nमीडिया को संबोधित करते हुए मंत्री ने कहा कि राज्य सरकार पूर्वी उत्तर प्रदेश के समग्र विकास के लिए प्रतिबद्ध है। स्थानीय नागरिकों ने मंत्री से मुलाकात कर नगर निगम की समस्याओं और लंबित पुलों के संबंध में ज्ञापन सौंपे।",
+      "summaryEn": "UP Cabinet Minister chairs review meeting at SKN collectorate, prioritizing monsoon preparedness and bypass expansion.",
+      "summaryHi": "यूपी के कैबिनेट मंत्री ने एसकेएन कलेक्ट्रेट में समीक्षा बैठक की अध्यक्षता की, मानसून की तैयारियों और बाईपास विस्तार को प्राथमिकता दी।",
+      "images": [
+        "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=800&q=80"
+      ],
+      "videoUrl": "",
+      "categories": [
+        "cat_1",
+        "cat_3"
+      ],
+      "district": "Sant Kabir Nagar",
+      "subdivision": "None",
+      "isBreaking": false,
+      "views": 89,
+      "createdAt": "2026-06-06T14:15:00.000Z",
+      "updatedAt": "2026-06-06T14:15:00.000Z"
+    },
+    {
+      "_id": "news_skn_entertainment",
+      "titleEn": "Bhojpuri Film Shooting Starts in Dhanghata; Huge Crowds Gather to Catch a Glimpse of Stars",
+      "titleHi": "धनघटा में शुरू हुई भोजपुरी फिल्म की शूटिंग, सितारों की एक झलक पाने के लिए उमड़ी भारी भीड़",
+      "contentEn": "The rural landscapes of Dhanghata subdivision in Sant Kabir Nagar have become the shooting location for a highly anticipated Bhojpuri movie. The film, starring famous regional superstars, held its first day of shooting near the bank of the Ghaghara River.\n\nAs news of the shoot spread, thousands of local residents from neighboring villages gathered at the spot. Local police had to deploy extra personnel to manage the crowd and maintain order. The film director praised the scenic beauty of Sant Kabir Nagar and stated that local talent is also being cast in supporting roles.\n\nThe shooting schedule will continue for the next three weeks, boosting local businesses, guest houses, and catering services. Lead actors thanked the residents of Dhanghata for their warm hospitality and cooperation.",
+      "contentHi": "संत कबीर नगर के धनघटा उपखंड के ग्रामीण इलाके एक बहुप्रतीक्षित भोजपुरी फिल्म की शूटिंग का केंद्र बन गए हैं। क्षेत्रीय सुपरस्टार्स अभिनीत इस फिल्म की शूटिंग के पहले दिन का काम घाघरा नदी के तट के पास शुरू हुआ।\n\nजैसे ही शूटिंग की खबर फैली, आसपास के गांवों के हजारों स्थानीय निवासी मौके पर एकत्र हो गए। भीड़ को नियंत्रित करने और कानून व्यवस्था बनाए रखने के लिए स्थानीय पुलिस को अतिरिक्त बल तैनात करना पड़ा। फिल्म निर्देशक ने संत कबीर नगर की प्राकृतिक सुंदरता की प्रशंसा की और कहा कि स्थानीय प्रतिभाओं को भी सहायक भूमिकाओं में लिया जा रहा है।\n\nशूटिंग का यह कार्यक्रम अगले तीन सप्ताह तक जारी रहेगा, जिससे स्थानीय व्यवसायों, गेस्ट हाउसों और खान-पान सेवाओं को बढ़ावा मिलेगा। मुख्य अभिनेताओं ने धनघटा के निवासियों को उनके गर्मजोशी भरे आतिथ्य और सहयोग के लिए धन्यवाद दिया।",
+      "summaryEn": "Famous Bhojpuri actors start movie schedule along the Ghaghara River in Dhanghata subdivision.",
+      "summaryHi": "प्रसिद्ध भोजपुरी अभिनेताओं ने धनघटा उपखंड में घाघरा नदी के किनारे फिल्म का शेड्यूल शुरू किया।",
+      "images": [
+        "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=800&q=80"
+      ],
+      "videoUrl": "",
+      "categories": [
+        "cat_5"
+      ],
+      "district": "Sant Kabir Nagar",
+      "subdivision": "Dhanghata",
+      "isBreaking": false,
+      "views": 320,
+      "createdAt": "2026-06-06T12:30:00.000Z",
+      "updatedAt": "2026-06-06T12:30:00.000Z"
+    },
+    {
+      "_id": "news_skn_cybercrime",
+      "titleEn": "Due to vigilance of Mahuli Police, cyber fraud victim gets Rs 21,000 back",
+      "titleHi": "महुली पुलिस की सतर्कता से साइबर ठगी के शिकार युवक को मिला खोया हुआ पैसा, पुलिस ने कराए 21 हजार रुपये वापस",
+      "contentEn": "Under the 'Crack Cyber Crime Campaign' conducted in the district against cyber offenses, the Mahuli Police station team performed commendable work by recovering ₹21,000 for a victim of cyber fraud. The campaign, operating under the direction of Superintendent of Police Sandeep Kumar Meena, focuses on preventing cyber crimes and providing immediate assistance to victims.\n\nAkhilesh Yadav, a resident of Kalan village under Mahuli police station area, had downloaded a gaming app, after which his email was hacked and ₹21,000 siphoned from his account. He lodged a complaint on National Cyber Helpline (1930) and approached Mahuli police cyber help desk.\n\nMahuli Police coordinated with the banking institutions and traced the transaction. Due to quick technical investigation, the entire amount was successfully restored to the victim's account. The police have appealed to citizens not to click on unknown links or share OTPs and UPI PINs.",
+      "contentHi": "जनपद में साइबर अपराधों के विरुद्ध चलाए जा रहे 'क्रैक साइबर क्राइम अभियान' के तहत थाना महुली पुलिस ने एक सराहनीय कार्य करते हुए साइबर ठगी के शिकार व्यक्ति की 21 हजार रुपये की धनराशि वापस कराई है। पुलिस अधीक्षक संदीप कुमार मीना के निर्देशन में संचालित यह अभियान साइबर अपराधों की रोकथाम एवं पीड़ितों को त्वरित सहायता उपलब्ध कराने के लिए लगातार कार्य कर रहा है।\n\nमहुली क्षेत्र के कलान गांव निवासी अखिलेश यादव ने एक गेमिंग ऐप डाउनलोड किया था, जिसके बाद उनका ई-मेल हैक हो गया और खाते से 21 हजार रुपये निकाल लिए गए। पीड़ित ने राष्ट्रीय साइबर हेल्पलाइन नंबर 1930 पर शिकायत दर्ज कराई और महुली पुलिस साइबर डेस्क से सहायता मांगी।\n\nपुलिस ने त्वरित तकनीकी जांच और बैंकों से समन्वय कर धनराशि को रिकवर किया। पुलिस ने नागरिकों से अपील की है कि किसी अज्ञात लिंक पर क्लिक न करें और न ही किसी से ओटीपी या यूपीआई पिन साझा करें।",
+      "summaryEn": "Mahuli police and cyber help desk restore hacked and stolen bank funds of Rs 21,000 back to a rural resident.",
+      "summaryHi": "महुली पुलिस और साइबर हेल्प डेस्क ने ग्रामीण निवासी के बैंक खाते से चोरी हुए 21,000 रुपये की धोखाधड़ी का खुलासा कर रकम वापस कराई।",
+      "images": [
+        "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=800&q=80"
+      ],
+      "videoUrl": "",
+      "categories": [
+        "cat_6",
+        "cat_3"
+      ],
+      "district": "Sant Kabir Nagar",
+      "subdivision": "None",
+      "isBreaking": true,
+      "views": 154,
+      "createdAt": "2026-06-06T10:15:00.000Z",
+      "updatedAt": "2026-06-06T10:15:00.000Z"
+    }
+  ],
+  "contacts": [
+    {
+      "_id": "msg_1780682187922",
+      "name": "Test User",
+      "email": "test@example.com",
+      "phone": "9876543210",
+      "message": "This is a test message to verify the contact workflow integration.",
+      "isRead": true,
+      "createdAt": "2026-06-05T17:56:27.922Z"
+    }
+  ],
+  "epapers": [
+    {
+      "_id": "epaper_1780771542898c6f5p",
+      "titleEn": "City Samachar - 6th June 2026",
+      "titleHi": "सिटी समाचार - 6 जून 2026",
+      "date": "2026-06-06",
+      "pdfUrl": "/uploads/epaper-pdf-1780771542892.pdf",
+      "thumbnailUrl": "/uploads/epaper-thumbnail-1780771542892.png",
+      "createdAt": "2026-06-06T18:45:42.898Z"
+    }
+  ]
+}
