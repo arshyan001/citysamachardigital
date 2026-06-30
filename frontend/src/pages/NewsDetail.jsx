@@ -130,7 +130,7 @@ export default function NewsDetail() {
     }
   };
 
-  const shareUrl = `${import.meta.env.VITE_API_URL || window.location.origin}/share/${id}`;
+  const shareUrl = `${window.location.protocol}//${window.location.host}/news/${id}`;
 
   const handleShareClick = async (platformUrl) => {
     window.open(platformUrl, '_blank');
