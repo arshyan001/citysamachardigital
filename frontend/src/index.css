@@ -512,6 +512,29 @@ select {
   overflow: hidden;
 }
 
+/* Light Theme overrides for Hero Main Card */
+.light-theme .hero-main-card {
+  border-color: var(--border-color);
+  box-shadow: var(--shadow-sm);
+}
+
+.light-theme .hero-main-card .card-overlay {
+  background: linear-gradient(0deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.4) 60%, rgba(255, 255, 255, 0) 100%);
+}
+
+.light-theme .hero-main-card h2 {
+  color: var(--color-text-primary) !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+}
+
+.light-theme .hero-main-card p {
+  color: var(--color-text-secondary) !important;
+}
+
+.light-theme .hero-main-card .card-meta {
+  color: var(--color-text-secondary) !important;
+}
+
 .card-meta {
   font-size: 12px;
   color: var(--color-text-secondary);
