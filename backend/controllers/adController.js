@@ -2,6 +2,7 @@ const Advertisement = require('../models/Advertisement');
 const jsonDb = require('../config/jsonDb');
 const fs = require('fs');
 const path = require('path');
+const { uploadToCloudinary, deleteFromCloudinary } = require('../config/cloudinary');
 
 // @desc    Get all advertisements
 // @route   GET /api/ads
@@ -68,9 +69,12 @@ const createAd = async (req, res) => {
   let mediaType = 'image';
 
   if (req.file) {
-    mediaUrl = `/uploads/${req.file.filename}`;
-    if (req.file.mimetype.startsWith('video/')) {
-      mediaType = 'video';
+    try {
+      mediaType = req.file.mimetype.startsWith('video/') ? 'video' : 'image';
+      const uploadResult = await uploadToCloudinary(req.file, 'ad_media');
+      mediaUrl = uploadResult.secure_url;
+    } catch (err) {
+      return res.status(500).json({ message: 'Media upload failed: ' + err.message });
     }
   } else {
     return res.status(400).json({ message: 'Please upload a photo or video file' });
@@ -117,13 +121,47 @@ const createAd = async (req, res) => {
 const updateAd = async (req, res) => {
   const { title, linkUrl, slot, size, isActive } = req.body;
 
+  let existingAd = null;
   if (global.useJsonDb) {
+    existingAd = jsonDb.getAdById(req.params.id);
+  } else {
     try {
-      const existingAd = jsonDb.getAdById(req.params.id);
-      if (!existingAd) {
-        return res.status(404).json({ message: 'Advertisement not found' });
+      existingAd = await Advertisement.findById(req.params.id);
+    } catch (err) {}
+  }
+
+  if (!existingAd) {
+    return res.status(404).json({ message: 'Advertisement not found' });
+  }
+
+  let mediaUrl = undefined;
+  let mediaType = undefined;
+
+  if (req.file) {
+    try {
+      // Delete old file
+      if (existingAd.mediaUrl) {
+        if (existingAd.mediaUrl.startsWith('/uploads/')) {
+          const absolutePath = path.join(__dirname, '..', existingAd.mediaUrl);
+          if (fs.existsSync(absolutePath)) {
+            fs.unlinkSync(absolutePath);
+          }
+        } else {
+          await deleteFromCloudinary(existingAd.mediaUrl);
+        }
       }
 
+      // Upload new file
+      mediaType = req.file.mimetype.startsWith('video/') ? 'video' : 'image';
+      const uploadResult = await uploadToCloudinary(req.file, 'ad_media');
+      mediaUrl = uploadResult.secure_url;
+    } catch (err) {
+      return res.status(500).json({ message: 'Media upload/delete failed: ' + err.message });
+    }
+  }
+
+  if (global.useJsonDb) {
+    try {
       let updatePayload = {
         title: title || existingAd.title,
         linkUrl: linkUrl !== undefined ? linkUrl : existingAd.linkUrl,
@@ -132,21 +170,9 @@ const updateAd = async (req, res) => {
         isActive: isActive !== undefined ? (isActive === 'true' || isActive === true) : existingAd.isActive
       };
 
-      if (req.file) {
-        // Delete old file
-        try {
-          if (existingAd.mediaUrl && existingAd.mediaUrl.startsWith('/uploads/')) {
-            const absolutePath = path.join(__dirname, '..', existingAd.mediaUrl);
-            if (fs.existsSync(absolutePath)) {
-              fs.unlinkSync(absolutePath);
-            }
-          }
-        } catch (err) {
-          console.error(err);
-        }
-
-        updatePayload.mediaUrl = `/uploads/${req.file.filename}`;
-        updatePayload.mediaType = req.file.mimetype.startsWith('video/') ? 'video' : 'image';
+      if (mediaUrl !== undefined) {
+        updatePayload.mediaUrl = mediaUrl;
+        updatePayload.mediaType = mediaType;
       }
 
       const updatedAd = jsonDb.updateAd(req.params.id, updatePayload);
@@ -166,21 +192,9 @@ const updateAd = async (req, res) => {
       ad.size = size || ad.size;
       ad.isActive = isActive !== undefined ? (isActive === 'true' || isActive === true) : ad.isActive;
 
-      if (req.file) {
-        // Delete old file from disk
-        try {
-          if (ad.mediaUrl && ad.mediaUrl.startsWith('/uploads/')) {
-            const absolutePath = path.join(__dirname, '..', ad.mediaUrl);
-            if (fs.existsSync(absolutePath)) {
-              fs.unlinkSync(absolutePath);
-            }
-          }
-        } catch (err) {
-          console.error('Error deleting old ad file:', err);
-        }
-
-        ad.mediaUrl = `/uploads/${req.file.filename}`;
-        ad.mediaType = req.file.mimetype.startsWith('video/') ? 'video' : 'image';
+      if (mediaUrl !== undefined) {
+        ad.mediaUrl = mediaUrl;
+        ad.mediaType = mediaType;
       }
 
       const updatedAd = await ad.save();
@@ -197,6 +211,35 @@ const updateAd = async (req, res) => {
 // @route   DELETE /api/ads/:id
 // @access  Private/Admin
 const deleteAd = async (req, res) => {
+  let existingAd = null;
+  if (global.useJsonDb) {
+    existingAd = jsonDb.getAdById(req.params.id);
+  } else {
+    try {
+      existingAd = await Advertisement.findById(req.params.id);
+    } catch (err) {}
+  }
+
+  if (!existingAd) {
+    return res.status(404).json({ message: 'Advertisement not found' });
+  }
+
+  // Delete media from Cloudinary (or disk if local)
+  try {
+    if (existingAd.mediaUrl) {
+      if (existingAd.mediaUrl.startsWith('/uploads/')) {
+        const absolutePath = path.join(__dirname, '..', existingAd.mediaUrl);
+        if (fs.existsSync(absolutePath)) {
+          fs.unlinkSync(absolutePath);
+        }
+      } else {
+        await deleteFromCloudinary(existingAd.mediaUrl);
+      }
+    }
+  } catch (err) {
+    console.error('Error deleting ad media:', err);
+  }
+
   if (global.useJsonDb) {
     try {
       const success = jsonDb.deleteAd(req.params.id);
@@ -211,26 +254,8 @@ const deleteAd = async (req, res) => {
   }
 
   try {
-    const ad = await Advertisement.findById(req.params.id);
-
-    if (ad) {
-      // Delete file from disk
-      try {
-        if (ad.mediaUrl && ad.mediaUrl.startsWith('/uploads/')) {
-          const absolutePath = path.join(__dirname, '..', ad.mediaUrl);
-          if (fs.existsSync(absolutePath)) {
-            fs.unlinkSync(absolutePath);
-          }
-        }
-      } catch (err) {
-        console.error('Error deleting ad file:', err);
-      }
-
-      await Advertisement.deleteOne({ _id: req.params.id });
-      res.json({ message: 'Advertisement removed' });
-    } else {
-      res.status(404).json({ message: 'Advertisement not found' });
-    }
+    await Advertisement.deleteOne({ _id: req.params.id });
+    res.json({ message: 'Advertisement removed' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

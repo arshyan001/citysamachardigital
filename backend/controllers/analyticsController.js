@@ -196,8 +196,8 @@ function generateTimelineData(newsList) {
       return createdStr.startsWith(dateStr);
     });
     const articleCount = dayArticles.length;
-    // Sum views of articles created on this day, add a baseline traffic view to look nice
-    const dayViews = dayArticles.reduce((sum, n) => sum + (n.views || 0), 0) + Math.floor(Math.random() * 40) + 15;
+    // Sum views of articles created on this day
+    const dayViews = dayArticles.reduce((sum, n) => sum + (n.views || 0), 0);
 
     return {
       date: new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),

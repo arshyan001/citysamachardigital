@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { Plus, Edit, Trash2, Mail, FolderPlus, Newspaper, CheckCircle, XCircle, FileText, ChevronRight, Languages, BarChart2, MessageSquare, ChevronDown, LogOut, Settings, Image, Globe, Share2, ThumbsUp, Eye } from 'lucide-react';
+import Swal from 'sweetalert2';
 
 export default function AdminDashboard() {
   const { language, t } = useLanguage();
@@ -16,7 +17,11 @@ export default function AdminDashboard() {
   }, [token, navigate]);
 
   // States
-  const [activeTab, setActiveTab] = useState('analytics'); // 'analytics' | 'list' | 'form' | 'categories' | 'messages' | 'epaper'
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'analytics';
+  const setActiveTab = (tabName) => {
+    setSearchParams({ tab: tabName });
+  };
   const [analyticsData, setAnalyticsData] = useState(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(true);
   const [newsList, setNewsList] = useState([]);
@@ -50,6 +55,21 @@ export default function AdminDashboard() {
   const [settingsPassword, setSettingsPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
+  // Editor-in-Chief States
+  const [editorNameEn, setEditorNameEn] = useState('');
+  const [editorNameHi, setEditorNameHi] = useState('');
+  const [editorRoleEn, setEditorRoleEn] = useState('Editor-in-Chief');
+  const [editorRoleHi, setEditorRoleHi] = useState('मुख्य संपादक');
+  const [editorDescEn, setEditorDescEn] = useState('');
+  const [editorDescHi, setEditorDescHi] = useState('');
+  const [editorPhotoFile, setEditorPhotoFile] = useState(null);
+  const [editorPhotoPreview, setEditorPhotoPreview] = useState('');
+  const [editorMobile, setEditorMobile] = useState('');
+  const [editorFacebook, setEditorFacebook] = useState('');
+  const [editorInstagram, setEditorInstagram] = useState('');
+  const [editorYoutube, setEditorYoutube] = useState('');
+
+
   // Form States - News
   const [titleEn, setTitleEn] = useState('');
   const [titleHi, setTitleHi] = useState('');
@@ -63,6 +83,7 @@ export default function AdminDashboard() {
   const [imageFiles, setImageFiles] = useState([]);
   const [imageUrlStr, setImageUrlStr] = useState('');
   const [isBreaking, setIsBreaking] = useState(false);
+  const [isNewsSaving, setIsNewsSaving] = useState(false);
 
   // Translation States & Function
   const [isAutoTranslate, setIsAutoTranslate] = useState(true);
@@ -181,24 +202,35 @@ export default function AdminDashboard() {
   };
 
   const handleDeleteComment = async (newsId, commentId) => {
-    if (!window.confirm(language === 'en' ? 'Are you sure you want to delete this comment?' : 'क्या आप वाकई इस टिप्पणी को हटाना चाहते हैं?')) return;
+    Swal.fire({
+      title: language === 'en' ? 'Are you sure?' : 'क्या आप आश्वस्त हैं?',
+      text: language === 'en' ? 'Do you want to delete this comment?' : 'क्या आप इस टिप्पणी को हटाना चाहते हैं?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: language === 'en' ? 'Yes, delete it!' : 'हाँ, इसे हटाएँ!',
+      cancelButtonText: language === 'en' ? 'Cancel' : 'रद्द करें'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const res = await fetch(`/api/news/${newsId}/comments/${commentId}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` }
+          });
 
-    try {
-      const res = await fetch(`/api/news/${newsId}/comments/${commentId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      if (res.ok) {
-        triggerAlert('success', language === 'en' ? 'Comment deleted successfully' : 'टिप्पणी सफलतापूर्वक हटा दी गई');
-        fetchComments();
-      } else {
-        triggerAlert('error', language === 'en' ? 'Failed to delete comment' : 'टिप्पणी हटाने में विफल');
+          if (res.ok) {
+            triggerAlert('success', language === 'en' ? 'Comment deleted successfully' : 'टिप्पणी सफलतापूर्वक हटा दी गई');
+            fetchComments();
+          } else {
+            triggerAlert('error', language === 'en' ? 'Failed to delete comment' : 'टिप्पणी हटाने में विफल');
+          }
+        } catch (err) {
+          console.error(err);
+          triggerAlert('error', 'Network error');
+        }
       }
-    } catch (err) {
-      console.error(err);
-      triggerAlert('error', 'Network error');
-    }
+    });
   };
 
   const fetchPoll = async () => {
@@ -260,6 +292,28 @@ export default function AdminDashboard() {
     }
   };
 
+  const fetchEditorInfo = async () => {
+    try {
+      const res = await fetch('/api/editor');
+      if (res.ok) {
+        const data = await res.json();
+        setEditorNameEn(data.nameEn || '');
+        setEditorNameHi(data.nameHi || '');
+        setEditorRoleEn(data.roleEn || 'Editor-in-Chief');
+        setEditorRoleHi(data.roleHi || 'मुख्य संपादक');
+        setEditorDescEn(data.descriptionEn || '');
+        setEditorDescHi(data.descriptionHi || '');
+        setEditorPhotoPreview(data.photoUrl || '');
+        setEditorMobile(data.mobile || '');
+        setEditorFacebook(data.facebook || '');
+        setEditorInstagram(data.instagram || '');
+        setEditorYoutube(data.youtube || '');
+      }
+    } catch (err) {
+      console.error('Error fetching editor info:', err);
+    }
+  };
+
   useEffect(() => {
     if (token) {
       fetchNews();
@@ -269,6 +323,7 @@ export default function AdminDashboard() {
       fetchPoll();
       fetchComments();
       fetchAds();
+      fetchEditorInfo();
     }
   }, [token]);
 
@@ -278,6 +333,9 @@ export default function AdminDashboard() {
     }
     if (token && activeTab === 'ads') {
       fetchAds();
+    }
+    if (token && activeTab === 'settings') {
+      fetchEditorInfo();
     }
   }, [activeTab, token]);
 
@@ -289,8 +347,22 @@ export default function AdminDashboard() {
 
   // Display flash alerts
   const triggerAlert = (type, text) => {
-    setAlert({ type, text });
-    setTimeout(() => setAlert(null), 5000);
+    const Toast = Swal.mixin({
+      toast: true,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.onmouseenter = Swal.stopTimer;
+        toast.onmouseleave = Swal.resumeTimer;
+      }
+    });
+
+    Toast.fire({
+      icon: type === 'error' ? 'error' : 'success',
+      title: text
+    });
   };
 
   // Toggle Category Checkbox
@@ -326,6 +398,7 @@ export default function AdminDashboard() {
       return;
     }
 
+    setIsNewsSaving(true);
     const formData = new FormData();
     formData.append('titleEn', titleEn);
     formData.append('titleHi', titleHi);
@@ -375,6 +448,8 @@ export default function AdminDashboard() {
     } catch (err) {
       console.error(err);
       triggerAlert('error', 'Network communication error');
+    } finally {
+      setIsNewsSaving(false);
     }
   };
 
@@ -403,24 +478,35 @@ export default function AdminDashboard() {
 
   // Delete News article
   const handleDeleteNews = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this article?')) return;
+    Swal.fire({
+      title: language === 'en' ? 'Are you sure?' : 'क्या आप आश्वस्त हैं?',
+      text: language === 'en' ? 'Do you want to delete this article?' : 'क्या आप इस समाचार को हटाना चाहते हैं?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: language === 'en' ? 'Yes, delete it!' : 'हाँ, इसे हटाएँ!',
+      cancelButtonText: language === 'en' ? 'Cancel' : 'रद्द करें'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const res = await fetch(`/api/news/${id}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` }
+          });
 
-    try {
-      const res = await fetch(`/api/news/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      if (res.ok) {
-        triggerAlert('success', 'Article deleted');
-        fetchNews();
-      } else {
-        triggerAlert('error', 'Failed to delete');
+          if (res.ok) {
+            triggerAlert('success', 'Article deleted');
+            fetchNews();
+          } else {
+            triggerAlert('error', 'Failed to delete');
+          }
+        } catch (err) {
+          console.error(err);
+          triggerAlert('error', 'Network error');
+        }
       }
-    } catch (err) {
-      console.error(err);
-      triggerAlert('error', 'Network error');
-    }
+    });
   };
 
   // Create Category
@@ -457,24 +543,35 @@ export default function AdminDashboard() {
 
   // Delete Category
   const handleDeleteCategory = async (id) => {
-    if (!window.confirm('Delete category? All associated articles will lose this category reference.')) return;
+    Swal.fire({
+      title: language === 'en' ? 'Are you sure?' : 'क्या आप आश्वस्त हैं?',
+      text: language === 'en' ? 'Delete category? All associated articles will lose this category reference.' : 'श्रेणी हटाएँ? सभी संबंधित समाचारों से यह श्रेणी हट जाएगी।',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: language === 'en' ? 'Yes, delete it!' : 'हाँ, इसे हटाएँ!',
+      cancelButtonText: language === 'en' ? 'Cancel' : 'रद्द करें'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const res = await fetch(`/api/news/categories/${id}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` }
+          });
 
-    try {
-      const res = await fetch(`/api/news/categories/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      if (res.ok) {
-        triggerAlert('success', 'Category deleted');
-        fetchCategories();
-        fetchNews();
-      } else {
-        triggerAlert('error', 'Failed to delete category');
+          if (res.ok) {
+            triggerAlert('success', 'Category deleted');
+            fetchCategories();
+            fetchNews();
+          } else {
+            triggerAlert('error', 'Failed to delete category');
+          }
+        } catch (err) {
+          console.error(err);
+        }
       }
-    } catch (err) {
-      console.error(err);
-    }
+    });
   };
 
   // Mark contact form read
@@ -495,21 +592,32 @@ export default function AdminDashboard() {
 
   // Delete Message
   const handleDeleteMessage = async (id) => {
-    if (!window.confirm('Delete this user message?')) return;
+    Swal.fire({
+      title: language === 'en' ? 'Are you sure?' : 'क्या आप आश्वस्त हैं?',
+      text: language === 'en' ? 'Delete this user message?' : 'क्या आप इस उपयोगकर्ता संदेश को हटाना चाहते हैं?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: language === 'en' ? 'Yes, delete it!' : 'हाँ, इसे हटाएँ!',
+      cancelButtonText: language === 'en' ? 'Cancel' : 'रद्द करें'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const res = await fetch(`/api/contact/${id}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` }
+          });
 
-    try {
-      const res = await fetch(`/api/contact/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      if (res.ok) {
-        triggerAlert('success', 'Message deleted');
-        fetchMessages();
+          if (res.ok) {
+            triggerAlert('success', 'Message deleted');
+            fetchMessages();
+          }
+        } catch (err) {
+          console.error(err);
+        }
       }
-    } catch (err) {
-      console.error(err);
-    }
+    });
   };
 
   // Submit E-Paper upload
@@ -569,24 +677,35 @@ export default function AdminDashboard() {
 
   // Delete E-Paper
   const handleDeleteEPaper = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this E-Paper edition?')) return;
+    Swal.fire({
+      title: language === 'en' ? 'Are you sure?' : 'क्या आप आश्वस्त हैं?',
+      text: language === 'en' ? 'Are you sure you want to delete this E-Paper edition?' : 'क्या आप वाकई इस ई-पेपर संस्करण को हटाना चाहते हैं?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: language === 'en' ? 'Yes, delete it!' : 'हाँ, इसे हटाएँ!',
+      cancelButtonText: language === 'en' ? 'Cancel' : 'रद्द करें'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const res = await fetch(`/api/epaper/${id}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` }
+          });
 
-    try {
-      const res = await fetch(`/api/epaper/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      if (res.ok) {
-        triggerAlert('success', 'E-Paper deleted successfully!');
-        fetchEPapers();
-      } else {
-        triggerAlert('error', 'Failed to delete');
+          if (res.ok) {
+            triggerAlert('success', 'E-Paper deleted successfully!');
+            fetchEPapers();
+          } else {
+            triggerAlert('error', 'Failed to delete');
+          }
+        } catch (err) {
+          console.error(err);
+          triggerAlert('error', 'Network error');
+        }
       }
-    } catch (err) {
-      console.error(err);
-      triggerAlert('error', 'Network error');
-    }
+    });
   };
 
   // Advertisement Functions
@@ -683,24 +802,35 @@ export default function AdminDashboard() {
   };
 
   const handleDeleteAd = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this advertisement?')) return;
+    Swal.fire({
+      title: language === 'en' ? 'Are you sure?' : 'क्या आप आश्वस्त हैं?',
+      text: language === 'en' ? 'Are you sure you want to delete this advertisement?' : 'क्या आप वाकई इस विज्ञापन को हटाना चाहते हैं?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: language === 'en' ? 'Yes, delete it!' : 'हाँ, इसे हटाएँ!',
+      cancelButtonText: language === 'en' ? 'Cancel' : 'रद्द करें'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const res = await fetch(`/api/ads/${id}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` }
+          });
 
-    try {
-      const res = await fetch(`/api/ads/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      if (res.ok) {
-        triggerAlert('success', 'Advertisement deleted');
-        fetchAds();
-      } else {
-        triggerAlert('error', 'Failed to delete');
+          if (res.ok) {
+            triggerAlert('success', 'Advertisement deleted');
+            fetchAds();
+          } else {
+            triggerAlert('error', 'Failed to delete');
+          }
+        } catch (err) {
+          console.error(err);
+          triggerAlert('error', 'Network error');
+        }
       }
-    } catch (err) {
-      console.error(err);
-      triggerAlert('error', 'Network error');
-    }
+    });
   };
 
   const handleToggleAdStatus = async (ad) => {
@@ -758,6 +888,54 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleEditorSubmit = async (e) => {
+    e.preventDefault();
+    if (!editorNameEn || !editorNameHi) {
+      triggerAlert('error', 'Editor name is required in both English and Hindi');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('nameEn', editorNameEn);
+    formData.append('nameHi', editorNameHi);
+    formData.append('roleEn', editorRoleEn);
+    formData.append('roleHi', editorRoleHi);
+    formData.append('descriptionEn', editorDescEn);
+    formData.append('descriptionHi', editorDescHi);
+    formData.append('mobile', editorMobile);
+    formData.append('facebook', editorFacebook);
+    formData.append('instagram', editorInstagram);
+    formData.append('youtube', editorYoutube);
+    if (editorPhotoFile) {
+      formData.append('photoFile', editorPhotoFile);
+    }
+
+    try {
+      const res = await fetch('/api/editor', {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      if (res.ok) {
+        triggerAlert('success', language === 'en' ? 'Editor profile updated successfully' : 'संपादक प्रोफ़ाइल सफलतापूर्वक अपडेट हो गई');
+        const data = await res.json();
+        setEditorPhotoPreview(data.photoUrl || '');
+        setEditorPhotoFile(null);
+        const fileInput = document.getElementById('editorPhotoInput');
+        if (fileInput) fileInput.value = '';
+      } else {
+        const data = await res.json();
+        triggerAlert('error', data.message || 'Failed to update editor info');
+      }
+    } catch (err) {
+      console.error(err);
+      triggerAlert('error', 'Network error');
+    }
+  };
+
   const fetchAnalytics = async () => {
     try {
       setAnalyticsLoading(true);
@@ -778,9 +956,35 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
+    let intervalId;
     if (activeTab === 'analytics' && token) {
+      // Initial load
       fetchAnalytics();
+
+      // Poll silently every 5 seconds for real-time updates
+      intervalId = setInterval(() => {
+        const fetchAnalyticsSilent = async () => {
+          try {
+            const res = await fetch('/api/analytics/dashboard', {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            });
+            if (res.ok) {
+              const data = await res.json();
+              setAnalyticsData(data);
+            }
+          } catch (err) {
+            console.error('Error polling dashboard stats:', err);
+          }
+        };
+        fetchAnalyticsSilent();
+      }, 5000);
     }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
   }, [activeTab, token]);
 
   return (
@@ -807,12 +1011,7 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* Alert banner */}
-      {alert && (
-        <div className={`alert ${alert.type === 'success' ? 'alert-success' : 'alert-error'}`}>
-          {alert.text}
-        </div>
-      )}
+
 
       {/* Dashboard Tabs Bar */}
       <div className="admin-tabs" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', flexWrap: 'wrap', gap: '15px' }}>
@@ -903,6 +1102,17 @@ export default function AdminDashboard() {
               <Image size={16} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
               {language === 'en' ? 'Manage Ads' : 'विज्ञापन प्रबंधन'}
             </button>
+
+            {/* Auto Newspaper Generator */}
+            <button
+              className="admin-tab"
+              onClick={() => navigate('/newspaper')}
+              style={{ background: 'linear-gradient(135deg, rgba(239,68,68,0.15), rgba(59,130,246,0.10))', borderColor: 'rgba(239,68,68,0.4)' }}
+              title={language === 'en' ? 'Auto generate today\'s newspaper as PDF' : 'आज का अखबार PDF में बनाएं'}
+            >
+              <span style={{ marginRight: '5px' }}>📰</span>
+              {language === 'en' ? 'Auto Newspaper' : 'ऑटो अखबार'}
+            </button>
           </div>
 
           {/* Mobile-only grouped dropdown */}
@@ -949,11 +1159,18 @@ export default function AdminDashboard() {
                     {language === 'en' ? 'Opinion Poll' : 'ओपिनियन पोल'}
                   </button>
                   <button
-                    style={{ background: 'transparent', border: 'none', color: ['ads', 'adForm'].includes(activeTab) ? 'var(--color-primary)' : 'var(--color-text-primary)', padding: '10px 15px', textAlign: 'left', cursor: 'pointer', fontWeight: 600, fontSize: '14px', width: '100%', display: 'flex', alignItems: 'center', gap: '8px' }}
+                    style={{ background: 'transparent', border: 'none', color: ['ads', 'adForm'].includes(activeTab) ? 'var(--color-primary)' : 'var(--color-text-primary)', padding: '10px 15px', textAlign: 'left', cursor: 'pointer', fontWeight: 600, fontSize: '14px', width: '100%', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '8px' }}
                     onClick={() => { setActiveTab('ads'); setIsEditMenuOpen(false); }}
                   >
                     <Image size={14} />
                     {language === 'en' ? 'Manage Ads' : 'विज्ञापन प्रबंधन'}
+                  </button>
+                  <button
+                    style={{ background: 'linear-gradient(135deg, rgba(239,68,68,0.12), rgba(59,130,246,0.08))', border: 'none', color: 'var(--color-primary)', padding: '10px 15px', textAlign: 'left', cursor: 'pointer', fontWeight: 700, fontSize: '14px', width: '100%', display: 'flex', alignItems: 'center', gap: '8px' }}
+                    onClick={() => { navigate('/newspaper'); setIsEditMenuOpen(false); }}
+                  >
+                    <span>📰</span>
+                    {language === 'en' ? 'Auto Newspaper PDF' : 'ऑटो अखबार PDF'}
                   </button>
                 </div>
               )}
@@ -998,8 +1215,33 @@ export default function AdminDashboard() {
                   newsList.map((article) => (
                     <tr key={article._id}>
                       <td>
-                        <div style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>{article.titleHi}</div>
-                        <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginTop: '4px' }}>{article.titleEn}</div>
+                        <div 
+                          style={{ 
+                            fontWeight: 600, 
+                            color: 'var(--color-text-primary)',
+                            maxWidth: '380px',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis'
+                          }} 
+                          title={article.titleHi}
+                        >
+                          {article.titleHi}
+                        </div>
+                        <div 
+                          style={{ 
+                            fontSize: '12px', 
+                            color: 'var(--color-text-secondary)', 
+                            marginTop: '4px',
+                            maxWidth: '380px',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis'
+                          }} 
+                          title={article.titleEn}
+                        >
+                          {article.titleEn}
+                        </div>
                         {article.isBreaking && (
                           <span className="live-badge" style={{ fontSize: '8px', padding: '1px 4px', display: 'inline-block', marginTop: '6px' }}>
                             {t('breakingNews')}
@@ -1295,7 +1537,7 @@ export default function AdminDashboard() {
                   <input
                     type="file"
                     multiple
-                    accept="image/*"
+                    accept="image/*,.heic,.heif"
                     className="form-control"
                     onChange={(e) => setImageFiles(e.target.files)}
                   />
@@ -1326,8 +1568,13 @@ export default function AdminDashboard() {
               </div>
 
               <div style={{ display: 'flex', gap: '15px', marginTop: '20px' }}>
-                <button type="submit" className="btn" style={{ width: 'auto' }}>
-                  {t('saveBtn')}
+                <button 
+                  type="submit" 
+                  className="btn" 
+                  style={{ width: 'auto' }}
+                  disabled={isNewsSaving}
+                >
+                  {isNewsSaving ? 'Saving....' : t('saveBtn')}
                 </button>
                 <button
                   type="button"
@@ -1748,23 +1995,196 @@ export default function AdminDashboard() {
 
         {/* TAB 4: CONTACT MESSAGES */}
         {activeTab === 'settings' && (
-          <div className="contact-card">
-            <h3 style={{ color: 'var(--color-text-primary)', marginBottom: '20px', fontSize: '18px', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px' }}>{language === 'en' ? 'Admin Settings' : 'एडमिन सेटिंग्स'}</h3>
-            <form onSubmit={handleUpdateCredentials}>
-              <div className="form-group">
-                <label>{language === 'en' ? 'Username' : 'उपयोगकर्ता नाम'}</label>
-                <input type="text" className="form-control" required value={settingsUsername} onChange={e => setSettingsUsername(e.target.value)} />
-              </div>
-              <div className="form-group">
-                <label>{language === 'en' ? 'New Password' : 'नया पासवर्ड'}</label>
-                <input type="password" className="form-control" required value={settingsPassword} onChange={e => setSettingsPassword(e.target.value)} minLength={8} />
-              </div>
-              <div className="form-group">
-                <label>{language === 'en' ? 'Confirm Password' : 'पासवर्ड पुष्टि'}</label>
-                <input type="password" className="form-control" required value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
-              </div>
-              <button type="submit" className="btn" style={{ width: 'auto' }}>{language === 'en' ? 'Update Credentials' : 'प्रमाणपत्र अपडेट करें'}</button>
-            </form>
+          <div className="grid grid-cols-2" style={{ gap: '20px', alignItems: 'start' }}>
+            <div className="contact-card">
+              <h3 style={{ color: 'var(--color-text-primary)', marginBottom: '20px', fontSize: '18px', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px' }}>{language === 'en' ? 'Admin Settings' : 'एडमिन सेटिंग्स'}</h3>
+              <form onSubmit={handleUpdateCredentials}>
+                <div className="form-group">
+                  <label>{language === 'en' ? 'Username' : 'उपयोगकर्ता नाम'}</label>
+                  <input type="text" className="form-control" required value={settingsUsername} onChange={e => setSettingsUsername(e.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label>{language === 'en' ? 'New Password' : 'नया पासवर्ड'}</label>
+                  <input type="password" className="form-control" required value={settingsPassword} onChange={e => setSettingsPassword(e.target.value)} minLength={8} />
+                </div>
+                <div className="form-group">
+                  <label>{language === 'en' ? 'Confirm Password' : 'पासवर्ड पुष्टि'}</label>
+                  <input type="password" className="form-control" required value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
+                </div>
+                <button type="submit" className="btn" style={{ width: 'auto' }}>{language === 'en' ? 'Update Credentials' : 'प्रमाणपत्र अपडेट करें'}</button>
+              </form>
+            </div>
+
+            <div className="contact-card">
+              <h3 style={{ color: 'var(--color-text-primary)', marginBottom: '20px', fontSize: '18px', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px' }}>
+                {language === 'en' ? 'Editor-in-Chief Profile' : 'मुख्य संपादक प्रोफ़ाइल'}
+              </h3>
+              <form onSubmit={handleEditorSubmit}>
+                {/* Editor Name English & Hindi */}
+                <div className="grid grid-cols-2" style={{ gap: '15px' }}>
+                  <div className="form-group">
+                    <label>{language === 'en' ? 'Name (Hindi) *' : 'नाम (हिंदी) *'}</label>
+                    <input
+                      id="editorNameHi"
+                      type="text"
+                      className="form-control"
+                      required
+                      value={editorNameHi}
+                      onChange={(e) => setEditorNameHi(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label>{language === 'en' ? 'Name (English) *' : 'नाम (English) *'}</label>
+                    <input
+                      id="editorNameEn"
+                      type="text"
+                      className="form-control"
+                      required
+                      value={editorNameEn}
+                      onChange={(e) => setEditorNameEn(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                {/* Editor Role English & Hindi */}
+                <div className="grid grid-cols-2" style={{ gap: '15px' }}>
+                  <div className="form-group">
+                    <label>{language === 'en' ? 'Role (Hindi)' : 'पद (हिंदी)'}</label>
+                    <input
+                      id="editorRoleHi"
+                      type="text"
+                      className="form-control"
+                      value={editorRoleHi}
+                      onChange={(e) => setEditorRoleHi(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label>{language === 'en' ? 'Role (English)' : 'पद (English)'}</label>
+                    <input
+                      id="editorRoleEn"
+                      type="text"
+                      className="form-control"
+                      value={editorRoleEn}
+                      onChange={(e) => setEditorRoleEn(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                {/* Editor Description English & Hindi */}
+                <div className="grid grid-cols-2" style={{ gap: '15px' }}>
+                  <div className="form-group">
+                    <label>{language === 'en' ? 'About (Hindi)' : 'के बारे में (हिंदी)'}</label>
+                    <textarea
+                      id="editorDescHi"
+                      rows="3"
+                      className="form-control"
+                      value={editorDescHi}
+                      onChange={(e) => setEditorDescHi(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label>{language === 'en' ? 'About (English)' : 'के बारे में (English)'}</label>
+                    <textarea
+                      id="editorDescEn"
+                      rows="3"
+                      className="form-control"
+                      value={editorDescEn}
+                      onChange={(e) => setEditorDescEn(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                {/* Mobile No & Social Link Fields */}
+                <div className="grid grid-cols-2" style={{ gap: '15px' }}>
+                  <div className="form-group">
+                    <label>{language === 'en' ? 'Mobile Number' : 'मोबाइल नंबर'}</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="+91 1234567890"
+                      value={editorMobile}
+                      onChange={(e) => setEditorMobile(e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>{language === 'en' ? 'Facebook Profile Link' : 'फेसबुक प्रोफाइल लिंक'}</label>
+                    <input
+                      type="url"
+                      className="form-control"
+                      placeholder="https://facebook.com/..."
+                      value={editorFacebook}
+                      onChange={(e) => setEditorFacebook(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2" style={{ gap: '15px' }}>
+                  <div className="form-group">
+                    <label>{language === 'en' ? 'Instagram Profile Link' : 'इंस्टाग्राम प्रोफाइल लिंक'}</label>
+                    <input
+                      type="url"
+                      className="form-control"
+                      placeholder="https://instagram.com/..."
+                      value={editorInstagram}
+                      onChange={(e) => setEditorInstagram(e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>{language === 'en' ? 'YouTube Channel Link' : 'यूट्यूब चैनल लिंक'}</label>
+                    <input
+                      type="url"
+                      className="form-control"
+                      placeholder="https://youtube.com/..."
+                      value={editorYoutube}
+                      onChange={(e) => setEditorYoutube(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                {/* Editor Photo Upload */}
+                <div className="form-group">
+                  <label>{language === 'en' ? 'Upload Profile Photo' : 'प्रोफ़ाइल फ़ोटो अपलोड करें'}</label>
+                  <input
+                    id="editorPhotoInput"
+                    type="file"
+                    className="form-control"
+                    accept="image/*,.heic,.heif"
+                    onChange={(e) => setEditorPhotoFile(e.target.files[0])}
+                  />
+
+                  {/* Photo Preview */}
+                  {(editorPhotoPreview || editorPhotoFile) && (
+                    <div style={{ marginTop: '15px' }}>
+                      <label style={{ fontSize: '13px', display: 'block', marginBottom: '6px' }}>{language === 'en' ? 'Photo Preview:' : 'फ़ोटो पूर्वावलोकन:'}</label>
+                      <div style={{ width: '80px', height: '80px', border: '2px solid var(--color-primary)', borderRadius: '50%', overflow: 'hidden', background: '#000' }}>
+                        {editorPhotoFile ? (
+                          <img
+                            src={URL.createObjectURL(editorPhotoFile)}
+                            alt="Preview"
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          />
+                        ) : (
+                          editorPhotoPreview && (
+                            <img
+                              src={editorPhotoPreview}
+                              alt="Current Editor"
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
+                          )
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <button id="editorSubmitBtn" type="submit" className="btn" style={{ width: 'auto', marginTop: '10px' }}>
+                  {language === 'en' ? 'Save Profile' : 'प्रोफ़ाइल सहेजें'}
+                </button>
+              </form>
+            </div>
           </div>
         )}
         {activeTab === 'messages' && (
@@ -1899,7 +2319,7 @@ export default function AdminDashboard() {
                   <input
                     id="epaperThumbInput"
                     type="file"
-                    accept="image/*"
+                    accept="image/*,.heic,.heif"
                     className="form-control"
                     onChange={(e) => setEpaperThumbFile(e.target.files[0])}
                   />
@@ -2277,7 +2697,19 @@ export default function AdminDashboard() {
                   ) : (
                     adsList.map((ad) => (
                       <tr key={ad._id}>
-                        <td style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>{ad.title}</td>
+                        <td 
+                          style={{ 
+                            fontWeight: 600, 
+                            color: 'var(--color-text-primary)',
+                            maxWidth: '180px',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis'
+                          }}
+                          title={ad.title}
+                        >
+                          {ad.title}
+                        </td>
                         <td>
                           {ad.mediaType === 'video' ? (
                             <video
@@ -2307,7 +2739,17 @@ export default function AdminDashboard() {
                                   ad.size === 'small' ? (language === 'en' ? 'Small' : 'छोटा') : (language === 'en' ? 'Original' : 'मूल')}
                           </span>
                         </td>
-                        <td style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>
+                        <td 
+                          style={{ 
+                            fontSize: '13px', 
+                            color: 'var(--color-text-secondary)',
+                            maxWidth: '180px',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis'
+                          }}
+                          title={ad.linkUrl}
+                        >
                           {ad.linkUrl ? (
                             <a href={ad.linkUrl} target="_blank" rel="noreferrer" style={{ color: 'var(--color-secondary)', textDecoration: 'underline' }}>
                               {ad.linkUrl}
@@ -2440,7 +2882,7 @@ export default function AdminDashboard() {
                   id="adFileInput"
                   type="file"
                   className="form-control"
-                  accept="image/*,video/*"
+                  accept="image/*,video/*,.heic,.heif"
                   onChange={(e) => setAdFile(e.target.files[0])}
                   required={!editingAdId}
                 />

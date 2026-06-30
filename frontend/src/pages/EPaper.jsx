@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { ArrowLeft, ZoomIn, ZoomOut, Download, Calendar, Printer, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 export default function EPaper() {
   const { language, t } = useLanguage();
@@ -52,7 +53,15 @@ export default function EPaper() {
     setDownloading(true);
     setTimeout(() => {
       setDownloading(false);
-      alert(language === 'en' ? 'Mock PDF download complete!' : 'मॉक पीडीएफ डाउनलोड पूर्ण हुआ!');
+      Swal.fire({
+        icon: 'success',
+        title: language === 'en' ? 'Mock PDF download complete!' : 'मॉक पीडीएफ डाउनलोड पूर्ण हुआ!',
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+      });
     }, 2000);
   };
 

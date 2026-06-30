@@ -2,17 +2,20 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { Calendar, Eye, MapPin } from 'lucide-react';
+import LazyImage from './LazyImage';
 
-export default function NewsCard({ news }) {
+export default function NewsCard({ news, forcedCategoryName }) {
   const { language, t } = useLanguage();
 
   const title = language === 'en' ? news.titleEn : news.titleHi;
   const summary = language === 'en' ? news.summaryEn : news.summaryHi;
   
-  // Get first category name if exists
-  const categoryName = news.categories && news.categories.length > 0 
-    ? (language === 'en' ? news.categories[0].nameEn : news.categories[0].nameHi) 
-    : '';
+  // Get category name (use forcedCategoryName if provided, else fall back to first category)
+  const categoryName = forcedCategoryName 
+    ? forcedCategoryName 
+    : (news.categories && news.categories.length > 0 
+        ? (language === 'en' ? news.categories[0].nameEn : news.categories[0].nameHi) 
+        : '');
 
   // Get subdivision badge if exists and is not 'None'
   const subName = news.subdivision && news.subdivision !== 'None'
@@ -32,7 +35,7 @@ export default function NewsCard({ news }) {
   return (
     <article className="news-card">
       <div className="news-card-image">
-        <img src={imageUrl} alt={title} loading="lazy" />
+        <LazyImage src={imageUrl} alt={title} />
         {categoryName && (
           <span className="category-badge">{categoryName}</span>
         )}

@@ -49,7 +49,19 @@ const getDb = () => {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         }
-      ]
+      ],
+      editorInfo: {
+        _id: 'editor_default',
+        nameEn: 'Admin Editor',
+        nameHi: 'एडमिन संपादक',
+        roleEn: 'Editor-in-Chief',
+        roleHi: 'मुख्य संपादक',
+        descriptionEn: 'Passionate journalist dedicated to delivering accurate and timely news to the local community.',
+        descriptionHi: 'स्थानीय समुदाय तक सटीक और समय पर समाचार पहुंचाने के लिए समर्पित पत्रकार।',
+        photoUrl: '',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
     };
     fs.writeFileSync(dbPath, JSON.stringify(initialDb, null, 2));
     return initialDb;
@@ -91,6 +103,21 @@ const getDb = () => {
       db.stats = { totalWebsiteViews: 0 };
       changed = true;
     }
+    if (!db.editorInfo) {
+      db.editorInfo = {
+        _id: 'editor_default',
+        nameEn: 'Admin Editor',
+        nameHi: 'एडमिन संपादक',
+        roleEn: 'Editor-in-Chief',
+        roleHi: 'मुख्य संपादक',
+        descriptionEn: 'Passionate journalist dedicated to delivering accurate and timely news to the local community.',
+        descriptionHi: 'स्थानीय समुदाय तक सटीक और समय पर समाचार पहुंचाने के लिए समर्पित पत्रकार।',
+        photoUrl: '',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      changed = true;
+    }
     if (changed) {
       fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
     }
@@ -111,7 +138,7 @@ const jsonDb = {
     const db = getDb();
     return db.users.find(u => u.username === username);
   },
-  
+
   getUserById: (id) => {
     const db = getDb();
     const user = db.users.find(u => u._id === id);
@@ -164,10 +191,10 @@ const jsonDb = {
 
     if (filters.search) {
       const searchRegex = new RegExp(filters.search, 'i');
-      list = list.filter(n => 
-        searchRegex.test(n.titleEn) || 
-        searchRegex.test(n.titleHi) || 
-        searchRegex.test(n.contentEn) || 
+      list = list.filter(n =>
+        searchRegex.test(n.titleEn) ||
+        searchRegex.test(n.titleHi) ||
+        searchRegex.test(n.contentEn) ||
         searchRegex.test(n.contentHi) ||
         searchRegex.test(n.summaryEn) ||
         searchRegex.test(n.summaryHi)
@@ -191,7 +218,7 @@ const jsonDb = {
       // Increment views
       db.news[index].views = (db.news[index].views || 0) + 1;
       saveDb(db);
-      
+
       const article = db.news[index];
       return {
         ...article,
@@ -335,13 +362,13 @@ const jsonDb = {
       // Delete old files from disk
       const oldEPaper = db.epapers[existingIndex];
       try {
-        if (oldEPaper.pdfUrl) {
+        if (oldEPaper.pdfUrl && oldEPaper.pdfUrl.startsWith('/uploads/')) {
           const absolutePdfPath = path.join(__dirname, '..', oldEPaper.pdfUrl);
           if (fs.existsSync(absolutePdfPath)) {
             fs.unlinkSync(absolutePdfPath);
           }
         }
-        if (oldEPaper.thumbnailUrl) {
+        if (oldEPaper.thumbnailUrl && oldEPaper.thumbnailUrl.startsWith('/uploads/')) {
           const absoluteThumbPath = path.join(__dirname, '..', oldEPaper.thumbnailUrl);
           if (fs.existsSync(absoluteThumbPath)) {
             fs.unlinkSync(absoluteThumbPath);
@@ -370,13 +397,13 @@ const jsonDb = {
 
     // Delete files from disk
     try {
-      if (epaper.pdfUrl) {
+      if (epaper.pdfUrl && epaper.pdfUrl.startsWith('/uploads/')) {
         const absolutePdfPath = path.join(__dirname, '..', epaper.pdfUrl);
         if (fs.existsSync(absolutePdfPath)) {
           fs.unlinkSync(absolutePdfPath);
         }
       }
-      if (epaper.thumbnailUrl) {
+      if (epaper.thumbnailUrl && epaper.thumbnailUrl.startsWith('/uploads/')) {
         const absoluteThumbPath = path.join(__dirname, '..', epaper.thumbnailUrl);
         if (fs.existsSync(absoluteThumbPath)) {
           fs.unlinkSync(absoluteThumbPath);
@@ -417,15 +444,15 @@ const jsonDb = {
   updatePoll: (pollData) => {
     const db = getDb();
     if (!db.polls) db.polls = [];
-    
+
     const currentPoll = db.polls[0] || { _id: 'poll_' + Date.now() };
-    
+
     const updatedPoll = {
       ...currentPoll,
       ...pollData,
       updatedAt: new Date().toISOString()
     };
-    
+
     db.polls[0] = updatedPoll;
     saveDb(db);
     return updatedPoll;
@@ -434,7 +461,7 @@ const jsonDb = {
   votePoll: (optionIndex) => {
     const db = getDb();
     if (!db.polls || db.polls.length === 0) return null;
-    
+
     const poll = db.polls[0];
     if (optionIndex === 1) {
       poll.votesOption1 = (poll.votesOption1 || 0) + 1;
@@ -443,7 +470,7 @@ const jsonDb = {
     } else if (optionIndex === 3) {
       poll.votesOption3 = (poll.votesOption3 || 0) + 1;
     }
-    
+
     db.polls[0] = poll;
     saveDb(db);
     return poll;
@@ -594,6 +621,40 @@ const jsonDb = {
       return db.news[index];
     }
     return null;
+  },
+
+  getEditorInfo: () => {
+    const db = getDb();
+    if (!db.editorInfo) {
+      db.editorInfo = {
+        _id: 'editor_default',
+        nameEn: 'Admin Editor',
+        nameHi: 'एडमिन संपादक',
+        roleEn: 'Editor-in-Chief',
+        roleHi: 'मुख्य संपादक',
+        descriptionEn: 'Passionate journalist dedicated to delivering accurate and timely news to the local community.',
+        descriptionHi: 'स्थानीय समुदाय तक सटीक और समय पर समाचार पहुंचाने के लिए समर्पित पत्रकार।',
+        photoUrl: '',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      saveDb(db);
+    }
+    return db.editorInfo;
+  },
+
+  updateEditorInfo: (editorData) => {
+    const db = getDb();
+    if (!db.editorInfo) {
+      db.editorInfo = {};
+    }
+    db.editorInfo = {
+      ...db.editorInfo,
+      ...editorData,
+      updatedAt: new Date().toISOString()
+    };
+    saveDb(db);
+    return db.editorInfo;
   }
 };
 

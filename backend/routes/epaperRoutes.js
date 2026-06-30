@@ -19,17 +19,7 @@ if (!fs.existsSync(uploadsDir)) {
 }
 
 // Multer storage setup
-const storage = multer.diskStorage({
-  destination(req, file, cb) {
-    cb(null, uploadsDir);
-  },
-  filename(req, file, cb) {
-    cb(
-      null,
-      `epaper-${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`
-    );
-  },
-});
+const storage = multer.memoryStorage();
 
 // File filter to check for pdf and images
 const fileFilter = (req, file, cb) => {
@@ -40,13 +30,16 @@ const fileFilter = (req, file, cb) => {
     }
     return cb(new Error('Only PDF files are allowed for the pdf field!'), false);
   } else if (file.fieldname === 'thumbnail') {
-    const filetypes = /jpeg|jpg|png|webp/;
-    const mimetype = filetypes.test(file.mimetype);
+    const filetypes = /jpeg|jpg|png|webp|heic|heif/i;
     const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    
+    const isHeicHeifExt = /heic|heif/.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = filetypes.test(file.mimetype) || (isHeicHeifExt && (file.mimetype === 'application/octet-stream' || !file.mimetype));
+
     if (mimetype && extname) {
       return cb(null, true);
     }
-    return cb(new Error('Only image files (jpeg, jpg, png, webp) are allowed for the thumbnail field!'), false);
+    return cb(new Error('Only image files (jpeg, jpg, png, webp, heic, heif) are allowed for the thumbnail field!'), false);
   }
   cb(null, true);
 };

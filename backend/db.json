@@ -3,8 +3,9 @@
     {
       "_id": "admin_user_id_1",
       "username": "admin",
-      "password": "$2a$10$BH7pjYxdMTUXEkbFj5rdHuapTUFJ7O6BuiTJ6DfSVWy0anha97mna",
-      "createdAt": "2026-06-05T17:53:42.505Z"
+      "password": "$2a$10$rA2dt8V0RwGhNDgIbDJBuuZq0w/7A7Sbg4GLOikcjh.Fqaej.HsUi",
+      "createdAt": "2026-06-05T17:53:42.505Z",
+      "updatedAt": "2026-06-20T18:23:47.243Z"
     }
   ],
   "categories": [

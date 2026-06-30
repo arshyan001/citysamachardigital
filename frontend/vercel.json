@@ -1,6 +1,16 @@
 {
-
     "rewrites": [
+        {
+            "source": "/news/:id",
+            "has": [
+                {
+                    "type": "header",
+                    "key": "User-Agent",
+                    "value": "(.*)(WhatsApp|facebookexternalhit|Twitterbot|TelegramBot|Slackbot|Discordbot|Googlebot|Bingbot|LinkedInBot)(.*)"
+                }
+            ],
+            "destination": "https://citysamachardigital.onrender.com/share/:id"
+        },
         {
             "source": "/(.*)",
             "destination": "/index.html"

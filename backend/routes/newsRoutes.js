@@ -28,34 +28,26 @@ if (!fs.existsSync(uploadsDir)) {
 }
 
 // Multer storage setup
-const storage = multer.diskStorage({
-  destination(req, file, cb) {
-    cb(null, uploadsDir);
-  },
-  filename(req, file, cb) {
-    cb(
-      null,
-      `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`
-    );
-  },
-});
+const storage = multer.memoryStorage();
 
 // File filter (optional but good)
 const fileFilter = (req, file, cb) => {
-  const filetypes = /jpeg|jpg|png|webp|gif/;
-  const mimetype = filetypes.test(file.mimetype);
+  const filetypes = /jpeg|jpg|png|webp|gif|heic|heif/i;
   const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+
+  const isHeicHeifExt = /heic|heif/.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = filetypes.test(file.mimetype) || (isHeicHeifExt && (file.mimetype === 'application/octet-stream' || !file.mimetype));
 
   if (mimetype && extname) {
     return cb(null, true);
   }
-  cb(new Error('Images only (jpeg, jpg, png, webp, gif)'));
+  cb(new Error('Images only (jpeg, jpg, png, webp, gif, heic, heif)'));
 };
 
 const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 5000000 }, // 5MB limit
+  limits: { fileSize: 10000000 }, // 10MB limit
 });
 
 // Category routes

@@ -2,6 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { Lock, User, AlertTriangle } from 'lucide-react';
+import Swal from 'sweetalert2';
+
+const Toast = Swal.mixin({
+  toast: true,
+  position: 'top-end',
+  showConfirmButton: false,
+  timer: 3000,
+  timerProgressBar: true,
+  didOpen: (toast) => {
+    toast.onmouseenter = Swal.stopTimer;
+    toast.onmouseleave = Swal.resumeTimer;
+  }
+});
 
 export default function AdminLogin() {
   const { language, t } = useLanguage();
@@ -21,7 +34,6 @@ export default function AdminLogin() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
 
     try {
@@ -40,13 +52,25 @@ export default function AdminLogin() {
         sessionStorage.setItem('admin_username', data.username);
         // Force header update
         window.dispatchEvent(new Event('storage'));
+
+        Toast.fire({
+          icon: 'success',
+          title: language === 'en' ? 'Logged in successfully!' : 'सफलतापूर्वक लॉग इन किया गया!'
+        });
+
         navigate('/admin/dashboard');
       } else {
-        setError(data.message || 'Login failed');
+        Toast.fire({
+          icon: 'error',
+          title: data.message || (language === 'en' ? 'Login failed' : 'लॉगिन विफल रहा')
+        });
       }
     } catch (err) {
       console.error('Login error:', err);
-      setError('Connection to server failed. Please try again.');
+      Toast.fire({
+        icon: 'error',
+        title: language === 'en' ? 'Connection to server failed. Please try again.' : 'सर्वर से कनेक्शन विफल रहा। कृपया पुन: प्रयास करें।'
+      });
     } finally {
       setLoading(false);
     }
@@ -64,12 +88,7 @@ export default function AdminLogin() {
           </p>
         </div>
 
-        {error && (
-          <div className="alert alert-error" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px' }}>
-            <AlertTriangle size={16} />
-            {error}
-          </div>
-        )}
+
 
         <form onSubmit={handleSubmit}>
           <div className="form-group" style={{ position: 'relative' }}>

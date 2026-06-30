@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { Calendar, Eye, MapPin, ArrowLeft, Video, Newspaper, ThumbsUp, Share2 } from 'lucide-react';
+import LazyImage from '../components/LazyImage';
 
 export default function NewsDetail() {
   const { id } = useParams();
@@ -129,6 +130,8 @@ export default function NewsDetail() {
     }
   };
 
+  const shareUrl = `${import.meta.env.VITE_API_URL || window.location.origin}/share/${id}`;
+
   const handleShareClick = async (platformUrl) => {
     window.open(platformUrl, '_blank');
     try {
@@ -143,7 +146,7 @@ export default function NewsDetail() {
   };
 
   const handleCopyLink = async () => {
-    navigator.clipboard.writeText(window.location.href);
+    navigator.clipboard.writeText(shareUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
     try {
@@ -217,6 +220,20 @@ export default function NewsDetail() {
 
     fetchNewsDetail();
   }, [id, navigate]);
+
+  useEffect(() => {
+    if (news) {
+      document.title = `${language === 'en' ? news.titleEn : news.titleHi} | City Samachar Digital`;
+      // Update description tag in document head
+      let descMeta = document.querySelector('meta[name="description"]');
+      if (!descMeta) {
+        descMeta = document.createElement('meta');
+        descMeta.name = 'description';
+        document.head.appendChild(descMeta);
+      }
+      descMeta.content = language === 'en' ? news.summaryEn : news.summaryHi;
+    }
+  }, [news, language]);
 
   if (loading) {
     return (
@@ -325,7 +342,7 @@ export default function NewsDetail() {
             {/* Images display */}
             {news.images && news.images.length > 0 && (
               <div className="article-main-image">
-                <img src={news.images[0]} alt={title} />
+                <LazyImage src={news.images[0]} alt={title} />
               </div>
             )}
 
@@ -342,13 +359,13 @@ export default function NewsDetail() {
                 {language === 'en' ? 'Share this article:' : 'इस ख़बर को शेयर करें:'}
               </span>
               <div className="share-bar">
-                <button className="share-btn fb" onClick={() => handleShareClick('https://facebook.com')}>
+                <button className="share-btn fb" onClick={() => handleShareClick(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`)}>
                   Facebook
                 </button>
-                <button className="share-btn tw" onClick={() => handleShareClick('https://twitter.com')}>
+                <button className="share-btn tw" onClick={() => handleShareClick(`https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(shareUrl)}`)}>
                   Twitter / X
                 </button>
-                <button className="share-btn wa" onClick={() => handleShareClick(`https://api.whatsapp.com/send?text=${encodeURIComponent(title + ' ' + window.location.href)}`)}>
+                <button className="share-btn wa" onClick={() => handleShareClick(`https://api.whatsapp.com/send?text=${encodeURIComponent(title + ' ' + shareUrl)}`)}>
                   WhatsApp
                 </button>
                 <button className="share-btn link" onClick={handleCopyLink}>

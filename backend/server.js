@@ -14,6 +14,7 @@ const pollRoutes = require('./routes/pollRoutes');
 const cricketRoutes = require('./routes/cricketRoutes');
 const adRoutes = require('./routes/adRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes');
+const editorRoutes = require('./routes/editorRoutes');
 
 const User = require('./models/User');
 const Category = require('./models/Category');
@@ -54,10 +55,95 @@ app.use('/api/poll', pollRoutes);
 app.use('/api/cricket', cricketRoutes);
 app.use('/api/ads', adRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/editor', editorRoutes);
 
 // Simple status route
 app.get('/', (req, res) => {
   res.send('News Channel API is running...');
+});
+
+// Share preview route for crawler bots and social previews
+app.get('/share/:id', async (req, res) => {
+  const { id } = req.params;
+  const userAgent = req.headers['user-agent'] || '';
+  
+  // Detect search engine & social media bot user agents
+  const isBot = /bot|crawler|spider|crawling|facebookexternalhit|whatsapp|telegrambot|slackbot|discordbot|googlebot|bingbot|linkedinbot|twitterbot|tumblr|embedly|quora link preview|paperli/i.test(userAgent);
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  
+  try {
+    const News = require('./models/News');
+    const jsonDb = require('./config/jsonDb');
+    
+    let news = null;
+    if (global.useJsonDb) {
+      const newsList = jsonDb.getNews({});
+      news = newsList.find(n => n._id === id);
+    } else {
+      const mongoose = require('mongoose');
+      if (mongoose.Types.ObjectId.isValid(id)) {
+        news = await News.findById(id);
+      }
+    }
+    
+    if (!news) {
+      return res.redirect(frontendUrl);
+    }
+    
+    if (isBot) {
+      const title = news.titleHi || news.titleEn || 'City Samachar Digital';
+      const summary = news.summaryHi || news.summaryEn || news.contentHi || news.contentEn || 'City Samachar Digital - Read latest news';
+      
+      let imageUrl = '';
+      if (news.images && news.images.length > 0) {
+        const img = news.images[0];
+        if (img.startsWith('http')) {
+          imageUrl = img;
+        } else {
+          const backendUrl = req.protocol + '://' + req.get('host');
+          imageUrl = backendUrl + img;
+        }
+      } else {
+        imageUrl = 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=800&q=80';
+      }
+      
+      const cleanSummary = summary.replace(/"/g, '&quot;').replace(/[\r\n]+/g, ' ').substring(0, 200);
+      const cleanTitle = title.replace(/"/g, '&quot;').replace(/[\r\n]+/g, ' ');
+      
+      res.send(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>${cleanTitle}</title>
+  <meta name="description" content="${cleanSummary}">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="${frontendUrl}/news/${id}">
+  <meta property="og:title" content="${cleanTitle}">
+  <meta property="og:description" content="${cleanSummary}">
+  <meta property="og:image" content="${imageUrl}">
+  
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="${frontendUrl}/news/${id}">
+  <meta property="twitter:title" content="${cleanTitle}">
+  <meta property="twitter:description" content="${cleanSummary}">
+  <meta property="twitter:image" content="${imageUrl}">
+</head>
+<body>
+  <h1>${cleanTitle}</h1>
+  <p>${cleanSummary}</p>
+  <img src="${imageUrl}" />
+</body>
+</html>`);
+    } else {
+      res.redirect(`${frontendUrl}/news/${id}`);
+    }
+  } catch (error) {
+    console.error('Error in share handler:', error);
+    res.redirect(frontendUrl);
+  }
 });
 
 
@@ -88,6 +174,22 @@ const seedData = async () => {
       ];
       await Category.insertMany(defaultCategories);
       console.log('[SEED] Default categories seeded.');
+    }
+
+    const EditorInfo = require('./models/EditorInfo');
+    const editorCount = await EditorInfo.countDocuments({});
+    if (editorCount === 0) {
+      const defaultEditor = new EditorInfo({
+        nameEn: 'Admin Editor',
+        nameHi: 'एडमिन संपादक',
+        roleEn: 'Editor-in-Chief',
+        roleHi: 'मुख्य संपादक',
+        descriptionEn: 'Passionate journalist dedicated to delivering accurate and timely news to the local community.',
+        descriptionHi: 'स्थानीय समुदाय तक सटीक और समय पर समाचार पहुंचाने के लिए समर्पित पत्रकार।',
+        photoUrl: '',
+      });
+      await defaultEditor.save();
+      console.log('[SEED] Default EditorInfo seeded.');
     }
 
 

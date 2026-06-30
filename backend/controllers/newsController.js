@@ -1,6 +1,7 @@
 const News = require('../models/News');
 const Category = require('../models/Category');
 const jsonDb = require('../config/jsonDb');
+const { uploadToCloudinary, deleteFromCloudinary } = require('../config/cloudinary');
 
 // @desc    Get all news articles with optional filters
 // @route   GET /api/news
@@ -100,6 +101,21 @@ const getNewsById = async (req, res) => {
 // @route   POST /api/news
 // @access  Private/Admin
 const createNews = async (req, res) => {
+  let finalImages = [];
+  try {
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        const uploadResult = await uploadToCloudinary(file, 'news_images');
+        finalImages.push(uploadResult.secure_url);
+      }
+    } else if (req.body.images) {
+      const images = req.body.images;
+      finalImages = Array.isArray(images) ? images : [images];
+    }
+  } catch (err) {
+    return res.status(500).json({ message: 'Image upload failed: ' + err.message });
+  }
+
   if (global.useJsonDb) {
     try {
       const {
@@ -113,16 +129,8 @@ const createNews = async (req, res) => {
         categories,
         district,
         subdivision,
-        isBreaking,
-        images
+        isBreaking
       } = req.body;
-
-      let finalImages = [];
-      if (req.files && req.files.length > 0) {
-        finalImages = req.files.map(file => `/uploads/${file.filename}`);
-      } else if (images) {
-        finalImages = Array.isArray(images) ? images : [images];
-      }
 
       let parsedCategories = [];
       if (categories) {
@@ -165,16 +173,8 @@ const createNews = async (req, res) => {
       categories,
       district,
       subdivision,
-      isBreaking,
-      images
+      isBreaking
     } = req.body;
-
-    let finalImages = [];
-    if (req.files && req.files.length > 0) {
-      finalImages = req.files.map(file => `/uploads/${file.filename}`);
-    } else if (images) {
-      finalImages = Array.isArray(images) ? images : [images];
-    }
 
     let parsedCategories = [];
     if (categories) {
@@ -211,6 +211,55 @@ const createNews = async (req, res) => {
 // @route   PUT /api/news/:id
 // @access  Private/Admin
 const updateNews = async (req, res) => {
+  console.log('📝 updateNews request received!');
+  console.log('Parameters:', req.params);
+  console.log('Body:', req.body);
+  console.log('Files:', req.files ? req.files.map(f => ({ originalname: f.originalname, mimetype: f.mimetype, size: f.size })) : 'No files');
+
+  let existingImages = [];
+  let isFound = false;
+
+  if (global.useJsonDb) {
+    const article = jsonDb.getNewsById(req.params.id);
+    if (article) {
+      existingImages = article.images || [];
+      isFound = true;
+    }
+  } else {
+    try {
+      const article = await News.findById(req.params.id);
+      if (article) {
+        existingImages = article.images || [];
+        isFound = true;
+      }
+    } catch (err) {}
+  }
+
+  if (!isFound) {
+    return res.status(404).json({ message: 'News article not found' });
+  }
+
+  let finalImages = undefined;
+  if (req.files && req.files.length > 0) {
+    try {
+      // Delete old images from Cloudinary
+      for (const imgUrl of existingImages) {
+        await deleteFromCloudinary(imgUrl);
+      }
+      // Upload new images to Cloudinary
+      finalImages = [];
+      for (const file of req.files) {
+        const uploadResult = await uploadToCloudinary(file, 'news_images');
+        finalImages.push(uploadResult.secure_url);
+      }
+    } catch (err) {
+      return res.status(500).json({ message: 'Image upload/delete failed: ' + err.message });
+    }
+  } else if (req.body.images) {
+    const images = req.body.images;
+    finalImages = Array.isArray(images) ? images : [images];
+  }
+
   if (global.useJsonDb) {
     try {
       const {
@@ -224,16 +273,8 @@ const updateNews = async (req, res) => {
         categories,
         district,
         subdivision,
-        isBreaking,
-        images
+        isBreaking
       } = req.body;
-
-      let finalImages = undefined;
-      if (req.files && req.files.length > 0) {
-        finalImages = req.files.map(file => `/uploads/${file.filename}`);
-      } else if (images) {
-        finalImages = Array.isArray(images) ? images : [images];
-      }
 
       let parsedCategories = undefined;
       if (categories) {
@@ -258,7 +299,7 @@ const updateNews = async (req, res) => {
       };
 
       if (parsedCategories) updatePayload.categories = parsedCategories;
-      if (finalImages) updatePayload.images = finalImages;
+      if (finalImages !== undefined) updatePayload.images = finalImages;
 
       const updatedNews = jsonDb.updateNews(req.params.id, updatePayload);
       if (updatedNews) {
@@ -283,8 +324,7 @@ const updateNews = async (req, res) => {
       categories,
       district,
       subdivision,
-      isBreaking,
-      images
+      isBreaking
     } = req.body;
 
     const news = await News.findById(req.params.id);
@@ -309,11 +349,8 @@ const updateNews = async (req, res) => {
         }
       }
 
-      if (req.files && req.files.length > 0) {
-        const uploadedImages = req.files.map(file => `/uploads/${file.filename}`);
-        news.images = uploadedImages;
-      } else if (images) {
-        news.images = Array.isArray(images) ? images : [images];
+      if (finalImages !== undefined) {
+        news.images = finalImages;
       }
 
       const updatedNews = await news.save();
@@ -330,6 +367,38 @@ const updateNews = async (req, res) => {
 // @route   DELETE /api/news/:id
 // @access  Private/Admin
 const deleteNews = async (req, res) => {
+  let existingImages = [];
+  let isFound = false;
+
+  if (global.useJsonDb) {
+    const article = jsonDb.getNewsById(req.params.id);
+    if (article) {
+      existingImages = article.images || [];
+      isFound = true;
+    }
+  } else {
+    try {
+      const article = await News.findById(req.params.id);
+      if (article) {
+        existingImages = article.images || [];
+        isFound = true;
+      }
+    } catch (err) {}
+  }
+
+  if (!isFound) {
+    return res.status(404).json({ message: 'News article not found' });
+  }
+
+  // Delete images from Cloudinary
+  try {
+    for (const imgUrl of existingImages) {
+      await deleteFromCloudinary(imgUrl);
+    }
+  } catch (err) {
+    console.error('Error deleting news images from Cloudinary:', err);
+  }
+
   if (global.useJsonDb) {
     try {
       const success = jsonDb.deleteNews(req.params.id);
@@ -344,14 +413,8 @@ const deleteNews = async (req, res) => {
   }
 
   try {
-    const news = await News.findById(req.params.id);
-
-    if (news) {
-      await News.deleteOne({ _id: req.params.id });
-      res.json({ message: 'News article removed' });
-    } else {
-      res.status(404).json({ message: 'News article not found' });
-    }
+    await News.deleteOne({ _id: req.params.id });
+    res.json({ message: 'News article removed' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

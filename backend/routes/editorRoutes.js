@@ -5,12 +5,9 @@ const path = require('path');
 const fs = require('fs');
 
 const {
-  getAds,
-  getAdById,
-  createAd,
-  updateAd,
-  deleteAd
-} = require('../controllers/adController');
+  getEditorInfo,
+  updateEditorInfo,
+} = require('../controllers/editorController');
 const { protect } = require('../middleware/authMiddleware');
 
 // Ensure uploads folder exists
@@ -22,34 +19,29 @@ if (!fs.existsSync(uploadsDir)) {
 // Multer storage setup
 const storage = multer.memoryStorage();
 
-// File filter to accept both images and videos
+// File filter to accept images only
 const fileFilter = (req, file, cb) => {
-  const filetypes = /jpeg|jpg|png|webp|gif|heic|heif|mp4|webm|ogg|mov|quicktime/i;
+  const filetypes = /jpeg|jpg|png|webp|gif|heic|heif/i;
   const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
 
   const isHeicHeifExt = /heic|heif/.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = /image|video/.test(file.mimetype) || (isHeicHeifExt && (file.mimetype === 'application/octet-stream' || !file.mimetype));
+  const mimetype = /image/.test(file.mimetype) || (isHeicHeifExt && (file.mimetype === 'application/octet-stream' || !file.mimetype));
 
   if (mimetype && extname) {
     return cb(null, true);
   }
-  cb(new Error('Images and Videos only (jpeg, jpg, png, webp, gif, heic, heif, mp4, webm, ogg, mov)'));
+  cb(new Error('Images only (jpeg, jpg, png, webp, gif, heic, heif)'));
 };
 
 const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 15000000 }, // 15MB limit for video ads
+  limits: { fileSize: 5000000 }, // 5MB limit
 });
 
-// Ad routes
+// Editor routes
 router.route('/')
-  .get(getAds)
-  .post(protect, upload.single('mediaFile'), createAd);
-
-router.route('/:id')
-  .get(getAdById)
-  .put(protect, upload.single('mediaFile'), updateAd)
-  .delete(protect, deleteAd);
+  .get(getEditorInfo)
+  .put(protect, upload.single('photoFile'), updateEditorInfo);
 
 module.exports = router;
