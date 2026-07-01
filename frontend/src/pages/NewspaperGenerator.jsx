@@ -88,18 +88,31 @@ function NewspaperLayout({ articles, language, selectedDate }) {
     <div
       className="newspaper-page"
       id="newspaper-print-area"
-      style={{ background: '#fdfcf5', color: '#1a1a1a' }}
     >
-      {/* ── MASTHEAD ── */}
-      <div className="newspaper-masthead">
-        <h1 style={{ fontSize: '44px' }}>
-          {lang === 'hi' ? 'सिटी समाचार डिजिटल' : 'City Samachar Digital'}
-        </h1>
-        <p className="masthead-tagline">
-          {lang === 'hi'
-            ? 'संत कबीर नगर का अपना दैनिक समाचार पत्र'
-            : "Sant Kabir Nagar's Premier Daily Newspaper"}
-        </p>
+      {/* ── MASTHEAD GRID ── */}
+      <div className="newspaper-masthead-grid">
+        <div className="masthead-logo-left">
+          <img 
+            src="/logo.png" 
+            alt="Logo" 
+            style={{ height: '65px', objectFit: 'contain', borderRadius: '4px' }} 
+            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+            crossOrigin="anonymous"
+          />
+        </div>
+        <div className="masthead-center-title">
+          <h1>{lang === 'hi' ? 'सिटी समाचार डिजिटल' : 'City Samachar Digital'}</h1>
+          <p className="masthead-tagline">
+            {lang === 'hi'
+              ? 'संत कबीर नगर का अपना दैनिक समाचार पत्र'
+              : "Sant Kabir Nagar's Premier Daily Newspaper"}
+          </p>
+        </div>
+        <div className="masthead-info-right">
+          <div><strong>{lang === 'hi' ? 'संस्करण:' : 'Edition:'}</strong> {lang === 'hi' ? 'डिजिटल' : 'Digital'}</div>
+          <div><strong>{lang === 'hi' ? 'मूल्य:' : 'Price:'}</strong> {lang === 'hi' ? 'निःशुल्क' : 'Free'}</div>
+          <div style={{ marginTop: '4px', fontSize: '9px', textTransform: 'uppercase', color: '#666' }}>Sant Kabir Nagar</div>
+        </div>
       </div>
 
       {/* ── METABAR ── */}
@@ -109,7 +122,7 @@ function NewspaperLayout({ articles, language, selectedDate }) {
         </span>
         <span style={{ fontSize: '12px', letterSpacing: 0 }}>{formattedDate}</span>
         <span>
-          {lang === 'hi' ? 'डिजिटल संस्करण | मूल्य: निःशुल्क' : 'Digital Edition | Price: Free'}
+          {lang === 'hi' ? 'दैनिक समाचार पत्र' : 'Daily Newspaper'}
         </span>
       </div>
 
@@ -353,6 +366,18 @@ export default function NewspaperGenerator() {
         backgroundColor: '#fdfcf5',
         logging: false,
         imageTimeout: 10000,
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: 1024,
+        windowHeight: 1440,
+        onclone: (clonedDoc) => {
+          const clonedPage = clonedDoc.querySelector('.newspaper-page');
+          if (clonedPage) {
+            clonedPage.style.zoom = '1';
+            clonedPage.style.transform = 'none';
+            clonedPage.style.width = '210mm';
+          }
+        }
       });
 
       const imgData = canvas.toDataURL('image/jpeg', 0.92);

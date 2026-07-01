@@ -230,15 +230,27 @@ select {
 .brand {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 24px;
-  font-weight: 800;
+  gap: 12px;
   color: var(--color-text-primary);
   font-family: var(--font-display);
+  text-decoration: none;
+  transition: var(--transition-smooth);
 }
 
-.brand span {
+.brand-logo {
+  height: 64px;
+  object-fit: contain;
+  border-radius: 4px;
+  transition: var(--transition-smooth);
+}
+
+.brand-text {
+  font-size: 22px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.5px;
   color: var(--color-primary);
+  transition: var(--transition-smooth);
 }
 
 .live-badge {
@@ -251,6 +263,23 @@ select {
   font-weight: 800;
   letter-spacing: 1px;
   animation: pulse 1.5s infinite;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .brand {
+    gap: 6px !important;
+  }
+  .brand-logo {
+    height: 42px;
+  }
+  .brand-text {
+    font-size: 14px;
+  }
+  .live-badge {
+    font-size: 8px;
+    padding: 2px 6px;
+  }
 }
 
 .nav-links {
@@ -562,7 +591,8 @@ select {
 }
 
 .news-card-image {
-  height: 135px;
+  width: 100%;
+  aspect-ratio: 16 / 9;
   position: relative;
   overflow: hidden;
   background: #000;
@@ -729,13 +759,19 @@ select {
   overflow: hidden;
   margin-bottom: 20px;
   border: 1px solid var(--border-color);
-  max-height: 500px;
+  max-height: 550px;
+  background-color: var(--fb-hover-bg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
 }
 
 .article-main-image img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  max-height: 550px;
+  object-fit: contain;
 }
 
 .article-content {
@@ -924,7 +960,8 @@ select {
 
 .action-btns {
   display: flex;
-  gap: 10px;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .btn-sm {
@@ -1664,7 +1701,6 @@ footer {
     justify-content: center;
     width: 100%;
     margin: 0;
-    pointer-events: none;
     /* Make brand label static on admin mobile view */
   }
 
@@ -2090,47 +2126,76 @@ footer {
    THE NEWSPAPER ITSELF
    ========================== */
 .newspaper-page {
-  background: #fdfcf5;
-  /* Warm newsprint color */
+  background-color: #fdfaf4;
+  /* warm physical newsprint base */
+  background-image: radial-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 0),
+                    radial-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 0);
+  background-size: 4px 4px;
+  background-position: 0 0, 2px 2px;
   color: #1a1a1a;
   font-family: 'Georgia', 'Times New Roman', serif;
   width: 210mm;
   /* A4 width */
   min-height: 297mm;
   margin: 0 auto;
-  padding: 16mm 14mm;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.45);
-  border: 1px solid #c8c0a8;
+  padding: 15mm 12mm;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  border: 1px solid #c0b59b;
   position: relative;
   line-height: 1.45;
 }
 
-/* Masthead — Newspaper title block */
-.newspaper-masthead {
-  text-align: center;
+/* Redesigned Broad-Sheet Title Masthead */
+.newspaper-masthead-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 3fr 1.2fr;
+  gap: 12px;
+  align-items: center;
+  border-top: 3px solid #1a1a1a;
   border-bottom: 5px double #1a1a1a;
-  border-top: 2px solid #1a1a1a;
-  padding: 10px 0 8px;
-  margin-bottom: 0;
+  padding: 12px 0 8px 0;
+  margin-bottom: 0px;
 }
 
-.newspaper-masthead h1 {
-  font-family: 'Georgia', 'UnifrakturMaguntia', serif;
-  font-size: 52px;
-  font-weight: 900;
-  letter-spacing: -1px;
-  color: #0a0a0a;
-  line-height: 1;
-  margin: 0;
+.masthead-logo-left {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.masthead-center-title {
+  text-align: center;
+}
+
+.masthead-center-title h1 {
+  font-family: 'Georgia', serif;
+  font-size: 34px;
+  font-weight: 950;
+  letter-spacing: -0.5px;
+  color: #1a1a1a;
   text-transform: uppercase;
+  margin: 0;
+  line-height: 1.1;
+  text-shadow: 0.5px 0.5px 0px rgba(0,0,0,0.15);
 }
 
-.newspaper-masthead .masthead-tagline {
+.masthead-center-title .masthead-tagline {
   font-style: italic;
-  font-size: 13px;
-  color: #4a4a4a;
+  font-size: 11.5px;
+  color: #3f3f3f;
   margin: 4px 0 0;
   font-family: 'Georgia', serif;
+  letter-spacing: 0.2px;
+}
+
+.masthead-info-right {
+  font-size: 9.5px;
+  text-align: right;
+  font-family: 'Georgia', serif;
+  color: #2e2e2e;
+  line-height: 1.4;
+  border-left: 1px solid #c8c0a8;
+  padding-left: 10px;
 }
 
 /* Metabar — date, edition, vol */
@@ -2150,15 +2215,18 @@ footer {
 
 /* Section label bar */
 .newspaper-section-label {
-  background: #1a1a1a;
-  color: #fdfcf5;
-  font-size: 11px;
+  border-top: 1px solid #1a1a1a;
+  border-bottom: 1px solid #1a1a1a;
+  font-size: 10.5px;
   font-weight: bold;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
-  padding: 3px 10px;
+  letter-spacing: 2px;
+  padding: 4px 14px;
   display: inline-block;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+  background: transparent;
+  color: #1a1a1a;
+  font-family: 'Georgia', serif;
 }
 
 /* Main lead story block */
@@ -2423,5 +2491,301 @@ footer {
   }
   100% {
     background-position: 200% 0;
+  }
+}
+
+/* ==========================
+   FACEBOOK STYLE LIKES & COMMENTS
+   ========================== */
+:root {
+  --fb-blue: #1877f2;
+  --fb-blue-hover: #166fe5;
+  --fb-hover-bg: rgba(255, 255, 255, 0.06);
+  --fb-bubble-bg: #242526;
+}
+
+.light-theme {
+  --fb-hover-bg: rgba(0, 0, 0, 0.05);
+  --fb-bubble-bg: #f0f2f5;
+}
+
+.fb-stats-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 2px 10px 2px;
+  border-bottom: 1px solid var(--border-color);
+  margin-top: 25px;
+}
+
+.fb-action-bar {
+  display: flex;
+  padding: 4px 0;
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 20px;
+}
+
+.fb-action-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  font-size: 14px;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.fb-action-btn:hover {
+  background-color: var(--fb-hover-bg);
+  color: var(--color-text-primary);
+}
+
+.fb-action-btn.active {
+  color: var(--fb-blue) !important;
+}
+
+.fb-comments-container {
+  margin-top: 20px;
+}
+
+.fb-comment-composer {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 25px;
+}
+
+.fb-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+}
+
+.fb-composer-box {
+  flex: 1;
+  background-color: var(--fb-bubble-bg);
+  border-radius: 18px;
+  padding: 10px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+}
+
+.fb-composer-name {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--color-text-primary);
+  font-weight: 700;
+  font-size: 13px;
+  padding: 4px 0 6px 0;
+  border-bottom: 1px solid var(--border-color);
+  width: 100%;
+}
+
+.fb-composer-name::placeholder {
+  color: var(--color-text-secondary);
+  opacity: 0.7;
+}
+
+.fb-composer-text {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--color-text-primary);
+  font-size: 14px;
+  resize: none;
+  font-family: inherit;
+  padding: 4px 0;
+  width: 100%;
+  min-height: 40px;
+}
+
+.fb-composer-text::placeholder {
+  color: var(--color-text-secondary);
+  opacity: 0.7;
+}
+
+.fb-composer-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 2px;
+}
+
+.fb-submit-btn {
+  background: var(--fb-blue);
+  color: white;
+  border: none;
+  padding: 6px 18px;
+  border-radius: 16px;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: not-allowed;
+  opacity: 0.4;
+  transition: opacity 0.2s, background-color 0.2s;
+}
+
+.fb-submit-btn.active {
+  opacity: 1;
+  cursor: pointer;
+}
+
+.fb-submit-btn.active:hover {
+  background-color: var(--fb-blue-hover);
+}
+
+.fb-comment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.fb-comment-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.fb-comment-bubble-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.fb-comment-bubble {
+  background-color: var(--fb-bubble-bg);
+  border-radius: 18px;
+  padding: 10px 16px;
+  display: inline-block;
+  align-self: flex-start;
+  max-width: 100%;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+}
+
+.fb-comment-author {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--color-text-primary);
+  display: block;
+}
+
+.fb-comment-text {
+  font-size: 14px;
+  color: var(--color-text-primary);
+  margin-top: 4px;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.fb-comment-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  padding-left: 8px;
+}
+
+.fb-comment-action-link {
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  font-size: 12px;
+  transition: color 0.15s;
+}
+
+.fb-comment-action-link:hover {
+  text-decoration: underline;
+  color: var(--color-text-primary);
+}
+
+.fb-comment-action-link.active {
+  color: var(--fb-blue) !important;
+}
+
+.fb-comment-date {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+/* ==========================
+   LIGHT THEME COLOR FIXES & OVERRIDES
+   ========================== */
+.light-theme .btn-secondary {
+  background: rgba(0, 0, 0, 0.05) !important;
+  color: var(--color-text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.light-theme .btn-secondary:hover {
+  background: rgba(0, 0, 0, 0.1) !important;
+}
+
+.light-theme .share-btn.link {
+  background: rgba(0, 0, 0, 0.05) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.light-theme .share-btn.link:hover {
+  background: rgba(0, 0, 0, 0.1) !important;
+}
+
+.light-theme ::-webkit-scrollbar-thumb {
+  background: #cbd5e1 !important;
+}
+
+.light-theme ::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary) !important;
+}
+
+.light-theme .table tr:hover td {
+  background: rgba(0, 0, 0, 0.02) !important;
+}
+
+/* ==========================
+   MOBILE RESPONSIVE NEWSPAPER ZOOM PREVIEW
+   ========================== */
+@media (max-width: 768px) {
+  .newspaper-page {
+    zoom: 0.45 !important;
+    margin: 0 auto !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .newspaper-page {
+    zoom: 0.38 !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .newspaper-page {
+    zoom: 0.32 !important;
   }
 }

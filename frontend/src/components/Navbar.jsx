@@ -231,14 +231,14 @@ export default function Navbar() {
       {/* Main Navigation Bar */}
       <nav className="nav-main">
         <div className="container">
-          <Link to="/" className="brand" style={{ display: 'flex', alignItems: 'center', gap: '12px' }} onClick={() => setIsOpen(false)}>
+          <Link to="/" className="brand" onClick={() => setIsOpen(false)}>
             <img 
               src="/logo.png" 
               alt={t('brandName')} 
-              style={{ height: '64px', objectFit: 'contain', borderRadius: '4px' }} 
+              className="brand-logo"
               onError={(e) => { e.target.style.display = 'none'; }}
             />
-            <span style={{ fontSize: '22px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '-0.5px' }}>
+            <span className="brand-text">
               {t('brandName')}
             </span>
             <span className="live-badge">Live</span>

@@ -509,6 +509,31 @@ export default function AdminDashboard() {
     });
   };
 
+  // Share News article
+  const handleShareNews = async (article) => {
+    const shareUrl = `${window.location.protocol}//${window.location.host}/news/${article._id}`;
+    const title = language === 'en' ? article.titleEn : article.titleHi;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: title,
+          url: shareUrl
+        });
+      } catch (err) {
+        console.log('Share failed/cancelled', err);
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        triggerAlert('success', language === 'en' ? 'Link copied to clipboard!' : 'लिंक क्लिपबोर्ड पर कॉपी हो गया!');
+      } catch (err) {
+        console.error('Failed to copy', err);
+        triggerAlert('error', language === 'en' ? 'Failed to copy link' : 'लिंक कॉपी करने में विफल');
+      }
+    }
+  };
+
   // Create Category
   const handleCreateCategory = async (e) => {
     e.preventDefault();
@@ -1215,38 +1240,73 @@ export default function AdminDashboard() {
                   newsList.map((article) => (
                     <tr key={article._id}>
                       <td>
-                        <div 
-                          style={{ 
-                            fontWeight: 600, 
-                            color: 'var(--color-text-primary)',
-                            maxWidth: '380px',
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis'
-                          }} 
-                          title={article.titleHi}
-                        >
-                          {article.titleHi}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          {article.images && article.images.length > 0 ? (
+                            <img 
+                              src={article.images[0]} 
+                              alt="" 
+                              style={{ 
+                                width: '50px', 
+                                height: '38px', 
+                                objectFit: 'cover', 
+                                borderRadius: '4px',
+                                border: '1px solid var(--border-color)',
+                                flexShrink: 0
+                              }} 
+                            />
+                          ) : (
+                            <div 
+                              style={{ 
+                                width: '50px', 
+                                height: '38px', 
+                                backgroundColor: 'var(--fb-hover-bg)', 
+                                borderRadius: '4px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: 'var(--color-text-secondary)',
+                                border: '1px solid var(--border-color)',
+                                flexShrink: 0
+                              }}
+                            >
+                              <Image size={14} />
+                            </div>
+                          )}
+                          <div>
+                            <div 
+                              style={{ 
+                                fontWeight: 600, 
+                                color: 'var(--color-text-primary)',
+                                maxWidth: '320px',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis'
+                              }} 
+                              title={article.titleHi}
+                            >
+                              {article.titleHi}
+                            </div>
+                            <div 
+                              style={{ 
+                                fontSize: '12px', 
+                                color: 'var(--color-text-secondary)', 
+                                marginTop: '4px',
+                                maxWidth: '320px',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis'
+                              }} 
+                              title={article.titleEn}
+                            >
+                              {article.titleEn}
+                            </div>
+                            {article.isBreaking && (
+                              <span className="live-badge" style={{ fontSize: '8px', padding: '1px 4px', display: 'inline-block', marginTop: '4px' }}>
+                                {t('breakingNews')}
+                              </span>
+                            )}
+                          </div>
                         </div>
-                        <div 
-                          style={{ 
-                            fontSize: '12px', 
-                            color: 'var(--color-text-secondary)', 
-                            marginTop: '4px',
-                            maxWidth: '380px',
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis'
-                          }} 
-                          title={article.titleEn}
-                        >
-                          {article.titleEn}
-                        </div>
-                        {article.isBreaking && (
-                          <span className="live-badge" style={{ fontSize: '8px', padding: '1px 4px', display: 'inline-block', marginTop: '6px' }}>
-                            {t('breakingNews')}
-                          </span>
-                        )}
                       </td>
                       <td>
                         <span style={{ fontSize: '13px', background: 'rgba(255,255,255,0.05)', padding: '2px 8px', borderRadius: '4px' }}>
@@ -1259,6 +1319,14 @@ export default function AdminDashboard() {
                       </td>
                       <td>
                         <div className="action-btns">
+                          <Link
+                            to={`/news/${article._id}`}
+                            className="btn btn-sm btn-secondary"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'var(--color-secondary)', color: '#fff', textDecoration: 'none', border: 'none' }}
+                          >
+                            <Eye size={12} />
+                            {language === 'en' ? 'View' : 'देखें'}
+                          </Link>
                           <button
                             className="btn btn-sm btn-secondary"
                             style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
@@ -1266,6 +1334,14 @@ export default function AdminDashboard() {
                           >
                             <Edit size={12} />
                             {t('edit')}
+                          </button>
+                          <button
+                            className="btn btn-sm btn-secondary"
+                            style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+                            onClick={() => handleShareNews(article)}
+                          >
+                            <Share2 size={12} />
+                            {language === 'en' ? 'Share' : 'शेयर'}
                           </button>
                           <button
                             className="btn btn-sm btn-danger"

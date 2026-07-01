@@ -27,7 +27,7 @@ export default function LazyImage({ src, alt, className, style }) {
       style={{
         position: 'relative',
         overflow: 'hidden',
-        background: 'rgba(255, 255, 255, 0.05)',
+        background: 'var(--fb-hover-bg)',
         width: '100%',
         height: '100%',
         borderRadius: style?.borderRadius || 'inherit',

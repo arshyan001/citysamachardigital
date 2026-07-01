@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
-import { Calendar, Eye, MapPin, ArrowLeft, Video, Newspaper, ThumbsUp, Share2 } from 'lucide-react';
+import { Calendar, Eye, MapPin, ArrowLeft, Video, Newspaper, ThumbsUp, Share2, MessageSquare } from 'lucide-react';
 import LazyImage from '../components/LazyImage';
 
 export default function NewsDetail() {
@@ -21,7 +21,81 @@ export default function NewsDetail() {
   const [newCommentText, setNewCommentText] = useState('');
   const [likes, setLikes] = useState(0);
   const [shares, setShares] = useState(0);
-  const [hasLiked, setHasLiked] = useState(false);
+  const [hasLiked, setHasLiked] = useState(() => {
+    try {
+      return localStorage.getItem(`liked_${id}`) === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const [commentLikes, setCommentLikes] = useState(() => {
+    try {
+      const saved = localStorage.getItem(`comment_likes_${id}`);
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const toggleCommentLike = (index) => {
+    setCommentLikes(prev => {
+      const updated = { ...prev, [index]: !prev[index] };
+      try {
+        localStorage.setItem(`comment_likes_${id}`, JSON.stringify(updated));
+      } catch (e) {
+        console.error(e);
+      }
+      return updated;
+    });
+  };
+
+  const getAvatarColor = (name) => {
+    if (!name) return '#9ca3af';
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const hue = Math.abs(hash) % 360;
+    return `hsl(${hue}, 60%, 40%)`;
+  };
+
+  const handleReplyClick = (authorName) => {
+    setNewCommentText(`@${authorName} `);
+    const composerInput = document.querySelector('.fb-composer-text');
+    if (composerInput) {
+      composerInput.focus();
+      composerInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
+  const handleCommentBtnClick = () => {
+    const composerInput = document.querySelector('.fb-composer-text');
+    if (composerInput) {
+      composerInput.focus();
+      composerInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
+  const handleFbShareBtnClick = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: title,
+          url: shareUrl
+        });
+        const res = await fetch(`/api/news/${id}/share`, { method: 'POST' });
+        if (res.ok) {
+          const data = await res.json();
+          setShares(data.shares);
+        }
+      } catch (err) {
+        console.log('Share cancelled/failed', err);
+      }
+    } else {
+      handleCopyLink();
+    }
+  };
 
   useEffect(() => {
     const fetchAds = async () => {
@@ -124,6 +198,11 @@ export default function NewsDetail() {
         const data = await res.json();
         setLikes(data.likes);
         setHasLiked(true);
+        try {
+          localStorage.setItem(`liked_${id}`, 'true');
+        } catch (e) {
+          console.error(e);
+        }
       }
     } catch (err) {
       console.error('Error liking article:', err);
@@ -342,7 +421,11 @@ export default function NewsDetail() {
             {/* Images display */}
             {news.images && news.images.length > 0 && (
               <div className="article-main-image">
-                <LazyImage src={news.images[0]} alt={title} />
+                <LazyImage 
+                  src={news.images[0]} 
+                  alt={title} 
+                  style={{ objectFit: 'contain', width: '100%', height: '100%' }}
+                />
               </div>
             )}
 
@@ -393,51 +476,117 @@ export default function NewsDetail() {
               </div>
             )}
 
-            {/* Comments Section */}
-            <div className="comments-section">
-              <h3 style={{ fontSize: '18px', borderBottom: '2px solid var(--color-primary)', paddingBottom: '6px', marginBottom: '20px', textTransform: 'uppercase' }}>
-                {language === 'en' ? 'Comments' : 'पाठकों की टिप्पणियाँ'} ({comments.length})
-              </h3>
-              
-              {/* Comment Form */}
-              <form onSubmit={handleCommentSubmit} className="glass" style={{ padding: '20px', borderRadius: 'var(--border-radius-sm)', marginBottom: '30px' }}>
-                <h4 style={{ fontSize: '14px', marginBottom: '15px' }}>
-                  {language === 'en' ? 'Leave a Comment' : 'अपनी टिप्पणी लिखें'}
-                </h4>
-                <div className="form-group">
-                  <label>{language === 'en' ? 'Your Name' : 'आपका नाम'}</label>
+            {/* Facebook Style Likes and Comments Widget */}
+            <div className="fb-comments-container">
+              {/* Stats Bar */}
+              <div className="fb-stats-bar">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '18px',
+                    height: '18px',
+                    borderRadius: '50%',
+                    background: '#1877f2',
+                    color: '#fff',
+                  }}>
+                    <ThumbsUp size={10} style={{ fill: '#fff', stroke: 'none' }} />
+                  </div>
+                  <span style={{ fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: '600' }}>
+                    {likes}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', gap: '12px', fontSize: '13px', color: 'var(--color-text-secondary)' }}>
+                  <span>{comments.length} {language === 'en' ? 'Comments' : 'टिप्पणियाँ'}</span>
+                  {shares > 0 && <span>•</span>}
+                  {shares > 0 && <span>{shares} {language === 'en' ? 'Shares' : 'शेयर'}</span>}
+                </div>
+              </div>
+
+              {/* Action Bar */}
+              <div className="fb-action-bar">
+                <button 
+                  className={`fb-action-btn ${hasLiked ? 'active' : ''}`} 
+                  onClick={handleLike}
+                  style={{ cursor: hasLiked ? 'default' : 'pointer' }}
+                >
+                  <ThumbsUp size={16} style={{ fill: hasLiked ? '#1877f2' : 'none' }} />
+                  <span>{language === 'en' ? 'Like' : 'पसंद करें'}</span>
+                </button>
+                <button className="fb-action-btn" onClick={handleCommentBtnClick}>
+                  <MessageSquare size={16} />
+                  <span>{language === 'en' ? 'Comment' : 'टिप्पणी करें'}</span>
+                </button>
+                <button className="fb-action-btn" onClick={handleFbShareBtnClick}>
+                  <Share2 size={16} />
+                  <span>
+                    {copied ? (language === 'en' ? 'Copied!' : 'कॉपी हो गया!') : (language === 'en' ? 'Share' : 'शेयर करें')}
+                  </span>
+                </button>
+              </div>
+
+              {/* Comment Composer */}
+              <form onSubmit={handleCommentSubmit} className="fb-comment-composer">
+                <div className="fb-avatar" style={{ backgroundColor: getAvatarColor(newCommentName || 'Guest') }}>
+                  {(newCommentName ? newCommentName.charAt(0) : 'U').toUpperCase()}
+                </div>
+                <div className="fb-composer-box">
                   <input 
                     type="text" 
-                    className="form-control" 
-                    required 
+                    className="fb-composer-name" 
+                    placeholder={language === 'en' ? 'Your Name...' : 'आपका नाम...'} 
                     value={newCommentName}
                     onChange={(e) => setNewCommentName(e.target.value)}
+                    required
                   />
-                </div>
-                <div className="form-group">
-                  <label>{language === 'en' ? 'Your Comment' : 'आपकी टिप्पणी'}</label>
                   <textarea 
-                    rows="4" 
-                    className="form-control" 
-                    required 
+                    className="fb-composer-text" 
+                    placeholder={language === 'en' ? 'Write a comment...' : 'अपनी टिप्पणी लिखें...'} 
                     value={newCommentText}
                     onChange={(e) => setNewCommentText(e.target.value)}
-                  ></textarea>
+                    rows="2"
+                    required
+                  />
+                  <div className="fb-composer-footer">
+                    <button 
+                      type="submit" 
+                      className={`fb-submit-btn ${(newCommentName.trim() && newCommentText.trim()) ? 'active' : ''}`}
+                      disabled={!newCommentName.trim() || !newCommentText.trim()}
+                    >
+                      {language === 'en' ? 'Post' : 'प्रकाशित करें'}
+                    </button>
+                  </div>
                 </div>
-                <button type="submit" className="btn" style={{ width: 'auto', padding: '10px 24px' }}>
-                  {language === 'en' ? 'Submit Comment' : 'टिप्पणी भेजें'}
-                </button>
               </form>
 
               {/* Comments List */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <div className="fb-comment-list">
                 {comments.map((comment, index) => (
-                  <div key={index} className="comment-item">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span className="comment-author">{comment.name}</span>
-                      <span className="comment-date">{comment.date}</span>
+                  <div key={index} className="fb-comment-item">
+                    <div className="fb-avatar" style={{ backgroundColor: getAvatarColor(comment.name) }}>
+                      {(comment.name ? comment.name.charAt(0) : 'U').toUpperCase()}
                     </div>
-                    <p className="comment-text">{comment.text}</p>
+                    <div className="fb-comment-bubble-wrapper">
+                      <div className="fb-comment-bubble">
+                        <span className="fb-comment-author">{comment.name}</span>
+                        <p className="fb-comment-text">{comment.text}</p>
+                      </div>
+                      <div className="fb-comment-actions">
+                        <button 
+                          className={`fb-comment-action-link ${commentLikes[index] ? 'active' : ''}`}
+                          onClick={() => toggleCommentLike(index)}
+                        >
+                          {commentLikes[index] ? (language === 'en' ? 'Liked' : 'पसंद किया') : (language === 'en' ? 'Like' : 'पसंद')}
+                        </button>
+                        <span>•</span>
+                        <button className="fb-comment-action-link" onClick={() => handleReplyClick(comment.name)}>
+                          {language === 'en' ? 'Reply' : 'जवाब दें'}
+                        </button>
+                        <span>•</span>
+                        <span className="fb-comment-date">{comment.date}</span>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -469,7 +618,7 @@ export default function NewsDetail() {
                   </div>
                   <div>
                     <h4 style={{ fontSize: '14px', fontWeight: 600, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: 1.3 }}>
-                      <Link to={`/news/${rel._id}`} style={{ color: '#fff' }}>
+                      <Link to={`/news/${rel._id}`} style={{ color: 'var(--color-text-primary)' }}>
                         {language === 'en' ? rel.titleEn : rel.titleHi}
                       </Link>
                     </h4>
