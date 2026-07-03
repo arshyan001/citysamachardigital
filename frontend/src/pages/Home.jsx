@@ -334,12 +334,6 @@ export default function Home() {
     }))
     .slice(0, 6);
 
-  // Extract news for shelves (only used in default view)
-  const politicsNews = news.filter(n => n.categories && n.categories.some(c => c.nameEn === 'Politics')).slice(0, 3);
-  const nationalNews = news.filter(n => n.categories && n.categories.some(c => c.nameEn === 'National')).slice(0, 3);
-  const sportsNews = news.filter(n => n.categories && n.categories.some(c => c.nameEn === 'Sports')).slice(0, 3);
-  const localNewsShelf = news.filter(n => n.categories && n.categories.some(c => c.nameEn === 'Local News')).slice(0, 3);
-  const crimeNews = news.filter(n => n.categories && n.categories.some(c => c.nameEn === 'Crime')).slice(0, 3);
 
   // Get Youtube ID
   const getYoutubeEmbedUrl = (url) => {
@@ -360,10 +354,10 @@ export default function Home() {
         </div>
         <div className="grid grid-cols-3" style={{ gap: '20px' }}>
           {shelfNews.map(n => (
-            <NewsCard 
-              key={n._id} 
-              news={n} 
-              forcedCategoryName={language === 'en' ? titleEn : titleHi} 
+            <NewsCard
+              key={n._id}
+              news={n}
+              forcedCategoryName={language === 'en' ? titleEn : titleHi}
             />
           ))}
         </div>
@@ -510,13 +504,21 @@ export default function Home() {
                       </div>
                     </div>
 
-                    {/* Category Shelves */}
-                    {renderCategoryShelf(localNewsShelf, 'Local News', 'स्थानीय समाचार')}
-                    {renderCategoryShelf(nationalNews, 'National News', 'राष्ट्रीय समाचार')}
-                    {renderCategoryShelf(politicsNews, 'Politics', 'राजनीति समाचार')}
-                    {renderCategoryShelf(sportsNews, 'Sports News', 'खेल जगत')}
-                    {renderCategoryShelf(crimeNews, 'Crime News', 'अपराध जगत')}
-                    {renderCategoryShelf(politicsNews.length === 0 ? regularNews.slice(0, 3) : [], 'More News', 'अन्य ख़बरें')}
+                    {/* Uncategorized / More News Shelf */}
+                    {(() => {
+                      const uncategorizedNews = news.filter(n => !n.categories || n.categories.length === 0).slice(0, 3);
+                      return renderCategoryShelf(uncategorizedNews, 'More News', 'अन्य ख़बरें');
+                    })()}
+
+                    {/* Dynamic Category Shelves */}
+                    {categories.map((cat) => {
+                      const shelfNews = news.filter(n => n.categories && n.categories.some(c => c._id === cat._id)).slice(0, 3);
+                      return (
+                        <React.Fragment key={cat._id}>
+                          {renderCategoryShelf(shelfNews, cat.nameEn, cat.nameHi)}
+                        </React.Fragment>
+                      );
+                    })}
 
                     {/* Video Bulletins inside left block */}
                     {videoNews.length > 0 && (
@@ -560,9 +562,9 @@ export default function Home() {
                     {renderAd('sidebar')}
 
                     {/* Editor-in-Chief Profile Widget */}
-                    <div 
-                      id="editorWidget" 
-                      className="widget-card" 
+                    <div
+                      id="editorWidget"
+                      className="widget-card"
                       style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '15px', cursor: 'pointer' }}
                       onClick={() => setIsEditorModalOpen(true)}
                     >
@@ -572,12 +574,12 @@ export default function Home() {
                       </div>
                       {editorInfo && editorInfo.photoUrl ? (
                         <div style={{ width: '140px', height: '140px', borderRadius: '50%', overflow: 'hidden', border: '3px solid var(--color-primary)', boxShadow: 'var(--shadow-sm)' }}>
-                          <img 
-                            src={editorInfo.photoUrl} 
-                            alt={language === 'en' 
-                              ? (editorInfo.nameEn || 'SADRE ALAM KHAN') 
-                              : (editorInfo.nameHi || 'सदरे आलम खान')} 
-                            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                          <img
+                            src={editorInfo.photoUrl}
+                            alt={language === 'en'
+                              ? (editorInfo.nameEn || 'SADRE ALAM KHAN')
+                              : (editorInfo.nameHi || 'सदरे आलम खान')}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                           />
                         </div>
                       ) : (
@@ -587,24 +589,24 @@ export default function Home() {
                       )}
                       <div>
                         <h4 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--color-text-primary)' }}>
-                          {editorInfo 
+                          {editorInfo
                             ? (language === 'en' ? (editorInfo.nameEn || 'SADRE ALAM KHAN') : (editorInfo.nameHi || 'सदरे आलम खान'))
                             : (language === 'en' ? 'SADRE ALAM KHAN' : 'सदरे आलम खान')}
                         </h4>
                         <p style={{ fontSize: '12px', color: 'var(--color-primary)', fontWeight: 600, marginTop: '4px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                          {editorInfo 
+                          {editorInfo
                             ? (language === 'en' ? (editorInfo.roleEn || 'Editor-in-Chief') : (editorInfo.roleHi || 'मुख्य संपादक'))
                             : (language === 'en' ? 'Editor-in-Chief' : 'मुख्य संपादक')}
                         </p>
                       </div>
                       <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.5', marginTop: '4px', fontStyle: 'italic' }}>
-                        "{editorInfo 
-                          ? (language === 'en' 
-                              ? (editorInfo.descriptionEn || 'Passionate journalist dedicated to delivering accurate and timely news to the local community.') 
-                              : (editorInfo.descriptionHi || 'स्थानीय समुदाय तक सटीक और समय पर समाचार पहुंचाने के लिए समर्पित पत्रकार।'))
-                          : (language === 'en' 
-                              ? 'Passionate journalist dedicated to delivering accurate and timely news to the local community.' 
-                              : 'स्थानीय समुदाय तक सटीक और समय पर समाचार पहुंचाने के लिए समर्पित पत्रकार।')}"
+                        "{editorInfo
+                          ? (language === 'en'
+                            ? (editorInfo.descriptionEn || 'Passionate journalist dedicated to delivering accurate and timely news to the local community.')
+                            : (editorInfo.descriptionHi || 'स्थानीय समुदाय तक सटीक और समय पर समाचार पहुंचाने के लिए समर्पित पत्रकार।'))
+                          : (language === 'en'
+                            ? 'Passionate journalist dedicated to delivering accurate and timely news to the local community.'
+                            : 'स्थानीय समुदाय तक सटीक और समय पर समाचार पहुंचाने के लिए समर्पित पत्रकार।')}"
                       </p>
                       <span style={{ fontSize: '11px', color: 'var(--color-primary)', textDecoration: 'underline', fontWeight: 600 }}>
                         {language === 'en' ? 'Click for Full Profile' : 'पूर्ण प्रोफ़ाइल के लिए क्लिक करें'}
@@ -621,11 +623,11 @@ export default function Home() {
                           <BookOpen size={16} style={{ color: 'var(--color-primary)' }} />
                           {language === 'en' ? 'LATEST E-PAPER' : 'नवीनतम ई-पेपर'}
                         </div>
-                        <div 
-                          style={{ 
-                            position: 'relative', 
-                            borderRadius: 'var(--border-radius-sm)', 
-                            overflow: 'hidden', 
+                        <div
+                          style={{
+                            position: 'relative',
+                            borderRadius: 'var(--border-radius-sm)',
+                            overflow: 'hidden',
                             border: '1px solid var(--border-color)',
                             aspectRatio: '3/4',
                             background: 'rgba(255, 255, 255, 0.02)',
@@ -634,9 +636,9 @@ export default function Home() {
                           onClick={() => navigate('/epaper')}
                         >
                           {latestEPaper.thumbnailUrl ? (
-                            <img 
-                              src={latestEPaper.thumbnailUrl} 
-                              alt="E-Paper Thumbnail" 
+                            <img
+                              src={latestEPaper.thumbnailUrl}
+                              alt="E-Paper Thumbnail"
                               style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.3s' }}
                               onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
                               onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
@@ -666,8 +668,8 @@ export default function Home() {
                             )}
                           </div>
                         </div>
-                        <button 
-                          className="btn btn-sm" 
+                        <button
+                          className="btn btn-sm"
                           style={{ width: '100%', background: 'linear-gradient(135deg, var(--color-primary) 0%, #b91c1c 100%)', color: '#fff', border: 'none', fontWeight: 700 }}
                           onClick={() => navigate('/epaper')}
                         >
@@ -703,12 +705,12 @@ export default function Home() {
                                 {index + 1}
                               </div>
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                <h4 
-                                  style={{ 
-                                    fontSize: '13px', 
-                                    fontWeight: 700, 
-                                    lineHeight: '1.4', 
-                                    color: 'var(--color-text-primary)', 
+                                <h4
+                                  style={{
+                                    fontSize: '13px',
+                                    fontWeight: 700,
+                                    lineHeight: '1.4',
+                                    color: 'var(--color-text-primary)',
                                     cursor: 'pointer',
                                     margin: 0
                                   }}
@@ -902,7 +904,7 @@ export default function Home() {
             textAlign: 'center'
           }} onClick={(e) => e.stopPropagation()}>
             {/* Close Button */}
-            <button 
+            <button
               style={{
                 position: 'absolute',
                 top: '15px',
@@ -933,12 +935,12 @@ export default function Home() {
             {/* Image (Even Larger!) */}
             {editorInfo && editorInfo.photoUrl ? (
               <div style={{ width: '180px', height: '180px', borderRadius: '50%', overflow: 'hidden', border: '4px solid var(--color-primary)', boxShadow: 'var(--shadow-md)' }}>
-                <img 
-                  src={editorInfo.photoUrl} 
-                  alt={language === 'en' 
-                    ? (editorInfo.nameEn || 'SADRE ALAM KHAN') 
-                    : (editorInfo.nameHi || 'सदरे आलम खान')} 
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                <img
+                  src={editorInfo.photoUrl}
+                  alt={language === 'en'
+                    ? (editorInfo.nameEn || 'SADRE ALAM KHAN')
+                    : (editorInfo.nameHi || 'सदरे आलम खान')}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
               </div>
             ) : (
@@ -950,12 +952,12 @@ export default function Home() {
             {/* Name & Role */}
             <div>
               <h3 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--color-text-primary)' }}>
-                {editorInfo 
+                {editorInfo
                   ? (language === 'en' ? (editorInfo.nameEn || 'SADRE ALAM KHAN') : (editorInfo.nameHi || 'सदरे आलम खान'))
                   : (language === 'en' ? 'SADRE ALAM KHAN' : 'सदरे आलम खान')}
               </h3>
               <p style={{ fontSize: '14px', color: 'var(--color-primary)', fontWeight: 700, marginTop: '5px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                {editorInfo 
+                {editorInfo
                   ? (language === 'en' ? (editorInfo.roleEn || 'Editor-in-Chief') : (editorInfo.roleHi || 'मुख्य संपादक'))
                   : (language === 'en' ? 'Editor-in-Chief' : 'मुख्य संपादक')}
               </p>
@@ -963,18 +965,18 @@ export default function Home() {
 
             {/* Description */}
             <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: '1.6', fontStyle: 'italic', background: 'rgba(255,255,255,0.02)', padding: '15px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-              "{editorInfo 
-                ? (language === 'en' 
-                    ? (editorInfo.descriptionEn || 'Passionate journalist dedicated to delivering accurate and timely news to the local community.') 
-                    : (editorInfo.descriptionHi || 'स्थानीय समुदाय तक सटीक और समय पर समाचार पहुंचाने के लिए समर्पित पत्रकार।'))
-                : (language === 'en' 
-                    ? 'Passionate journalist dedicated to delivering accurate and timely news to the local community.' 
-                    : 'स्थानीय समुदाय तक सटीक और समय पर समाचार पहुंचाने के लिए समर्पित पत्रकार।')}"
+              "{editorInfo
+                ? (language === 'en'
+                  ? (editorInfo.descriptionEn || 'Passionate journalist dedicated to delivering accurate and timely news to the local community.')
+                  : (editorInfo.descriptionHi || 'स्थानीय समुदाय तक सटीक और समय पर समाचार पहुंचाने के लिए समर्पित पत्रकार।'))
+                : (language === 'en'
+                  ? 'Passionate journalist dedicated to delivering accurate and timely news to the local community.'
+                  : 'स्थानीय समुदाय तक सटीक और समय पर समाचार पहुंचाने के लिए समर्पित पत्रकार।')}"
             </p>
 
             {/* Details Section */}
             <div style={{ width: '100%', borderTop: '1px solid var(--border-color)', paddingTop: '20px', display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'flex-start', paddingLeft: '10px' }}>
-              
+
               {/* Phone */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--color-text-primary)', fontSize: '15px' }}>
                 <Phone size={18} style={{ color: 'var(--color-primary)' }} />
@@ -997,12 +999,12 @@ export default function Home() {
                 <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--color-text-secondary)', marginRight: '10px' }}>
                   {language === 'en' ? 'Social Links:' : 'सोशल लिंक्स:'}
                 </span>
-                
+
                 {/* Facebook */}
-                <a 
-                  href={editorInfo && editorInfo.facebook ? editorInfo.facebook : 'https://facebook.com'} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
+                <a
+                  href={editorInfo && editorInfo.facebook ? editorInfo.facebook : 'https://facebook.com'}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -1021,10 +1023,10 @@ export default function Home() {
                 </a>
 
                 {/* Instagram */}
-                <a 
-                  href={editorInfo && editorInfo.instagram ? editorInfo.instagram : 'https://instagram.com'} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
+                <a
+                  href={editorInfo && editorInfo.instagram ? editorInfo.instagram : 'https://instagram.com'}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -1043,10 +1045,10 @@ export default function Home() {
                 </a>
 
                 {/* YouTube */}
-                <a 
-                  href={editorInfo && editorInfo.youtube ? editorInfo.youtube : 'https://youtube.com'} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
+                <a
+                  href={editorInfo && editorInfo.youtube ? editorInfo.youtube : 'https://youtube.com'}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   style={{
                     display: 'flex',
                     alignItems: 'center',

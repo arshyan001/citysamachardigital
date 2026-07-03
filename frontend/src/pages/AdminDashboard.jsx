@@ -82,6 +82,7 @@ export default function AdminDashboard() {
   const [videoUrl, setVideoUrl] = useState('');
   const [imageFiles, setImageFiles] = useState([]);
   const [imageUrlStr, setImageUrlStr] = useState('');
+  const [existingImages, setExistingImages] = useState([]);
   const [isBreaking, setIsBreaking] = useState(false);
   const [isNewsSaving, setIsNewsSaving] = useState(false);
 
@@ -386,6 +387,7 @@ export default function AdminDashboard() {
     setVideoUrl('');
     setImageFiles([]);
     setImageUrlStr('');
+    setExistingImages([]);
     setIsBreaking(false);
   };
 
@@ -416,7 +418,15 @@ export default function AdminDashboard() {
         formData.append('images', imageFiles[i]);
       }
     } else if (imageUrlStr) {
-      formData.append('images', imageUrlStr);
+      // Split by comma and trim each URL to handle multiple comma-separated URLs
+      const urls = imageUrlStr.split(',').map(url => url.trim()).filter(Boolean);
+      urls.forEach(url => {
+        formData.append('images', url);
+      });
+    } else if (existingImages && existingImages.length > 0) {
+      existingImages.forEach(url => {
+        formData.append('images', url);
+      });
     }
 
     try {
@@ -467,8 +477,10 @@ export default function AdminDashboard() {
     setVideoUrl(article.videoUrl || '');
     setIsBreaking(article.isBreaking || false);
 
-    if (article.images && article.images.length > 0) {
-      setImageUrlStr(article.images[0]);
+    const artImages = article.images || [];
+    setExistingImages(artImages);
+    if (artImages.length > 0) {
+      setImageUrlStr(artImages.join(', '));
     } else {
       setImageUrlStr('');
     }
@@ -1617,8 +1629,82 @@ export default function AdminDashboard() {
                     className="form-control"
                     onChange={(e) => setImageFiles(e.target.files)}
                   />
-                  <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)', marginTop: '5px' }}>
-                    Or insert an external Image URL (for edit preservation):
+                  
+                  {/* Preview of newly selected files */}
+                  {imageFiles && imageFiles.length > 0 && (
+                    <div style={{ marginTop: '10px' }}>
+                      <div style={{ fontSize: '12px', fontWeight: 'bold', marginBottom: '5px', color: 'var(--color-text-secondary)' }}>
+                        {language === 'en' ? 'New Images Selected:' : 'चयनित नई तस्वीरें:'}
+                      </div>
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        {Array.from(imageFiles).map((file, idx) => (
+                          <div key={idx} style={{ position: 'relative', width: '60px', height: '60px', borderRadius: '4px', overflow: 'hidden', border: '1px solid var(--border-color)' }}>
+                            <img 
+                              src={URL.createObjectURL(file)} 
+                              alt="preview" 
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                            />
+                          </div>
+                        ))}
+                      </div>
+                      {editingId && (
+                        <div style={{ fontSize: '11px', color: 'var(--color-live)', marginTop: '5px', fontWeight: '600' }}>
+                          ⚠️ {language === 'en' ? 'Note: Uploading new files will replace all existing images.' : 'नोट: नई फ़ाइलें अपलोड करने से सभी पुरानी तस्वीरें बदल जाएंगी।'}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Preview of existing images when editing */}
+                  {editingId && existingImages && existingImages.length > 0 && (
+                    <div style={{ marginTop: '10px', marginBottom: '10px' }}>
+                      <div style={{ fontSize: '12px', fontWeight: 'bold', marginBottom: '5px', color: 'var(--color-text-secondary)' }}>
+                        {language === 'en' ? 'Existing Images:' : 'मौजूदा तस्वीरें:'}
+                      </div>
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        {existingImages.map((url, idx) => (
+                          <div key={idx} style={{ position: 'relative', width: '60px', height: '60px', borderRadius: '4px', overflow: 'hidden', border: '1px solid var(--border-color)' }}>
+                            <img 
+                              src={url} 
+                              alt="existing" 
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updated = existingImages.filter((_, i) => i !== idx);
+                                setExistingImages(updated);
+                                setImageUrlStr(updated.join(', '));
+                              }}
+                              style={{
+                                position: 'absolute',
+                                top: '2px',
+                                right: '2px',
+                                background: 'rgba(239, 68, 68, 0.9)',
+                                color: '#fff',
+                                border: 'none',
+                                borderRadius: '50%',
+                                width: '16px',
+                                height: '16px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '10px',
+                                cursor: 'pointer',
+                                lineHeight: 1
+                              }}
+                              title={language === 'en' ? 'Remove Image' : 'छवि हटाएं'}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)', marginTop: '10px' }}>
+                    Or insert external Image URLs (comma-separated for multiple):
                   </div>
                   <input
                     type="text"
@@ -1626,7 +1712,12 @@ export default function AdminDashboard() {
                     className="form-control"
                     style={{ marginTop: '5px', fontSize: '13px' }}
                     value={imageUrlStr}
-                    onChange={(e) => setImageUrlStr(e.target.value)}
+                    onChange={(e) => {
+                      setImageUrlStr(e.target.value);
+                      // Update existingImages preview state based on input
+                      const urls = e.target.value.split(',').map(u => u.trim()).filter(Boolean);
+                      setExistingImages(urls);
+                    }}
                   />
                 </div>
 

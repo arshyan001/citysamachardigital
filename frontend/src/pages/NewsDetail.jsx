@@ -418,14 +418,18 @@ export default function NewsDetail() {
               </div>
             </div>
 
-            {/* Images display */}
+            {/* Images display in grid */}
             {news.images && news.images.length > 0 && (
-              <div className="article-main-image">
-                <LazyImage 
-                  src={news.images[0]} 
-                  alt={title} 
-                  style={{ objectFit: 'contain', width: '100%', height: '100%' }}
-                />
+              <div className={`article-images-grid grid-count-${news.images.length > 3 ? '4-plus' : news.images.length}`}>
+                {news.images.map((imgUrl, imgIndex) => (
+                  <div key={imgIndex} className="article-grid-image-wrapper">
+                    <LazyImage 
+                      src={imgUrl} 
+                      alt={`${title} - ${imgIndex + 1}`} 
+                      style={{ objectFit: news.images.length === 1 ? 'contain' : 'cover', width: '100%', height: '100%' }}
+                    />
+                  </div>
+                ))}
               </div>
             )}
 
