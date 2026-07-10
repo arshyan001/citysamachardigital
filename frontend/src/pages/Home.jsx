@@ -412,18 +412,21 @@ export default function Home() {
                     <div className="hero-headlines-grid">
                       {/* Hero Card */}
                       {heroNews && (
-                        <div className="hero-main-card" style={{ cursor: 'pointer', height: '420px' }} onClick={() => navigate(`/news/${heroNews._id}`)}>
-                          <LazyImage
-                            src={heroNews.images && heroNews.images.length > 0 ? heroNews.images[0] : 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1200&q=80'}
-                            alt={heroNews.titleHi}
-                          />
-                          <div className="card-overlay"></div>
-                          <div className="card-content" style={{ padding: '20px' }}>
-                            <span className="card-tag">{t('latestNews')}</span>
-                            <h2 style={{ fontSize: '22px', textShadow: '0 2px 4px rgba(0,0,0,0.6)' }}>
+                        <div className="hero-main-card" onClick={() => navigate(`/news/${heroNews._id}`)}>
+                          <div className="hero-main-card-image">
+                            <LazyImage
+                              src={heroNews.images && heroNews.images.length > 0 ? heroNews.images[0] : 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1200&q=80'}
+                              alt={heroNews.titleHi}
+                            />
+                            <span className="category-badge" style={{ position: 'absolute', top: '12px', left: '12px' }}>
+                              {t('latestNews')}
+                            </span>
+                          </div>
+                          <div className="hero-main-card-content">
+                            <h2>
                               {heroNews.titleHi}
                             </h2>
-                            <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>
+                            <p>
                               {heroNews.summaryHi}
                             </p>
                             <div className="card-meta">
@@ -436,7 +439,7 @@ export default function Home() {
                       )}
 
                       {/* Headlines List */}
-                      <div className="glass" style={{ padding: '15px', borderRadius: 'var(--border-radius-md)', display: 'flex', flexDirection: 'column', height: '420px' }}>
+                      <div className="glass" style={{ padding: '15px', borderRadius: 'var(--border-radius-md)', display: 'flex', flexDirection: 'column', height: '100%', minHeight: '380px' }}>
                         <h3 style={{ fontSize: '15px', borderBottom: '2px solid var(--color-primary)', paddingBottom: '6px', marginBottom: '12px', textTransform: 'uppercase', color: 'var(--color-text-primary)' }}>
                           बड़ी ख़बरें
                         </h3>
