@@ -3,7 +3,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { Mail, Phone, MapPin, Send, AlertTriangle } from 'lucide-react';
 
 export default function ContactUs() {
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -61,9 +61,7 @@ export default function ContactUs() {
       <div style={{ textAlign: 'center', marginBottom: '40px' }}>
         <h2 style={{ fontSize: '32px', color: '#fff' }}>{t('contactTitle')}</h2>
         <p style={{ color: 'var(--color-text-secondary)', marginTop: '8px', fontSize: '16px' }}>
-          {language === 'en'
-            ? 'Have a hot scoop or a news tip? Send us a message and our reporting team will reach out.'
-            : 'क्या आपके पास कोई विशेष ख़बर या न्यूज़ टिप है? हमें संदेश भेजें और हमारी रिपोर्टिंग टीम आपसे संपर्क करेगी।'}
+          क्या आपके पास कोई विशेष ख़बर या न्यूज़ टिप है? हमें संदेश भेजें और हमारी रिपोर्टिंग टीम आपसे संपर्क करेगी।
         </p>
       </div>
 
@@ -149,16 +147,16 @@ export default function ContactUs() {
 
           <div className="contact-card" style={{ height: '100%' }}>
             <h3 style={{ color: '#fff', fontSize: '20px', marginBottom: '20px', borderBottom: '2px solid var(--color-primary)', paddingBottom: '8px' }}>
-              {language === 'en' ? 'Our Head Office' : 'हमारा मुख्य कार्यालय'}
+              हमारा मुख्य कार्यालय
             </h3>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', fontSize: '15px' }}>
               <div style={{ display: 'flex', gap: '15px' }}>
                 <MapPin size={24} style={{ color: 'var(--color-primary)', flexShrink: 0 }} />
                 <div>
-                  <h4 style={{ color: '#fff', fontWeight: 600 }}>{language === 'en' ? 'Address' : 'पता'}</h4>
+                  <h4 style={{ color: '#fff', fontWeight: 600 }}>पता</h4>
                   <p style={{ color: 'var(--color-text-secondary)', marginTop: '4px' }}>
-                    Khalilabad Bypass Road, Khalilabad, Sant Kabir Nagar, Uttar Pradesh - 272175
+                    खलीलाबाद बायपास रोड, खलीलाबाद, संत कबीर नगर, उत्तर प्रदेश - 272175
                   </p>
                 </div>
               </div>
@@ -166,10 +164,10 @@ export default function ContactUs() {
               <div style={{ display: 'flex', gap: '15px' }}>
                 <Phone size={24} style={{ color: 'var(--color-primary)', flexShrink: 0 }} />
                 <div>
-                  <h4 style={{ color: '#fff', fontWeight: 600 }}>{language === 'en' ? 'Phone' : 'फ़ोन'}</h4>
+                  <h4 style={{ color: '#fff', fontWeight: 600 }}>फ़ोन</h4>
                   <p style={{ color: 'var(--color-text-secondary)', marginTop: '4px' }}>
-                    Editorial Desk: +91 7007936247<br />
-                    Broadcast Operations: +91 9984745005
+                    संपादकीय डेस्क: +91 7007936247<br />
+                    प्रसारण संचालन: +91 9984745005
                   </p>
                 </div>
               </div>
@@ -177,10 +175,10 @@ export default function ContactUs() {
               <div style={{ display: 'flex', gap: '15px' }}>
                 <Mail size={24} style={{ color: 'var(--color-primary)', flexShrink: 0 }} />
                 <div>
-                  <h4 style={{ color: '#fff', fontWeight: 600 }}>{language === 'en' ? 'Email' : 'ईमेल'}</h4>
+                  <h4 style={{ color: '#fff', fontWeight: 600 }}>ईमेल</h4>
                   <p style={{ color: 'var(--color-text-secondary)', marginTop: '4px' }}>
-                    General Info: arshyan001@gmail.com<br />
-                    Submit Press Releases: arshyan0021@gmail.com
+                    सामान्य जानकारी: arshyan001@gmail.com<br />
+                    प्रेस विज्ञप्ति: arshyan0021@gmail.com
                   </p>
                 </div>
               </div>

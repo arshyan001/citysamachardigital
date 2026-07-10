@@ -5,25 +5,25 @@ import { Calendar, Eye, MapPin } from 'lucide-react';
 import LazyImage from './LazyImage';
 
 export default function NewsCard({ news, forcedCategoryName }) {
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
 
-  const title = language === 'en' ? news.titleEn : news.titleHi;
-  const summary = language === 'en' ? news.summaryEn : news.summaryHi;
+  const title = news.titleHi;
+  const summary = news.summaryHi;
   
   // Get category name (use forcedCategoryName if provided, else fall back to first category)
   const categoryName = forcedCategoryName 
     ? forcedCategoryName 
     : (news.categories && news.categories.length > 0 
-        ? (language === 'en' ? news.categories[0].nameEn : news.categories[0].nameHi) 
+        ? news.categories[0].nameHi 
         : '');
 
   // Get subdivision badge if exists and is not 'None'
   const subName = news.subdivision && news.subdivision !== 'None'
-    ? (language === 'en' ? news.subdivision : t(news.subdivision.toLowerCase()))
+    ? t(news.subdivision.toLowerCase())
     : '';
 
   const formattedDate = new Date(news.createdAt).toLocaleDateString(
-    language === 'en' ? 'en-US' : 'hi-IN',
+    'hi-IN',
     { month: 'short', day: 'numeric', year: 'numeric' }
   );
 

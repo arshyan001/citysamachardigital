@@ -402,12 +402,12 @@ export default function AdminDashboard() {
 
     setIsNewsSaving(true);
     const formData = new FormData();
-    formData.append('titleEn', titleEn);
+    formData.append('titleEn', titleHi);
     formData.append('titleHi', titleHi);
-    formData.append('contentEn', contentEn);
+    formData.append('contentEn', contentHi);
     formData.append('contentHi', contentHi);
-    formData.append('summaryEn', summaryEn);
-    formData.append('summaryHi', summaryHi);
+    formData.append('summaryEn', summaryHi || titleHi);
+    formData.append('summaryHi', summaryHi || '');
     formData.append('subdivision', subdivision);
     formData.append('videoUrl', videoUrl);
     formData.append('isBreaking', isBreaking);
@@ -549,8 +549,8 @@ export default function AdminDashboard() {
   // Create Category
   const handleCreateCategory = async (e) => {
     e.preventDefault();
-    if (!newCatEn || !newCatHi) {
-      triggerAlert('error', 'Fill in both language names for the category');
+    if (!newCatHi) {
+      triggerAlert('error', 'श्रेणी का नाम दर्ज करें');
       return;
     }
 
@@ -561,7 +561,7 @@ export default function AdminDashboard() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({ nameEn: newCatEn, nameHi: newCatHi })
+        body: JSON.stringify({ nameEn: newCatHi, nameHi: newCatHi })
       });
 
       if (res.ok) {
@@ -661,8 +661,8 @@ export default function AdminDashboard() {
   const handleEPaperSubmit = async (e) => {
     e.preventDefault();
 
-    if (!epaperDate || !epaperTitleEn || !epaperTitleHi) {
-      triggerAlert('error', 'Date and Titles are required');
+    if (!epaperDate || !epaperTitleHi) {
+      triggerAlert('error', 'तारीख और शीर्षक आवश्यक हैं');
       return;
     }
 
@@ -673,7 +673,7 @@ export default function AdminDashboard() {
 
     const formData = new FormData();
     formData.append('date', epaperDate);
-    formData.append('titleEn', epaperTitleEn);
+    formData.append('titleEn', epaperTitleHi);
     formData.append('titleHi', epaperTitleHi);
     formData.append('pdf', epaperPdfFile);
     if (epaperThumbFile) {
@@ -927,18 +927,18 @@ export default function AdminDashboard() {
 
   const handleEditorSubmit = async (e) => {
     e.preventDefault();
-    if (!editorNameEn || !editorNameHi) {
-      triggerAlert('error', 'Editor name is required in both English and Hindi');
+    if (!editorNameHi) {
+      triggerAlert('error', 'संपादक का नाम आवश्यक है');
       return;
     }
 
     const formData = new FormData();
-    formData.append('nameEn', editorNameEn);
+    formData.append('nameEn', editorNameHi);
     formData.append('nameHi', editorNameHi);
-    formData.append('roleEn', editorRoleEn);
-    formData.append('roleHi', editorRoleHi);
-    formData.append('descriptionEn', editorDescEn);
-    formData.append('descriptionHi', editorDescHi);
+    formData.append('roleEn', editorRoleHi || '');
+    formData.append('roleHi', editorRoleHi || '');
+    formData.append('descriptionEn', editorDescHi || '');
+    formData.append('descriptionHi', editorDescHi || '');
     formData.append('mobile', editorMobile);
     formData.append('facebook', editorFacebook);
     formData.append('instagram', editorInstagram);
@@ -1380,196 +1380,41 @@ export default function AdminDashboard() {
               <h3 style={{ color: 'var(--color-text-primary)', margin: 0, fontSize: '18px' }}>
                 {editingId ? t('editNews') : t('addNews')}
               </h3>
-
-              <label className="checkbox-label" style={{ fontSize: '13px', color: 'var(--color-text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <input
-                  type="checkbox"
-                  checked={isAutoTranslate}
-                  onChange={(e) => setIsAutoTranslate(e.target.checked)}
-                  style={{ transform: 'scale(1.1)' }}
-                />
-                {language === 'en' ? 'Enable Auto-Translate on focus out' : 'बाहर क्लिक करने पर स्वतः अनुवाद सक्षम करें'}
-              </label>
             </div>
 
             <form onSubmit={handleNewsSubmit}>
-              <div className="grid grid-cols-2">
-                <div className="form-group">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                    <label style={{ margin: 0 }}>{t('titleHi')} *</label>
-                    {titleEn && (
-                      <button
-                        type="button"
-                        style={{ padding: '2px 8px', fontSize: '11px', borderRadius: '4px', height: '22px', display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255,255,255,0.05)', color: 'var(--color-text-secondary)', border: '1px solid var(--border-color)', cursor: 'pointer' }}
-                        onClick={() => handleTranslateText(titleEn, 'hi', setTitleHi, 'titleHi', true)}
-                        disabled={translatingFields['titleHi']}
-                      >
-                        <Languages size={11} className={translatingFields['titleHi'] ? 'animate-spin' : ''} />
-                        {translatingFields['titleHi'] ? (language === 'en' ? 'Translating...' : 'अनुवाद हो रहा है...') : (language === 'en' ? 'Translate from English' : 'अंग्रेजी से अनुवाद करें')}
-                      </button>
-                    )}
-                  </div>
-                  <input
-                    type="text"
-                    className="form-control"
-                    required
-                    value={titleHi}
-                    onChange={(e) => setTitleHi(e.target.value)}
-                    onBlur={() => {
-                      if (isAutoTranslate && (!titleEn || titleEn.trim() === '')) {
-                        handleTranslateText(titleHi, 'en', setTitleEn, 'titleEn');
-                      }
-                    }}
-                  />
-                </div>
-                <div className="form-group">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                    <label style={{ margin: 0 }}>{t('titleEn')} *</label>
-                    {titleHi && (
-                      <button
-                        type="button"
-                        style={{ padding: '2px 8px', fontSize: '11px', borderRadius: '4px', height: '22px', display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255,255,255,0.05)', color: 'var(--color-text-secondary)', border: '1px solid var(--border-color)', cursor: 'pointer' }}
-                        onClick={() => handleTranslateText(titleHi, 'en', setTitleEn, 'titleEn', true)}
-                        disabled={translatingFields['titleEn']}
-                      >
-                        <Languages size={11} className={translatingFields['titleEn'] ? 'animate-spin' : ''} />
-                        {translatingFields['titleEn'] ? (language === 'en' ? 'Translating...' : 'अनुवाद हो रहा है...') : (language === 'en' ? 'Translate from Hindi' : 'हिंदी से अनुवाद करें')}
-                      </button>
-                    )}
-                  </div>
-                  <input
-                    type="text"
-                    className="form-control"
-                    required
-                    value={titleEn}
-                    onChange={(e) => setTitleEn(e.target.value)}
-                    onBlur={() => {
-                      if (isAutoTranslate && (!titleHi || titleHi.trim() === '')) {
-                        handleTranslateText(titleEn, 'hi', setTitleHi, 'titleHi');
-                      }
-                    }}
-                  />
-                </div>
+              <div className="form-group">
+                <label>{t('titleHi')} *</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  required
+                  value={titleHi}
+                  onChange={(e) => setTitleHi(e.target.value)}
+                />
               </div>
 
-              <div className="grid grid-cols-2">
-                <div className="form-group">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                    <label style={{ margin: 0 }}>{t('contentHi')} (Support 1000-2000 words) *</label>
-                    {contentEn && (
-                      <button
-                        type="button"
-                        style={{ padding: '2px 8px', fontSize: '11px', borderRadius: '4px', height: '22px', display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255,255,255,0.05)', color: 'var(--color-text-secondary)', border: '1px solid var(--border-color)', cursor: 'pointer' }}
-                        onClick={() => handleTranslateText(contentEn, 'hi', setContentHi, 'contentHi', true)}
-                        disabled={translatingFields['contentHi']}
-                      >
-                        <Languages size={11} className={translatingFields['contentHi'] ? 'animate-spin' : ''} />
-                        {translatingFields['contentHi'] ? (language === 'en' ? 'Translating...' : 'अनुवाद हो रहा है...') : (language === 'en' ? 'Translate from English' : 'अंग्रेजी से अनुवाद करें')}
-                      </button>
-                    )}
-                  </div>
-                  <textarea
-                    rows="12"
-                    className="form-control"
-                    required
-                    placeholder="लिखें पूरी खबर यहाँ..."
-                    value={contentHi}
-                    onChange={(e) => setContentHi(e.target.value)}
-                    onBlur={() => {
-                      if (isAutoTranslate && (!contentEn || contentEn.trim() === '')) {
-                        handleTranslateText(contentHi, 'en', setContentEn, 'contentEn');
-                      }
-                    }}
-                  ></textarea>
-                </div>
-                <div className="form-group">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                    <label style={{ margin: 0 }}>{t('contentEn')} (Support 1000-2000 words) *</label>
-                    {contentHi && (
-                      <button
-                        type="button"
-                        style={{ padding: '2px 8px', fontSize: '11px', borderRadius: '4px', height: '22px', display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255,255,255,0.05)', color: 'var(--color-text-secondary)', border: '1px solid var(--border-color)', cursor: 'pointer' }}
-                        onClick={() => handleTranslateText(contentHi, 'en', setContentEn, 'contentEn', true)}
-                        disabled={translatingFields['contentEn']}
-                      >
-                        <Languages size={11} className={translatingFields['contentEn'] ? 'animate-spin' : ''} />
-                        {translatingFields['contentEn'] ? (language === 'en' ? 'Translating...' : 'अनुवाद हो रहा है...') : (language === 'en' ? 'Translate from Hindi' : 'हिंदी से अनुवाद करें')}
-                      </button>
-                    )}
-                  </div>
-                  <textarea
-                    rows="12"
-                    className="form-control"
-                    required
-                    placeholder="Type news story description here..."
-                    value={contentEn}
-                    onChange={(e) => setContentEn(e.target.value)}
-                    onBlur={() => {
-                      if (isAutoTranslate && (!contentHi || contentHi.trim() === '')) {
-                        handleTranslateText(contentEn, 'hi', setContentHi, 'contentHi');
-                      }
-                    }}
-                  ></textarea>
-                </div>
+              <div className="form-group">
+                <label>{t('contentHi')} (Support 1000-2000 words) *</label>
+                <textarea
+                  rows="12"
+                  className="form-control"
+                  required
+                  placeholder="लिखें पूरी खबर यहाँ..."
+                  value={contentHi}
+                  onChange={(e) => setContentHi(e.target.value)}
+                ></textarea>
               </div>
 
-              <div className="grid grid-cols-2">
-                <div className="form-group">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                    <label style={{ margin: 0 }}>{language === 'en' ? 'Short Summary (Hindi)' : 'संक्षिप्त सारांश (हिंदी)'}</label>
-                    {summaryEn && (
-                      <button
-                        type="button"
-                        style={{ padding: '2px 8px', fontSize: '11px', borderRadius: '4px', height: '22px', display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255,255,255,0.05)', color: 'var(--color-text-secondary)', border: '1px solid var(--border-color)', cursor: 'pointer' }}
-                        onClick={() => handleTranslateText(summaryEn, 'hi', setSummaryHi, 'summaryHi', true)}
-                        disabled={translatingFields['summaryHi']}
-                      >
-                        <Languages size={11} className={translatingFields['summaryHi'] ? 'animate-spin' : ''} />
-                        {translatingFields['summaryHi'] ? (language === 'en' ? 'Translating...' : 'अनुवाद हो रहा है...') : (language === 'en' ? 'Translate from English' : 'अंग्रेजी से अनुवाद करें')}
-                      </button>
-                    )}
-                  </div>
-                  <textarea
-                    rows="3"
-                    className="form-control"
-                    placeholder="यदि खाली छोड़ दिया गया, तो समाचार विवरण से स्वचालित रूप से उत्पन्न होगा।"
-                    value={summaryHi}
-                    onChange={(e) => setSummaryHi(e.target.value)}
-                    onBlur={() => {
-                      if (isAutoTranslate && (!summaryEn || summaryEn.trim() === '')) {
-                        handleTranslateText(summaryHi, 'en', setSummaryEn, 'summaryEn');
-                      }
-                    }}
-                  ></textarea>
-                </div>
-                <div className="form-group">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                    <label style={{ margin: 0 }}>{language === 'en' ? 'Short Summary (English)' : 'संक्षिप्त सारांश (English)'}</label>
-                    {summaryHi && (
-                      <button
-                        type="button"
-                        style={{ padding: '2px 8px', fontSize: '11px', borderRadius: '4px', height: '22px', display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255,255,255,0.05)', color: 'var(--color-text-secondary)', border: '1px solid var(--border-color)', cursor: 'pointer' }}
-                        onClick={() => handleTranslateText(summaryHi, 'en', setSummaryEn, 'summaryEn', true)}
-                        disabled={translatingFields['summaryEn']}
-                      >
-                        <Languages size={11} className={translatingFields['summaryEn'] ? 'animate-spin' : ''} />
-                        {translatingFields['summaryEn'] ? (language === 'en' ? 'Translating...' : 'अनुवाद हो रहा है...') : (language === 'en' ? 'Translate from Hindi' : 'हिंदी से अनुवाद करें')}
-                      </button>
-                    )}
-                  </div>
-                  <textarea
-                    rows="3"
-                    className="form-control"
-                    placeholder="If empty, summary will be auto-extracted from article content."
-                    value={summaryEn}
-                    onChange={(e) => setSummaryEn(e.target.value)}
-                    onBlur={() => {
-                      if (isAutoTranslate && (!summaryHi || summaryHi.trim() === '')) {
-                        handleTranslateText(summaryEn, 'hi', setSummaryHi, 'summaryHi');
-                      }
-                    }}
-                  ></textarea>
-                </div>
+              <div className="form-group">
+                <label>{'संक्षिप्त सारांश (हिंदी)'}</label>
+                <textarea
+                  rows="3"
+                  className="form-control"
+                  placeholder="यदि खाली छोड़ दिया गया, तो समाचार विवरण से स्वचालित रूप से उत्पन्न होगा।"
+                  value={summaryHi}
+                  onChange={(e) => setSummaryHi(e.target.value)}
+                ></textarea>
               </div>
 
               <div className="grid grid-cols-2">
@@ -1763,32 +1608,23 @@ export default function AdminDashboard() {
             {/* Create Category Panel */}
             <div className="contact-card">
               <h3 style={{ color: 'var(--color-text-primary)', marginBottom: '20px', fontSize: '18px', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px' }}>
-                {language === 'en' ? 'Add New Category' : 'नई श्रेणी जोड़ें'}
+                {'नई श्रेणी जोड़ें'}
               </h3>
               <form onSubmit={handleCreateCategory}>
-                <div className="form-group">
-                  <label>Category Name (English) *</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Health"
-                    className="form-control"
-                    value={newCatEn}
-                    onChange={(e) => setNewCatEn(e.target.value)}
-                  />
-                </div>
                 <div className="form-group">
                   <label>श्रेणी नाम (हिंदी) *</label>
                   <input
                     type="text"
                     placeholder="उदा. स्वास्थ्य"
                     className="form-control"
+                    required
                     value={newCatHi}
                     onChange={(e) => setNewCatHi(e.target.value)}
                   />
                 </div>
                 <button type="submit" className="btn" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                   <Plus size={16} />
-                  {language === 'en' ? 'Add Category' : 'श्रेणी जोड़ें'}
+                  {'श्रेणी जोड़ें'}
                 </button>
               </form>
             </div>
@@ -1815,9 +1651,7 @@ export default function AdminDashboard() {
                   >
                     <div>
                       <span style={{ color: 'var(--color-text-primary)', fontWeight: 600 }}>{cat.nameHi}</span>
-                      <span style={{ color: 'var(--color-text-secondary)', fontSize: '13px', marginLeft: '10px' }}>
-                        ({cat.nameEn})
-                      </span>
+
                     </div>
                     <button
                       className="btn btn-sm btn-danger"
@@ -2188,80 +2022,40 @@ export default function AdminDashboard() {
               </h3>
               <form onSubmit={handleEditorSubmit}>
                 {/* Editor Name English & Hindi */}
-                <div className="grid grid-cols-2" style={{ gap: '15px' }}>
-                  <div className="form-group">
-                    <label>{language === 'en' ? 'Name (Hindi) *' : 'नाम (हिंदी) *'}</label>
-                    <input
-                      id="editorNameHi"
-                      type="text"
-                      className="form-control"
-                      required
-                      value={editorNameHi}
-                      onChange={(e) => setEditorNameHi(e.target.value)}
-                    />
-                  </div>
-                  
-                  <div className="form-group">
-                    <label>{language === 'en' ? 'Name (English) *' : 'नाम (English) *'}</label>
-                    <input
-                      id="editorNameEn"
-                      type="text"
-                      className="form-control"
-                      required
-                      value={editorNameEn}
-                      onChange={(e) => setEditorNameEn(e.target.value)}
-                    />
-                  </div>
+                <div className="form-group">
+                  <label>{language === 'en' ? 'Name (Hindi) *' : 'नाम (हिंदी) *'}</label>
+                  <input
+                    id="editorNameHi"
+                    type="text"
+                    className="form-control"
+                    required
+                    value={editorNameHi}
+                    onChange={(e) => setEditorNameHi(e.target.value)}
+                  />
                 </div>
 
-                {/* Editor Role English & Hindi */}
-                <div className="grid grid-cols-2" style={{ gap: '15px' }}>
-                  <div className="form-group">
-                    <label>{language === 'en' ? 'Role (Hindi)' : 'पद (हिंदी)'}</label>
-                    <input
-                      id="editorRoleHi"
-                      type="text"
-                      className="form-control"
-                      value={editorRoleHi}
-                      onChange={(e) => setEditorRoleHi(e.target.value)}
-                    />
-                  </div>
-                  
-                  <div className="form-group">
-                    <label>{language === 'en' ? 'Role (English)' : 'पद (English)'}</label>
-                    <input
-                      id="editorRoleEn"
-                      type="text"
-                      className="form-control"
-                      value={editorRoleEn}
-                      onChange={(e) => setEditorRoleEn(e.target.value)}
-                    />
-                  </div>
+                {/* Editor Role */}
+                <div className="form-group">
+                  <label>{language === 'en' ? 'Role (Hindi)' : 'पद (हिंदी)'}</label>
+                  <input
+                    id="editorRoleHi"
+                    type="text"
+                    className="form-control"
+                    value={editorRoleHi}
+                    onChange={(e) => setEditorRoleHi(e.target.value)}
+                  />
                 </div>
 
-                {/* Editor Description English & Hindi */}
-                <div className="grid grid-cols-2" style={{ gap: '15px' }}>
-                  <div className="form-group">
-                    <label>{language === 'en' ? 'About (Hindi)' : 'के बारे में (हिंदी)'}</label>
-                    <textarea
-                      id="editorDescHi"
-                      rows="3"
-                      className="form-control"
-                      value={editorDescHi}
-                      onChange={(e) => setEditorDescHi(e.target.value)}
-                    />
-                  </div>
-                  
-                  <div className="form-group">
-                    <label>{language === 'en' ? 'About (English)' : 'के बारे में (English)'}</label>
-                    <textarea
-                      id="editorDescEn"
-                      rows="3"
-                      className="form-control"
-                      value={editorDescEn}
-                      onChange={(e) => setEditorDescEn(e.target.value)}
-                    />
-                  </div>
+                {/* Editor Description */}
+                <div className="form-group">
+                  <label>{language === 'en' ? 'About (Hindi)' : 'के बारे में (हिंदी)'}</label>
+                  <textarea
+                    id="editorDescHi"
+                    rows="3"
+                    className="form-control"
+                    value={editorDescHi}
+                    onChange={(e) => setEditorDescHi(e.target.value)}
+                  />
                 </div>
 
                 {/* Mobile No & Social Link Fields */}
@@ -2457,17 +2251,7 @@ export default function AdminDashboard() {
                   />
                 </div>
 
-                <div className="form-group">
-                  <label>{language === 'en' ? 'Title (English) *' : 'शीर्षक (English) *'}</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. City Samachar Daily - 6th June 2026"
-                    className="form-control"
-                    value={epaperTitleEn}
-                    onChange={(e) => setEpaperTitleEn(e.target.value)}
-                  />
-                </div>
+
 
                 <div className="form-group">
                   <label>{language === 'en' ? 'Select E-Paper PDF * (PDF files only)' : 'ई-पेपर पीडीएफ चुनें * (केवल पीडीएफ फाइल)'}</label>

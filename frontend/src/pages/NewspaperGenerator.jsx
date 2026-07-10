@@ -31,7 +31,7 @@ const truncate = (text = '', maxLen = 400) =>
 const formatDate = (dateStr, lang) => {
   try {
     const d = new Date(dateStr + 'T00:00:00');
-    return d.toLocaleDateString(lang === 'hi' ? 'hi-IN' : 'en-IN', {
+    return d.toLocaleDateString('hi-IN', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
@@ -58,11 +58,11 @@ const getVolumeNo = (dateStr) => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function NewspaperLayout({ articles, language, selectedDate }) {
-  const lang = language;
+  const lang = 'hi';
   const formattedDate = formatDate(selectedDate, lang);
   const { vol, issue } = getVolumeNo(selectedDate);
 
-  const title = (a) => (lang === 'hi' ? a.titleHi || a.titleEn : a.titleEn || a.titleHi);
+  const title = (a) => a.titleHi || a.titleEn || '';
   const content = (a) =>
     stripHtml(lang === 'hi' ? a.contentHi || a.contentEn : a.contentEn || a.contentHi);
   const summary = (a) =>
@@ -101,7 +101,7 @@ function NewspaperLayout({ articles, language, selectedDate }) {
           />
         </div>
         <div className="masthead-center-title">
-          <h1>{lang === 'hi' ? 'सिटी समाचार डिजिटल' : 'City Samachar Digital'}</h1>
+          <h1>सिटी समाचार डिजिटल</h1>
           <p className="masthead-tagline">
             {lang === 'hi'
               ? 'संत कबीर नगर का अपना दैनिक समाचार पत्र'
@@ -109,8 +109,8 @@ function NewspaperLayout({ articles, language, selectedDate }) {
           </p>
         </div>
         <div className="masthead-info-right">
-          <div><strong>{lang === 'hi' ? 'संस्करण:' : 'Edition:'}</strong> {lang === 'hi' ? 'डिजिटल' : 'Digital'}</div>
-          <div><strong>{lang === 'hi' ? 'मूल्य:' : 'Price:'}</strong> {lang === 'hi' ? 'निःशुल्क' : 'Free'}</div>
+          <div><strong>संस्करण:</strong> डिजिटल</div>
+          <div><strong>मूल्य:</strong> निःशुल्क</div>
           <div style={{ marginTop: '4px', fontSize: '9px', textTransform: 'uppercase', color: '#666' }}>Sant Kabir Nagar</div>
         </div>
       </div>
@@ -118,11 +118,11 @@ function NewspaperLayout({ articles, language, selectedDate }) {
       {/* ── METABAR ── */}
       <div className="newspaper-metabar">
         <span>
-          {lang === 'hi' ? `वर्ष ${vol}, अंक ${issue}` : `Vol. ${vol}, No. ${issue}`}
+          `वर्ष ${vol}, अंक ${issue}`
         </span>
         <span style={{ fontSize: '12px', letterSpacing: 0 }}>{formattedDate}</span>
         <span>
-          {lang === 'hi' ? 'दैनिक समाचार पत्र' : 'Daily Newspaper'}
+          'दैनिक समाचार पत्र'
         </span>
       </div>
 
@@ -142,7 +142,7 @@ function NewspaperLayout({ articles, language, selectedDate }) {
         <div className="newspaper-lead-story">
           <div style={{ textAlign: 'center', marginBottom: '12px' }}>
             <span className="newspaper-section-label">
-              {lang === 'hi' ? 'मुख्य समाचार' : 'Top Story'}
+              'मुख्य समाचार'
             </span>
           </div>
 
@@ -176,7 +176,7 @@ function NewspaperLayout({ articles, language, selectedDate }) {
                     onError={(e) => { e.currentTarget.style.display = 'none'; }}
                   />
                   <p className="newspaper-image-caption">
-                    {lang === 'hi' ? 'फ़ाइल फ़ोटो' : 'File Photo'}
+                    'फ़ाइल फ़ोटो'
                   </p>
                 </>
               ) : (
@@ -193,7 +193,7 @@ function NewspaperLayout({ articles, language, selectedDate }) {
                     fontStyle: 'italic',
                   }}
                 >
-                  {lang === 'hi' ? 'चित्र उपलब्ध नहीं' : 'No image available'}
+                  'चित्र उपलब्ध नहीं'
                 </div>
               )}
             </div>
@@ -240,7 +240,7 @@ function NewspaperLayout({ articles, language, selectedDate }) {
           <div className="newspaper-hr" style={{ margin: '14px 0' }} />
           <div style={{ textAlign: 'left', marginBottom: '8px' }}>
             <span className="newspaper-section-label">
-              {lang === 'hi' ? 'अन्य समाचार' : 'Other News'}
+              'अन्य समाचार'
             </span>
           </div>
           <div
@@ -278,7 +278,7 @@ function NewspaperLayout({ articles, language, selectedDate }) {
         </span>
         <span>citysamachardigital.com</span>
         <span>
-          {lang === 'hi' ? 'मुद्रक व प्रकाशक: संपादक मंडल' : 'Printed & Published by: Editorial Board'}
+          'मुद्रक व प्रकाशक: संपादक मंडल'
         </span>
       </div>
     </div>
@@ -298,7 +298,7 @@ export default function NewspaperGenerator() {
   const [selectedDate, setSelectedDate] = useState(
     () => new Date().toISOString().split('T')[0]
   );
-  const [paperLang, setPaperLang] = useState(language || 'hi');
+  const paperLang = 'hi';
   const [allNews, setAllNews] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -419,7 +419,7 @@ export default function NewspaperGenerator() {
       console.error('PDF generation error:', err);
       Swal.fire({
         icon: 'error',
-        title: paperLang === 'hi' ? 'पीडीएफ बनाने में त्रुटि हुई' : 'Error generating PDF',
+        title: 'पीडीएफ बनाने में त्रुटि हुई',
         text: paperLang === 'hi'
           ? 'कृपया दोबारा प्रयास करें।'
           : 'Please try again.'
@@ -468,7 +468,7 @@ export default function NewspaperGenerator() {
             }}
           >
             <ArrowLeft size={16} />
-            {paperLang === 'hi' ? 'वापस जाएं' : 'Back'}
+            {'वापस जाएं'}
           </button>
 
           {/* Title */}
@@ -483,7 +483,7 @@ export default function NewspaperGenerator() {
             }}
           >
             <Newspaper size={20} style={{ color: 'var(--color-primary)' }} />
-            {paperLang === 'hi' ? 'ऑटो समाचार पत्र जनरेटर' : 'Auto Newspaper Generator'}
+            {'ऑटो समाचार पत्र जनरेटर'}
           </div>
 
           {/* Controls group */}
@@ -527,7 +527,7 @@ export default function NewspaperGenerator() {
               className="lang-toggle"
               onClick={handlePrint}
               disabled={selectedArticles.length === 0}
-              title={paperLang === 'hi' ? 'प्रिंट करें' : 'Print'}
+              title='प्रिंट करें'
               style={{ fontSize: '12px', padding: '6px 12px' }}
             >
               <Printer size={14} />
@@ -553,7 +553,7 @@ export default function NewspaperGenerator() {
               ) : (
                 <Download size={14} />
               )}
-              {paperLang === 'hi' ? 'PDF डाउनलोड' : 'Download PDF'}
+              'PDF डाउनलोड'
             </button>
           </div>
         </div>
@@ -593,7 +593,7 @@ export default function NewspaperGenerator() {
                   }}
                 >
                   <CheckSquare size={13} />
-                  {paperLang === 'hi' ? 'सभी चुनें' : 'Select All'}
+                  'सभी चुनें'
                 </button>
                 <button
                   onClick={selectNone}
@@ -609,7 +609,7 @@ export default function NewspaperGenerator() {
                   }}
                 >
                   <Square size={13} />
-                  {paperLang === 'hi' ? 'कोई नहीं' : 'Deselect'}
+                  'कोई नहीं'
                 </button>
               </div>
             )}
@@ -620,7 +620,7 @@ export default function NewspaperGenerator() {
             <div style={{ textAlign: 'center', padding: '30px 0', color: 'var(--color-text-secondary)' }}>
               <RefreshCw size={24} style={{ animation: 'spin 1s linear infinite', color: 'var(--color-primary)' }} />
               <p style={{ marginTop: '10px', fontSize: '13px' }}>
-                {paperLang === 'hi' ? 'खबरें लोड हो रही हैं…' : 'Loading news…'}
+                'खबरें लोड हो रही हैं…'
               </p>
             </div>
           )}
@@ -722,7 +722,7 @@ export default function NewspaperGenerator() {
             <div ref={printRef}>
               <NewspaperLayout
                 articles={selectedArticles}
-                language={paperLang}
+                language='hi'
                 selectedDate={selectedDate}
               />
             </div>
@@ -750,7 +750,7 @@ export default function NewspaperGenerator() {
               ) : (
                 <Download size={16} />
               )}
-              {paperLang === 'hi' ? '📥 PDF डाउनलोड करें' : '📥 Download PDF'}
+              '📥 PDF डाउनलोड करें'
             </button>
 
             <button
@@ -759,7 +759,7 @@ export default function NewspaperGenerator() {
               style={{ padding: '12px 24px', fontSize: '14px', borderRadius: '8px' }}
             >
               <Printer size={16} style={{ marginRight: '8px' }} />
-              {paperLang === 'hi' ? 'प्रिंट करें' : 'Print'}
+              'प्रिंट करें'
             </button>
           </div>
         )}

@@ -17,12 +17,12 @@ export default function Footer() {
               {t('brandName').split(' ').slice(1).join(' ')}
             </h3>
             <p style={{ margin: '12px 0 20px 0', fontSize: '14px', maxWidth: '300px' }}>
-              {t('tagline')}. Providing the fastest local and national updates in both Hindi and English.
+              {t('tagline')}। स्थानीय और राष्ट्रीय समाचार सबसे तेज़।
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '14px' }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <MapPin size={16} style={{ color: 'var(--color-primary)' }} />
-                Sant Kabir Nagar, Uttar Pradesh, India
+                संत कबीर नगर, उत्तर प्रदेश, भारत
               </span>
               <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Phone size={16} style={{ color: 'var(--color-primary)' }} />
@@ -37,7 +37,7 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h4 style={{ color: '#fff', marginBottom: '16px', fontSize: '16px', textTransform: 'uppercase' }}>Quick Links</h4>
+            <h4 style={{ color: '#fff', marginBottom: '16px', fontSize: '16px', textTransform: 'uppercase' }}>त्वरित लिंक</h4>
             <ul className="footer-links-list">
               <li><Link to="/">{t('home')}</Link></li>
               <li><Link to="/city/All">{t('district')}</Link></li>
@@ -59,9 +59,9 @@ export default function Footer() {
 
         {/* Footer Bottom */}
         <div className="footer-bottom">
-          <p>&copy; {new Date().getFullYear()} {t('brandName')}. All Rights Reserved.</p>
+          <p>&copy; {new Date().getFullYear()} {t('brandName')}। सर्वाधिकार सुरक्षित।</p>
           <p style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-            Designed and Developed by ARSHYAN KHAN❤️
+            डिज़ाइन और विकास ARSHYAN KHAN ❤️
           </p>
         </div>
       </div>

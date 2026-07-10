@@ -4,7 +4,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { AlertCircle } from 'lucide-react';
 
 export default function BreakingNews() {
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
   const [breakingNews, setBreakingNews] = useState([]);
   const navigate = useNavigate();
   const location = useLocation();
@@ -45,7 +45,7 @@ export default function BreakingNews() {
               className="ticker-item"
               onClick={() => navigate(`/news/${news._id}`)}
             >
-              • {language === 'en' ? news.titleEn : news.titleHi}
+              • {news.titleHi}
             </span>
           ))}
           {/* Duplicate track to make it infinite scrolling seamlessly */}
@@ -55,7 +55,7 @@ export default function BreakingNews() {
               className="ticker-item"
               onClick={() => navigate(`/news/${news._id}`)}
             >
-              • {language === 'en' ? news.titleEn : news.titleHi}
+              • {news.titleHi}
             </span>
           ))}
         </div>

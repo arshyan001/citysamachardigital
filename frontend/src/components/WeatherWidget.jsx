@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 
 export default function WeatherWidget() {
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
   
   // States
   const [city, setCity] = useState(() => localStorage.getItem('weather_city_name') || 'Sant Kabir Nagar');
@@ -35,37 +35,37 @@ export default function WeatherWidget() {
   const [errorMsg, setErrorMsg] = useState('');
   const [showDetails, setShowDetails] = useState(false);
 
-  // WMO code helper
-  const getWeatherDescription = (code, lang) => {
+  // WMO code helper - Hindi only
+  const getWeatherDescription = (code) => {
     const descriptions = {
-      0: { en: 'Sunny / Clear Sky', hi: 'साफ़ धूप / साफ़ आसमान' },
-      1: { en: 'Mainly Clear', hi: 'सामान्यतः साफ़' },
-      2: { en: 'Partly Cloudy', hi: 'आंशिक रूप से बादल' },
-      3: { en: 'Overcast', hi: 'सघन बादल छाए हैं' },
-      45: { en: 'Foggy', hi: 'कोहरा' },
-      48: { en: 'Depositing Rime Fog', hi: 'सघन कोहरा' },
-      51: { en: 'Light Drizzle', hi: 'हल्की बूंदाबांदी' },
-      53: { en: 'Moderate Drizzle', hi: 'बूंदाबांदी' },
-      55: { en: 'Heavy Drizzle', hi: 'घनी बूंदाबांदी' },
-      61: { en: 'Slight Rain', hi: 'हल्की बारिश' },
-      63: { en: 'Moderate Rain', hi: 'मध्यम वर्षा' },
-      65: { en: 'Heavy Rain', hi: 'भारी बारिश' },
-      66: { en: 'Light Freezing Rain', hi: 'हल्की बर्फीली बारिश' },
-      67: { en: 'Heavy Freezing Rain', hi: 'भारी बर्फीली बारिश' },
-      71: { en: 'Slight Snow Fall', hi: 'हल्की बर्फबारी' },
-      73: { en: 'Moderate Snow Fall', hi: 'मध्यम बर्फबारी' },
-      75: { en: 'Heavy Snow Fall', hi: 'भारी बर्फबारी' },
-      77: { en: 'Snow Grains', hi: 'ओले' },
-      80: { en: 'Slight Rain Showers', hi: 'हल्की बौछारें' },
-      81: { en: 'Moderate Rain Showers', hi: 'मध्यम बौछारें' },
-      82: { en: 'Violent Rain Showers', hi: 'तेज बौछारें' },
-      85: { en: 'Slight Snow Showers', hi: 'हल्की बर्फीली बौछारें' },
-      86: { en: 'Heavy Snow Showers', hi: 'भारी बर्फीली बौछारें' },
-      95: { en: 'Thunderstorm', hi: 'आंधी-तूफान' },
-      96: { en: 'Thunderstorm with Hail', hi: 'ओलावृष्टि के साथ आंधी-तूफान' },
-      99: { en: 'Severe Thunderstorm with Hail', hi: 'भारी ओलावृष्टि के साथ आंधी-तूफान' },
+      0: 'साफ़ धूप / साफ़ आसमान',
+      1: 'सामान्यतः साफ़',
+      2: 'आंशिक रूप से बादल',
+      3: 'सघन बादल छाए हैं',
+      45: 'कोहरा',
+      48: 'सघन कोहरा',
+      51: 'हल्की बूंदाबांदी',
+      53: 'बूंदाबांदी',
+      55: 'घनी बूंदाबांदी',
+      61: 'हल्की बारिश',
+      63: 'मध्यम वर्षा',
+      65: 'भारी बारिश',
+      66: 'हल्की बर्फीली बारिश',
+      67: 'भारी बर्फीली बारिश',
+      71: 'हल्की बर्फबारी',
+      73: 'मध्यम बर्फबारी',
+      75: 'भारी बर्फबारी',
+      77: 'ओले',
+      80: 'हल्की बौछारें',
+      81: 'मध्यम बौछारें',
+      82: 'तेज बौछारें',
+      85: 'हल्की बर्फीली बौछारें',
+      86: 'भारी बर्फीली बौछारें',
+      95: 'आंधी-तूफान',
+      96: 'ओलावृष्टि के साथ आंधी-तूफान',
+      99: 'भारी ओलावृष्टि के साथ आंधी-तूफान',
     };
-    return descriptions[code]?.[lang] || (lang === 'en' ? 'Unsettled' : 'बदलते मौसम');
+    return descriptions[code] || 'बदलते मौसम';
   };
 
   // Weather Icon helper
@@ -80,8 +80,8 @@ export default function WeatherWidget() {
     return <Cloud size={size} style={{ color: '#9ca3af' }} />;
   };
 
-  // Dynamic news Weather Bulletin generator
-  const generateWeatherNews = (cityName, current, daily, lang) => {
+  // Dynamic news Weather Bulletin generator - Hindi only
+  const generateWeatherNews = (cityName, current, daily) => {
     const code = current.weather_code;
     const temp = Math.round(current.temperature_2m);
     const feelsLike = Math.round(current.apparent_temperature);
@@ -91,59 +91,30 @@ export default function WeatherWidget() {
     const windSpeed = current.wind_speed_10m;
     const rainSum = daily.precipitation_sum[0];
 
-    const isHi = lang === 'hi';
-
-    if (isHi) {
-      let headline = `मौसम बुलेटिन: आज ${cityName} में `;
-      let body = '';
-      
-      if ([0, 1].includes(code)) {
-        headline += 'आसमान बिल्कुल साफ़ और मौसम गर्म रहने की संभावना है।';
-        body = `आज का अधिकतम तापमान ${maxTemp}°C तक रहने की संभावना है, जबकि न्यूनतम तापमान ${minTemp}°C दर्ज किया जाएगा। वर्तमान में तापमान ${temp}°C है जो कि महसूस होने में ${feelsLike}°C जैसा लग रहा है। हवा ${windSpeed} किमी/घंटे की गति से चल रही है और आर्द्रता ${humidity}% है। तेज धूप होने के कारण दोपहर के समय पर्याप्त पानी पीकर ही घर से बाहर निकलें।`;
-      } else if ([2, 3].includes(code)) {
-        headline += 'आंशिक रूप से बादल छाए रहने और मौसम सुहावना रहने का अनुमान है।';
-        body = `आज दिनभर बादलों की आवाजाही लगी रहेगी, जिससे धूप का असर कम होगा। अधिकतम तापमान ${maxTemp}°C और न्यूनतम तापमान ${minTemp}°C रहने की उम्मीद है। हवा की गति ${windSpeed} किमी/घंटा और आर्द्रता ${humidity}% होने से शाम को ठंडी हवाएं चल सकती हैं। भारी वर्षा का कोई पूर्वानुमान नहीं है।`;
-      } else if ([45, 48].includes(code)) {
-        headline += 'सुबह के समय कोहरे के कारण दृश्यता कम रहने की संभावना है।';
-        body = `तापमान गिरने के साथ सुबह के वक्त दृश्यता कम रहेगी। अधिकतम तापमान ${maxTemp}°C और न्यूनतम तापमान ${minTemp}°C रहेगा। वाहन चालकों को धीमी गति से चलने और फॉग लाइट का उपयोग करने की सलाह दी जाती है।`;
-      } else if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code)) {
-        headline += 'रिमझिम बारिश और ठंडी हवाओं का मौसम अलर्ट जारी।';
-        body = `आज मौसम विभाग ने लगभग ${rainSum} मिमी वर्षा का अनुमान जताया है। वर्तमान में तापमान ${temp}°C बना हुआ है। हवा की गति ${windSpeed} किमी/घंटा तक पहुँच सकती है। बाहर निकलते समय छाता साथ रखें और जलभराव वाले क्षेत्रों से बचें।`;
-      } else if ([95, 96, 99].includes(code)) {
-        headline += 'भारी आंधी-तूफान और ओलावृष्टि की बड़ी चेतावनी।';
-        body = `प्रशासन ने आज मौसम बिगड़ने की चेतावनी दी है। हवा की रफ्तार ${daily.wind_speed_10m_max[0]} किमी/घंटे से ऊपर जा सकती है। लोगों को पेड़ों, जर्जर भवनों और बिजली के खंभों से दूर रहने और सुरक्षित स्थानों पर शरण लेने की सलाह दी गई है।`;
-      } else {
-        headline += 'मौसम में उतार-चढ़ाव और बदलाव जारी रहने की उम्मीद है।';
-        body = `आज तापमान ${minTemp}°C से ${maxTemp}°C के बीच बना रहेगा। हवा ${windSpeed} किमी/घंटे की रफ़्तार से चल रही है। मौसम विभाग स्थिति पर नज़र बनाए हुए है।`;
-      }
-
-      return { headline, body };
+    let headline = `मौसम बुलेटिन: आज ${cityName} में `;
+    let body = '';
+    
+    if ([0, 1].includes(code)) {
+      headline += 'आसमान बिल्कुल साफ़ और मौसम गर्म रहने की संभावना है।';
+      body = `आज का अधिकतम तापमान ${maxTemp}°C तक रहने की संभावना है, जबकि न्यूनतम तापमान ${minTemp}°C दर्ज किया जाएगा। वर्तमान में तापमान ${temp}°C है जो कि महसूस होने में ${feelsLike}°C जैसा लग रहा है। हवा ${windSpeed} किमी/घंटे की गति से चल रही है और आर्द्रता ${humidity}% है। तेज धूप होने के कारण दोपहर के समय पर्याप्त पानी पीकर ही घर से बाहर निकलें।`;
+    } else if ([2, 3].includes(code)) {
+      headline += 'आंशिक रूप से बादल छाए रहने और मौसम सुहावना रहने का अनुमान है।';
+      body = `आज दिनभर बादलों की आवाजाही लगी रहेगी, जिससे धूप का असर कम होगा। अधिकतम तापमान ${maxTemp}°C और न्यूनतम तापमान ${minTemp}°C रहने की उम्मीद है। हवा की गति ${windSpeed} किमी/घंटा और आर्द्रता ${humidity}% होने से शाम को ठंडी हवाएं चल सकती हैं। भारी वर्षा का कोई पूर्वानुमान नहीं है।`;
+    } else if ([45, 48].includes(code)) {
+      headline += 'सुबह के समय कोहरे के कारण दृश्यता कम रहने की संभावना है।';
+      body = `तापमान गिरने के साथ सुबह के वक्त दृश्यता कम रहेगी। अधिकतम तापमान ${maxTemp}°C और न्यूनतम तापमान ${minTemp}°C रहेगा। वाहन चालकों को धीमी गति से चलने और फॉग लाइट का उपयोग करने की सलाह दी जाती है।`;
+    } else if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code)) {
+      headline += 'रिमझिम बारिश और ठंडी हवाओं का मौसम अलर्ट जारी।';
+      body = `आज मौसम विभाग ने लगभग ${rainSum} मिमी वर्षा का अनुमान जताया है। वर्तमान में तापमान ${temp}°C बना हुआ है। हवा की गति ${windSpeed} किमी/घंटा तक पहुँच सकती है। बाहर निकलते समय छाता साथ रखें और जलभराव वाले क्षेत्रों से बचें।`;
+    } else if ([95, 96, 99].includes(code)) {
+      headline += 'भारी आंधी-तूफान और ओलावृष्टि की बड़ी चेतावनी।';
+      body = `प्रशासन ने आज मौसम बिगड़ने की चेतावनी दी है। हवा की रफ्तार ${daily.wind_speed_10m_max[0]} किमी/घंटे से ऊपर जा सकती है। लोगों को पेड़ों, जर्जर भवनों और बिजली के खंभों से दूर रहने और सुरक्षित स्थानों पर शरण लेने की सलाह दी गई है।`;
     } else {
-      let headline = `Weather Bulletin: `;
-      let body = '';
-
-      if ([0, 1].includes(code)) {
-        headline += `Clear skies and dry weather expected in ${cityName} today.`;
-        body = `The maximum temperature is projected to reach ${maxTemp}°C, with a minimum of ${minTemp}°C. Currently, it is ${temp}°C (feels like ${feelsLike}°C). Winds are blowing at ${windSpeed} km/h with a relative humidity of ${humidity}%. Health officials advise drinking plenty of water during afternoon heat.`;
-      } else if ([2, 3].includes(code)) {
-        headline += `Partly cloudy skies to bring pleasant relief to ${cityName}.`;
-        body = `Overcast conditions will keep temperatures mild today, ranging between ${minTemp}°C and ${maxTemp}°C. Humidity levels stand at ${humidity}%, ensuring a comfortable evening breeze. No heavy rainfall is expected.`;
-      } else if ([45, 48].includes(code)) {
-        headline += `Fog advisory active with reduced visibility in the area.`;
-        body = `Drivers are urged to use caution due to early morning fog. Temperatures will range from ${minTemp}°C to ${maxTemp}°C. Conditions are expected to clear up by midday.`;
-      } else if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code)) {
-        headline += `Rain alerts active for ${cityName} with light to moderate wet spells.`;
-        body = `Showers are expected with a total daily precipitation forecast of ${rainSum}mm. Wind gusts can reach up to ${windSpeed} km/h. Don't forget to carry an umbrella and watch out for minor water logging on roads.`;
-      } else if ([95, 96, 99].includes(code)) {
-        headline += `Severe thunderstorm and wind warnings issued for ${cityName}.`;
-        body = `Authorities urge residents to stay indoors as strong storms approach. Wind gusts may exceed ${daily.wind_speed_10m_max[0]} km/h, and hail is possible. Avoid taking shelter under high trees or power lines.`;
-      } else {
-        headline += `Mild shifts in local temperatures anticipated today.`;
-        body = `Expect daily temperatures to hover between ${minTemp}°C and ${maxTemp}°C. Winds are stable at ${windSpeed} km/h with no active warning systems in place.`;
-      }
-
-      return { headline, body };
+      headline += 'मौसम में उतार-चढ़ाव और बदलाव जारी रहने की उम्मीद है।';
+      body = `आज तापमान ${minTemp}°C से ${maxTemp}°C के बीच बना रहेगा। हवा ${windSpeed} किमी/घंटे की रफ़्तार से चल रही है। मौसम विभाग स्थिति पर नज़र बनाए हुए है।`;
     }
+
+    return { headline, body };
   };
 
   // Reverse geocode lat/lon to city name using OSM Nominatim
@@ -153,7 +124,7 @@ export default function WeatherWidget() {
       if (res.ok) {
         const data = await res.json();
         const address = data.address;
-        const resolvedName = address.city || address.town || address.village || address.suburb || address.county || 'Detected Area';
+        const resolvedName = address.city || address.town || address.village || address.suburb || address.county || 'पता लगाया गया क्षेत्र';
         setCity(resolvedName);
         localStorage.setItem('weather_city_name', resolvedName);
       }
@@ -174,11 +145,11 @@ export default function WeatherWidget() {
         const data = await res.json();
         setWeatherData(data);
       } else {
-        setErrorMsg(language === 'en' ? 'Weather data fetch failed' : 'मौसम का डेटा लाने में असमर्थ');
+        setErrorMsg('मौसम का डेटा लाने में असमर्थ');
       }
     } catch (err) {
       console.error(err);
-      setErrorMsg(language === 'en' ? 'Network error fetching weather' : 'नेटवर्क त्रुटि: मौसम डेटा नहीं मिला');
+      setErrorMsg('नेटवर्क त्रुटि: मौसम डेटा नहीं मिला');
     } finally {
       setLoading(false);
     }
@@ -192,7 +163,7 @@ export default function WeatherWidget() {
   // Handle Geolocation request
   const handleGeolocation = () => {
     if (!navigator.geolocation) {
-      setErrorMsg(language === 'en' ? 'Geolocation not supported by browser' : 'भौगोलिक स्थिति आपके ब्राउज़र द्वारा समर्थित नहीं है');
+      setErrorMsg('भौगोलिक स्थिति आपके ब्राउज़र द्वारा समर्थित नहीं है');
       return;
     }
 
@@ -207,7 +178,7 @@ export default function WeatherWidget() {
       },
       (error) => {
         console.warn(error);
-        setErrorMsg(language === 'en' ? 'Permission denied or location lookup failed' : 'स्थान अनुमति अस्वीकार या स्थान खोजने में विफल');
+        setErrorMsg('स्थान अनुमति अस्वीकार या स्थान खोजने में विफल');
       }
     );
   };
@@ -237,14 +208,14 @@ export default function WeatherWidget() {
           localStorage.setItem('weather_lon', lon.toString());
           setSearchCity('');
         } else {
-          setErrorMsg(language === 'en' ? `City "${searchCity}" not found` : `शहर "${searchCity}" नहीं मिला`);
+          setErrorMsg(`शहर "${searchCity}" नहीं मिला`);
         }
       } else {
-        setErrorMsg(language === 'en' ? 'City search failed' : 'शहर की खोज विफल रही');
+        setErrorMsg('शहर की खोज विफल रही');
       }
     } catch (err) {
       console.error(err);
-      setErrorMsg(language === 'en' ? 'Network error searching city' : 'नेटवर्क त्रुटि: शहर नहीं खोजा जा सका');
+      setErrorMsg('नेटवर्क त्रुटि: शहर नहीं खोजा जा सका');
     } finally {
       setLoading(false);
     }
@@ -255,7 +226,7 @@ export default function WeatherWidget() {
     if (!weatherData || !weatherData.daily) return [];
     
     const days = [];
-    const locale = language === 'en' ? 'en-US' : 'hi-IN';
+    const locale = 'hi-IN';
     
     // We start from index 1 (tomorrow)
     for (let i = 1; i <= 3; i++) {
@@ -276,7 +247,7 @@ export default function WeatherWidget() {
   };
 
   const bulletin = weatherData && weatherData.current && weatherData.daily
-    ? generateWeatherNews(city, weatherData.current, weatherData.daily, language)
+    ? generateWeatherNews(city, weatherData.current, weatherData.daily)
     : null;
 
   return (
@@ -284,17 +255,14 @@ export default function WeatherWidget() {
       <div className="widget-header" style={{ marginBottom: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <Sun size={16} style={{ color: '#fbbf24' }} />
-          {language === 'en' ? 'Weather - Forecast' : 'मौसम पूर्वानुमान'}
+          मौसम पूर्वानुमान
         </div>
         <button 
           type="button"
           onClick={() => setShowDetails(!showDetails)}
           style={{ background: 'transparent', border: 'none', color: 'var(--color-primary)', fontSize: '11px', cursor: 'pointer', fontWeight: 'bold' }}
         >
-          {showDetails 
-            ? (language === 'en' ? 'Hide Details' : 'विवरण छिपाएं')
-            : (language === 'en' ? 'Show Details' : 'विवरण देखें')
-          }
+          {showDetails ? 'विवरण छिपाएं' : 'विवरण देखें'}
         </button>
       </div>
 
@@ -306,14 +274,14 @@ export default function WeatherWidget() {
             onClick={handleGeolocation} 
             className="lang-toggle" 
             style={{ padding: '6px', background: 'rgba(255,255,255,0.05)', flexShrink: 0, borderRadius: '6px' }}
-            title={language === 'en' ? 'Use my current location' : 'मेरा स्थान खोजें'}
+            title="मेरा स्थान खोजें"
           >
             <Navigation size={13} style={{ transform: 'rotate(45deg)' }} />
           </button>
           <div style={{ position: 'relative', flexGrow: 1 }}>
             <input
               type="text"
-              placeholder={language === 'en' ? 'Search city...' : 'शहर खोजें...'}
+              placeholder="शहर खोजें..."
               className="form-control"
               style={{ height: '30px', fontSize: '12px', paddingLeft: '26px', background: 'rgba(11, 15, 25, 0.4)', paddingRight: '6px' }}
               value={searchCity}
@@ -322,7 +290,7 @@ export default function WeatherWidget() {
             <Search size={11} style={{ position: 'absolute', left: '8px', top: '9px', color: 'var(--color-text-secondary)' }} />
           </div>
           <button type="submit" className="btn" style={{ width: 'auto', padding: '0 10px', height: '30px', fontSize: '11px', borderRadius: '6px' }}>
-            {language === 'en' ? 'Go' : 'खोजें'}
+            खोजें
           </button>
         </form>
       )}
@@ -336,7 +304,7 @@ export default function WeatherWidget() {
 
       {loading && !weatherData ? (
         <div style={{ textAlign: 'center', padding: '20px 0', color: 'var(--color-text-secondary)', fontSize: '12px' }}>
-          {language === 'en' ? 'Loading weather...' : 'मौसम लोड हो रहा है...'}
+          मौसम लोड हो रहा है...
         </div>
       ) : weatherData ? (
         <>
@@ -352,7 +320,7 @@ export default function WeatherWidget() {
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', background: '#10b981', marginRight: '4px', animation: 'pulse 1.5s infinite' }}></span>
                 <span style={{ fontSize: '10px', color: '#10b981', fontWeight: 'bold' }}>
-                  {language === 'en' ? 'Live' : 'लाइव'}
+                  लाइव
                 </span>
               </div>
             </div>
@@ -366,7 +334,7 @@ export default function WeatherWidget() {
                   {Math.round(weatherData.current.temperature_2m)}°C
                 </div>
                 <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)', fontWeight: 600, marginTop: '2px' }}>
-                  {getWeatherDescription(weatherData.current.weather_code, language)}
+                  {getWeatherDescription(weatherData.current.weather_code)}
                 </div>
               </div>
             </div>
@@ -374,11 +342,11 @@ export default function WeatherWidget() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '10px', borderTop: '1px solid var(--border-color)', paddingTop: '8px', fontSize: '11px', color: 'var(--color-text-secondary)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <Thermometer size={12} style={{ color: '#fbbf24' }} />
-                <span>{language === 'en' ? 'Feels:' : 'महसूस:'} {Math.round(weatherData.current.apparent_temperature)}°C</span>
+                <span>महसूस: {Math.round(weatherData.current.apparent_temperature)}°C</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <Droplets size={12} style={{ color: '#3b82f6' }} />
-                <span>{language === 'en' ? 'Humidity:' : 'आर्द्रता:'} {weatherData.current.relative_humidity_2m}%</span>
+                <span>आर्द्रता: {weatherData.current.relative_humidity_2m}%</span>
               </div>
             </div>
           </div>
@@ -389,7 +357,7 @@ export default function WeatherWidget() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px', borderBottom: '1px solid rgba(239, 68, 68, 0.15)', paddingBottom: '4px' }}>
                 <span style={{ display: 'inline-block', width: '5px', height: '5px', borderRadius: '50%', background: 'red', animation: 'pulse 1.2s infinite' }}></span>
                 <span style={{ fontSize: '10px', fontWeight: '800', color: 'var(--color-primary)', textTransform: 'uppercase' }}>
-                  {language === 'en' ? 'Weather Bulletin' : 'दैनिक मौसम समाचार'}
+                  दैनिक मौसम समाचार
                 </span>
               </div>
               <h5 style={{ fontSize: '11.5px', color: '#fff', fontWeight: 'bold', marginBottom: '4px', lineHeight: '1.3' }}>
@@ -405,7 +373,7 @@ export default function WeatherWidget() {
           {showDetails && (
             <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '10px' }}>
               <h5 style={{ fontSize: '11px', color: 'var(--color-text-primary)', textTransform: 'uppercase', marginBottom: '6px', fontWeight: 700 }}>
-                {language === 'en' ? '3-Day Forecast' : '3 दिवसीय पूर्वानुमान'}
+                3 दिवसीय पूर्वानुमान
               </h5>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {getForecastDays().map((day, idx) => (
@@ -426,10 +394,10 @@ export default function WeatherWidget() {
                       <div style={{ fontSize: '9px', color: 'var(--color-text-secondary)' }}>{day.dateString}</div>
                     </div>
                     
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }} title={getWeatherDescription(day.code, language)}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }} title={getWeatherDescription(day.code)}>
                       {getWeatherIcon(day.code, 14)}
                       <span style={{ fontSize: '10px', color: 'var(--color-text-secondary)', width: '55px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {getWeatherDescription(day.code, language)}
+                        {getWeatherDescription(day.code)}
                       </span>
                     </div>
 

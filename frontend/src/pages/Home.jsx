@@ -7,7 +7,7 @@ import LazyImage from '../components/LazyImage';
 import { Search, Play, Image, Video, Thermometer, Sun, Wind, CloudRain, Globe, Newspaper, User, Phone, Facebook, Instagram, Youtube, X, Eye, TrendingUp, BookOpen, Calendar } from 'lucide-react';
 
 export default function Home() {
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const [news, setNews] = useState([]);
@@ -21,81 +21,35 @@ export default function Home() {
   const [trendingNews, setTrendingNews] = useState([]);
   const [latestEPaper, setLatestEPaper] = useState(null);
 
-  // Mock weather data for Sant Kabir Nagar
-  const weatherMock = {
-    temp: '32°C',
-    condition: language === 'en' ? 'Sunny' : 'धूपदार',
-    humidity: '54%',
-    wind: '12 km/h'
-  };
-
-
-
   const [selectedZodiac, setSelectedZodiac] = useState('');
   const zodiacList = [
-    { key: 'mesh', nameHi: 'मेष', nameEn: 'Aries' },
-    { key: 'vrish', nameHi: 'वृष', nameEn: 'Taurus' },
-    { key: 'mithun', nameHi: 'मिथुन', nameEn: 'Gemini' },
-    { key: 'kark', nameHi: 'कर्क', nameEn: 'Cancer' },
-    { key: 'singh', nameHi: 'सिंह', nameEn: 'Leo' },
-    { key: 'kanya', nameHi: 'कन्या', nameEn: 'Virgo' },
-    { key: 'tula', nameHi: 'तुला', nameEn: 'Libra' },
-    { key: 'vrishchik', nameHi: 'वृश्चिक', nameEn: 'Scorpio' },
-    { key: 'dhanu', nameHi: 'धनु', nameEn: 'Sagittarius' },
-    { key: 'makar', nameHi: 'मकर', nameEn: 'Capricorn' },
-    { key: 'kumbh', nameHi: 'कुंभ', nameEn: 'Aquarius' },
-    { key: 'meen', nameHi: 'मीन', nameEn: 'Pisces' }
+    { key: 'mesh', name: 'मेष' },
+    { key: 'vrish', name: 'वृष' },
+    { key: 'mithun', name: 'मिथुन' },
+    { key: 'kark', name: 'कर्क' },
+    { key: 'singh', name: 'सिंह' },
+    { key: 'kanya', name: 'कन्या' },
+    { key: 'tula', name: 'तुला' },
+    { key: 'vrishchik', name: 'वृश्चिक' },
+    { key: 'dhanu', name: 'धनु' },
+    { key: 'makar', name: 'मकर' },
+    { key: 'kumbh', name: 'कुंभ' },
+    { key: 'meen', name: 'मीन' }
   ];
 
   const zodiacPredictions = {
-    mesh: {
-      hi: 'मेष: आज का दिन आपके लिए ऊर्जावान रहेगा। कार्यक्षेत्र में सफलता मिलेगी और नए अवसर प्राप्त होंगे। धन का आगमन हो सकता है।',
-      en: 'Aries: Today will be energetic for you. You will get success in your workspace and find new opportunities.'
-    },
-    vrish: {
-      hi: 'वृष: धन लाभ के योग बन रहे हैं। परिवार के साथ सुखद समय व्यतीत होगा। वाणी पर नियंत्रण रखें और क्रोध से बचें।',
-      en: 'Taurus: Possibility of financial gains. Pleasant time will be spent with family. Keep control on your words.'
-    },
-    mithun: {
-      hi: 'मिथुन: आज नए प्रोजेक्ट शुरू करने के लिए अच्छा दिन है। स्वास्थ्य का ध्यान रखें और यात्रा करते समय सावधानी बरतें।',
-      en: 'Gemini: Good day to start new projects today. Take care of your health and avoid traveling unnecessarily.'
-    },
-    kark: {
-      hi: 'कर्क: मानसिक शांति महसूस होगी। दोस्तों का सहयोग मिलेगा। व्यावसायिक क्षेत्र में प्रगति होगी और आर्थिक तंगी दूर होगी।',
-      en: 'Cancer: You will feel mental peace. Support from friends will be there. Progress in business.'
-    },
-    singh: {
-      hi: 'सिंह: आत्मविश्वास में वृद्धि होगी। कोई नया शुभ समाचार मिल सकता है। अटके हुए काम पूरे होंगे। रिश्तेदारों से मदद मिलेगी।',
-      en: 'Leo: Confidence will increase. You may receive some new updates. Pending work will be completed.'
-    },
-    kanya: {
-      hi: 'कन्या: आज आपको अपनी मेहनत का फल मिलेगा। सामाजिक कार्यों में रुचि बढ़ेगी। पारिवारिक सुख मिलेगा। नए संबंध बनेंगे।',
-      en: 'Virgo: Today you will get the fruits of your hard work. Interest in social work will increase.'
-    },
-    tula: {
-      hi: 'तुला: व्यापार में सुधार होगा। किसी करीबी से शुभ समाचार मिल सकता है। स्वास्थ्य अच्छा रहेगा। पुराने मित्रों से भेंट होगी।',
-      en: 'Libra: Business will improve. Good news from a close one is expected. Health will remain good.'
-    },
-    vrishchik: {
-      hi: 'वृश्चिक: थोड़ा संभलकर चलने का दिन है। विवादों से दूर रहें। खर्चों में बढ़ोतरी हो सकती है। मन को शांत रखें।',
-      en: 'Scorpio: A day to walk cautiously. Stay away from disputes. Expenses might increase.'
-    },
-    dhanu: {
-      hi: 'धनु: करियर में नए मुकाम हासिल होंगे। धार्मिक यात्रा के योग हैं। संबंध मधुर होंगे। स्वास्थ्य में सुधार होगा।',
-      en: 'Sagittarius: New achievements in career. Travel to religious places is likely. Relationships will sweeten.'
-    },
-    makar: {
-      hi: 'मकर: कार्यस्थल पर सराहना मिलेगी। पुराना ऋण चुकाने में सफल होंगे। मित्रों से मुलाकात होगी। उत्साह बना रहेगा।',
-      en: 'Capricorn: Appreciation at the workplace. Successful in clearing old debts. Meeting with friends.'
-    },
-    kumbh: {
-      hi: 'कुंभ: रचनात्मक कार्यों में रुचि बढ़ेगी। आर्थिक स्थिति मजबूत होगी। नए मित्र बनेंगे। व्यापारिक यात्राएं सफल होंगी।',
-      en: 'Aquarius: Interest in creative works will grow. Financial position will strengthen. New friends will be made.'
-    },
-    meen: {
-      hi: 'मीन: आज आपकी यात्रा सुखद रहेगी। शिक्षा के क्षेत्र में सफलता मिलेगी। परिवार का पूर्ण सहयोग रहेगा।',
-      en: 'Pisces: Your travel will be pleasant today. Success in education field. Family support will be there.'
-    }
+    mesh: 'मेष: आज का दिन आपके लिए ऊर्जावान रहेगा। कार्यक्षेत्र में सफलता मिलेगी और नए अवसर प्राप्त होंगे। धन का आगमन हो सकता है।',
+    vrish: 'वृष: धन लाभ के योग बन रहे हैं। परिवार के साथ सुखद समय व्यतीत होगा। वाणी पर नियंत्रण रखें और क्रोध से बचें।',
+    mithun: 'मिथुन: आज नए प्रोजेक्ट शुरू करने के लिए अच्छा दिन है। स्वास्थ्य का ध्यान रखें और यात्रा करते समय सावधानी बरतें।',
+    kark: 'कर्क: मानसिक शांति महसूस होगी। दोस्तों का सहयोग मिलेगा। व्यावसायिक क्षेत्र में प्रगति होगी और आर्थिक तंगी दूर होगी।',
+    singh: 'सिंह: आत्मविश्वास में वृद्धि होगी। कोई नया शुभ समाचार मिल सकता है। अटके हुए काम पूरे होंगे। रिश्तेदारों से मदद मिलेगी।',
+    kanya: 'कन्या: आज आपको अपनी मेहनत का फल मिलेगा। सामाजिक कार्यों में रुचि बढ़ेगी। पारिवारिक सुख मिलेगा। नए संबंध बनेंगे।',
+    tula: 'तुला: व्यापार में सुधार होगा। किसी करीबी से शुभ समाचार मिल सकता है। स्वास्थ्य अच्छा रहेगा। पुराने मित्रों से भेंट होगी।',
+    vrishchik: 'वृश्चिक: थोड़ा संभलकर चलने का दिन है। विवादों से दूर रहें। खर्चों में बढ़ोतरी हो सकती है। मन को शांत रखें।',
+    dhanu: 'धनु: करियर में नए मुकाम हासिल होंगे। धार्मिक यात्रा के योग हैं। संबंध मधुर होंगे। स्वास्थ्य में सुधार होगा।',
+    makar: 'मकर: कार्यस्थल पर सराहना मिलेगी। पुराना ऋण चुकाने में सफल होंगे। मित्रों से मुलाकात होगी। उत्साह बना रहेगा।',
+    kumbh: 'कुंभ: रचनात्मक कार्यों में रुचि बढ़ेगी। आर्थिक स्थिति मजबूत होगी। नए मित्र बनेंगे। व्यापारिक यात्राएं सफल होंगी।',
+    meen: 'मीन: आज आपकी यात्रा सुखद रहेगी। शिक्षा के क्षेत्र में सफलता मिलेगी। परिवार का पूर्ण सहयोग रहेगा।'
   };
 
   // Advertisement Helpers
@@ -177,7 +131,7 @@ export default function Home() {
         onClick={() => ad.linkUrl && window.open(ad.linkUrl, '_blank')}
       >
         <span style={{ position: 'absolute', top: '5px', right: '5px', background: 'rgba(0,0,0,0.6)', color: 'rgba(255,255,255,0.7)', fontSize: '9px', padding: '2px 5px', borderRadius: '3px', zIndex: 1, fontWeight: 'bold' }}>
-          AD
+          विज्ञापन
         </span>
         <AdContent />
       </div>
@@ -329,7 +283,7 @@ export default function Home() {
     .filter((n) => n.images && n.images.length > 0)
     .map((n) => ({
       newsId: n._id,
-      title: language === 'en' ? n.titleEn : n.titleHi,
+      title: n.titleHi,
       url: n.images[0],
     }))
     .slice(0, 6);
@@ -338,18 +292,18 @@ export default function Home() {
   // Get Youtube ID
   const getYoutubeEmbedUrl = (url) => {
     if (!url) return '';
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\\&v=)([^#\\&\\?]*).*/;
     const match = url.match(regExp);
     return (match && match[2].length === 11) ? `https://www.youtube.com/embed/${match[2]}` : '';
   };
 
-  const renderCategoryShelf = (shelfNews, titleEn, titleHi) => {
+  const renderCategoryShelf = (shelfNews, titleHi) => {
     if (shelfNews.length === 0) return null;
     return (
       <div style={{ marginBottom: '40px' }}>
         <div className="category-shelf-header">
           <h3 className="category-shelf-title">
-            {language === 'en' ? titleEn : titleHi}
+            {titleHi}
           </h3>
         </div>
         <div className="grid grid-cols-3" style={{ gap: '20px' }}>
@@ -357,7 +311,7 @@ export default function Home() {
             <NewsCard
               key={n._id}
               news={n}
-              forcedCategoryName={language === 'en' ? titleEn : titleHi}
+              forcedCategoryName={titleHi}
             />
           ))}
         </div>
@@ -395,7 +349,7 @@ export default function Home() {
             }}
             onClick={() => setSelectedCategory('')}
           >
-            {language === 'en' ? 'All News' : 'सभी ख़बरें'}
+            सभी ख़बरें
           </button>
 
           {categories.map((cat) => (
@@ -410,7 +364,7 @@ export default function Home() {
               }}
               onClick={() => setSelectedCategory(cat._id)}
             >
-              {language === 'en' ? cat.nameEn : cat.nameHi}
+              {cat.nameHi}
             </button>
           ))}
         </div>
@@ -438,8 +392,8 @@ export default function Home() {
                   <div className="category-shelf-header">
                     <h3 className="category-shelf-title">
                       {selectedCategory
-                        ? (categories.find(c => c._id === selectedCategory)?.[language === 'en' ? 'nameEn' : 'nameHi'] || t('latestNews'))
-                        : (language === 'en' ? `Search Results for "${searchQuery}"` : `"${searchQuery}" के लिए खोज परिणाम`)}
+                        ? (categories.find(c => c._id === selectedCategory)?.nameHi || t('latestNews'))
+                        : `"${searchQuery}" के लिए खोज परिणाम`}
                     </h3>
                   </div>
                   <div className="grid grid-cols-3" style={{ gap: '20px' }}>
@@ -449,7 +403,7 @@ export default function Home() {
                   </div>
                 </div>
               ) : (
-                /* Newspaper Dashboard View (Dainik Jagran Style) */
+                /* Newspaper Dashboard View */
                 <div className="home-layout-grid">
 
                   {/* Left Column (News Stories & Category Shelves) */}
@@ -461,19 +415,19 @@ export default function Home() {
                         <div className="hero-main-card" style={{ cursor: 'pointer', height: '420px' }} onClick={() => navigate(`/news/${heroNews._id}`)}>
                           <LazyImage
                             src={heroNews.images && heroNews.images.length > 0 ? heroNews.images[0] : 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1200&q=80'}
-                            alt={language === 'en' ? heroNews.titleEn : heroNews.titleHi}
+                            alt={heroNews.titleHi}
                           />
                           <div className="card-overlay"></div>
                           <div className="card-content" style={{ padding: '20px' }}>
                             <span className="card-tag">{t('latestNews')}</span>
                             <h2 style={{ fontSize: '22px', textShadow: '0 2px 4px rgba(0,0,0,0.6)' }}>
-                              {language === 'en' ? heroNews.titleEn : heroNews.titleHi}
+                              {heroNews.titleHi}
                             </h2>
                             <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>
-                              {language === 'en' ? heroNews.summaryEn : heroNews.summaryHi}
+                              {heroNews.summaryHi}
                             </p>
                             <div className="card-meta">
-                              <span>{new Date(heroNews.createdAt).toLocaleDateString(language === 'en' ? 'en-US' : 'hi-IN')}</span>
+                              <span>{new Date(heroNews.createdAt).toLocaleDateString('hi-IN')}</span>
                               <span>•</span>
                               <span>{heroNews.views || 0} {t('views')}</span>
                             </div>
@@ -484,7 +438,7 @@ export default function Home() {
                       {/* Headlines List */}
                       <div className="glass" style={{ padding: '15px', borderRadius: 'var(--border-radius-md)', display: 'flex', flexDirection: 'column', height: '420px' }}>
                         <h3 style={{ fontSize: '15px', borderBottom: '2px solid var(--color-primary)', paddingBottom: '6px', marginBottom: '12px', textTransform: 'uppercase', color: 'var(--color-text-primary)' }}>
-                          {language === 'en' ? 'Top Stories' : 'बड़ी ख़बरें'}
+                          बड़ी ख़बरें
                         </h3>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', flexGrow: 1, overflowY: 'auto' }}>
                           {news.slice(1, 5).map((item, idx) => (
@@ -492,10 +446,10 @@ export default function Home() {
                               <span style={{ color: 'var(--color-primary)', fontWeight: '800', fontSize: '16px' }}>•</span>
                               <div>
                                 <h4 style={{ fontSize: '13px', fontWeight: '600', lineHeight: '1.3', display: '-webkit-box', WebkitLineClamp: '2', WebkitBoxOrient: 'vertical', overflow: 'hidden', color: 'var(--color-text-primary)' }}>
-                                  {language === 'en' ? item.titleEn : item.titleHi}
+                                  {item.titleHi}
                                 </h4>
                                 <span style={{ fontSize: '10px', color: 'var(--color-text-secondary)' }}>
-                                  {new Date(item.createdAt).toLocaleDateString(language === 'en' ? 'en-US' : 'hi-IN')}
+                                  {new Date(item.createdAt).toLocaleDateString('hi-IN')}
                                 </span>
                               </div>
                             </div>
@@ -507,7 +461,7 @@ export default function Home() {
                     {/* Uncategorized / More News Shelf */}
                     {(() => {
                       const uncategorizedNews = news.filter(n => !n.categories || n.categories.length === 0).slice(0, 3);
-                      return renderCategoryShelf(uncategorizedNews, 'More News', 'अन्य ख़बरें');
+                      return renderCategoryShelf(uncategorizedNews, 'अन्य ख़बरें');
                     })()}
 
                     {/* Dynamic Category Shelves */}
@@ -515,7 +469,7 @@ export default function Home() {
                       const shelfNews = news.filter(n => n.categories && n.categories.some(c => c._id === cat._id)).slice(0, 3);
                       return (
                         <React.Fragment key={cat._id}>
-                          {renderCategoryShelf(shelfNews, cat.nameEn, cat.nameHi)}
+                          {renderCategoryShelf(shelfNews, cat.nameHi)}
                         </React.Fragment>
                       );
                     })}
@@ -536,7 +490,7 @@ export default function Home() {
                               <div className="video-container">
                                 <iframe
                                   src={getYoutubeEmbedUrl(vn.videoUrl)}
-                                  title={language === 'en' ? vn.titleEn : vn.titleHi}
+                                  title={vn.titleHi}
                                   frameBorder="0"
                                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                   allowFullScreen
@@ -546,7 +500,7 @@ export default function Home() {
                                 style={{ marginTop: '10px', fontSize: '14px', cursor: 'pointer', color: 'var(--color-text-primary)' }}
                                 onClick={() => navigate(`/news/${vn._id}`)}
                               >
-                                {language === 'en' ? vn.titleEn : vn.titleHi}
+                                {vn.titleHi}
                               </h4>
                             </div>
                           ))}
@@ -570,15 +524,13 @@ export default function Home() {
                     >
                       <div className="widget-header" style={{ width: '100%', justifyContent: 'center' }}>
                         <User size={16} style={{ color: 'var(--color-primary)' }} />
-                        {language === 'en' ? 'Editor-in-Chief' : 'मुख्य संपादक'}
+                        मुख्य संपादक
                       </div>
                       {editorInfo && editorInfo.photoUrl ? (
                         <div style={{ width: '140px', height: '140px', borderRadius: '50%', overflow: 'hidden', border: '3px solid var(--color-primary)', boxShadow: 'var(--shadow-sm)' }}>
                           <img
                             src={editorInfo.photoUrl}
-                            alt={language === 'en'
-                              ? (editorInfo.nameEn || 'SADRE ALAM KHAN')
-                              : (editorInfo.nameHi || 'सदरे आलम खान')}
+                            alt={editorInfo.nameHi || 'सदरे आलम खान'}
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                           />
                         </div>
@@ -589,27 +541,19 @@ export default function Home() {
                       )}
                       <div>
                         <h4 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--color-text-primary)' }}>
-                          {editorInfo
-                            ? (language === 'en' ? (editorInfo.nameEn || 'SADRE ALAM KHAN') : (editorInfo.nameHi || 'सदरे आलम खान'))
-                            : (language === 'en' ? 'SADRE ALAM KHAN' : 'सदरे आलम खान')}
+                          {editorInfo ? (editorInfo.nameHi || 'सदरे आलम खान') : 'सदरे आलम खान'}
                         </h4>
                         <p style={{ fontSize: '12px', color: 'var(--color-primary)', fontWeight: 600, marginTop: '4px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                          {editorInfo
-                            ? (language === 'en' ? (editorInfo.roleEn || 'Editor-in-Chief') : (editorInfo.roleHi || 'मुख्य संपादक'))
-                            : (language === 'en' ? 'Editor-in-Chief' : 'मुख्य संपादक')}
+                          {editorInfo ? (editorInfo.roleHi || 'मुख्य संपादक') : 'मुख्य संपादक'}
                         </p>
                       </div>
                       <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.5', marginTop: '4px', fontStyle: 'italic' }}>
                         "{editorInfo
-                          ? (language === 'en'
-                            ? (editorInfo.descriptionEn || 'Passionate journalist dedicated to delivering accurate and timely news to the local community.')
-                            : (editorInfo.descriptionHi || 'स्थानीय समुदाय तक सटीक और समय पर समाचार पहुंचाने के लिए समर्पित पत्रकार।'))
-                          : (language === 'en'
-                            ? 'Passionate journalist dedicated to delivering accurate and timely news to the local community.'
-                            : 'स्थानीय समुदाय तक सटीक और समय पर समाचार पहुंचाने के लिए समर्पित पत्रकार।')}"
+                          ? (editorInfo.descriptionHi || 'स्थानीय समुदाय तक सटीक और समय पर समाचार पहुंचाने के लिए समर्पित पत्रकार।')
+                          : 'स्थानीय समुदाय तक सटीक और समय पर समाचार पहुंचाने के लिए समर्पित पत्रकार।'}"
                       </p>
                       <span style={{ fontSize: '11px', color: 'var(--color-primary)', textDecoration: 'underline', fontWeight: 600 }}>
-                        {language === 'en' ? 'Click for Full Profile' : 'पूर्ण प्रोफ़ाइल के लिए क्लिक करें'}
+                        पूर्ण प्रोफ़ाइल के लिए क्लिक करें
                       </span>
                     </div>
 
@@ -621,7 +565,7 @@ export default function Home() {
                       <div className="widget-card" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                         <div className="widget-header">
                           <BookOpen size={16} style={{ color: 'var(--color-primary)' }} />
-                          {language === 'en' ? 'LATEST E-PAPER' : 'नवीनतम ई-पेपर'}
+                          नवीनतम ई-पेपर
                         </div>
                         <div
                           style={{
@@ -638,7 +582,7 @@ export default function Home() {
                           {latestEPaper.thumbnailUrl ? (
                             <img
                               src={latestEPaper.thumbnailUrl}
-                              alt="E-Paper Thumbnail"
+                              alt="ई-पेपर थंबनेल"
                               style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.3s' }}
                               onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
                               onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
@@ -647,7 +591,7 @@ export default function Home() {
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '10px' }}>
                               <Newspaper size={40} style={{ color: 'var(--color-text-secondary)' }} />
                               <span style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>
-                                {language === 'en' ? 'Click to Read' : 'पढ़ने के लिए क्लिक करें'}
+                                पढ़ने के लिए क्लिक करें
                               </span>
                             </div>
                           )}
@@ -663,7 +607,7 @@ export default function Home() {
                             fontWeight: 700
                           }}>
                             {new Date(latestEPaper.date).toLocaleDateString(
-                              language === 'en' ? 'en-US' : 'hi-IN',
+                              'hi-IN',
                               { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' }
                             )}
                           </div>
@@ -673,7 +617,7 @@ export default function Home() {
                           style={{ width: '100%', background: 'linear-gradient(135deg, var(--color-primary) 0%, #b91c1c 100%)', color: '#fff', border: 'none', fontWeight: 700 }}
                           onClick={() => navigate('/epaper')}
                         >
-                          {language === 'en' ? 'Open E-Paper Reader' : 'ई-पेपर रीडर खोलें'}
+                          ई-पेपर रीडर खोलें
                         </button>
                       </div>
                     )}
@@ -683,7 +627,7 @@ export default function Home() {
                       <div className="widget-card">
                         <div className="widget-header">
                           <TrendingUp size={16} style={{ color: 'var(--color-primary)' }} />
-                          {language === 'en' ? 'TRENDING STORIES' : 'ट्रेंडिंग खबरें'}
+                          ट्रेंडिंग खबरें
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                           {trendingNews.map((item, index) => (
@@ -718,7 +662,7 @@ export default function Home() {
                                   onMouseEnter={(e) => e.currentTarget.style.color = 'var(--color-primary)'}
                                   onMouseLeave={(e) => e.currentTarget.style.color = 'var(--color-text-primary)'}
                                 >
-                                  {language === 'en' ? item.titleEn : item.titleHi}
+                                  {item.titleHi}
                                 </h4>
                                 <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                   <Eye size={10} />
@@ -735,7 +679,7 @@ export default function Home() {
                     <div className="widget-card">
                       <div className="widget-header">
                         <Globe size={16} style={{ color: '#8b5cf6' }} />
-                        {language === 'en' ? 'Daily Horoscope' : 'दैनिक राशिफल'}
+                        दैनिक राशिफल
                       </div>
                       <select
                         className="horoscope-select"
@@ -743,17 +687,17 @@ export default function Home() {
                         onChange={(e) => setSelectedZodiac(e.target.value)}
                       >
                         <option value="">
-                          {language === 'en' ? '-- Select Zodiac Sign --' : '-- अपनी राशि चुनें --'}
+                          -- अपनी राशि चुनें --
                         </option>
                         {zodiacList.map(z => (
                           <option key={z.key} value={z.key}>
-                            {language === 'en' ? z.nameEn : z.nameHi}
+                            {z.name}
                           </option>
                         ))}
                       </select>
                       {selectedZodiac && (
                         <div className="horoscope-content">
-                          {zodiacPredictions[selectedZodiac][language === 'en' ? 'en' : 'hi']}
+                          {zodiacPredictions[selectedZodiac]}
                         </div>
                       )}
                     </div>
@@ -763,30 +707,30 @@ export default function Home() {
                       <div className="widget-card">
                         <div className="widget-header">
                           <Newspaper size={16} style={{ color: 'var(--color-primary)' }} />
-                          {language === 'en' ? 'Opinion Poll' : 'ओपिनियन पोल'}
+                          ओपिनियन पोल
                         </div>
                         <p style={{ fontSize: '13px', fontWeight: '600', marginBottom: '12px', color: 'var(--color-text-primary)' }}>
-                          {language === 'en' ? poll.questionEn : poll.questionHi}
+                          {poll.questionHi}
                         </p>
 
                         {!hasVotedPoll ? (
                           <div>
                             <button className="poll-option-btn" onClick={() => handlePollVote(1)}>
-                              {language === 'en' ? poll.option1En : poll.option1Hi}
+                              {poll.option1Hi}
                             </button>
                             <button className="poll-option-btn" onClick={() => handlePollVote(2)}>
-                              {language === 'en' ? poll.option2En : poll.option2Hi}
+                              {poll.option2Hi}
                             </button>
-                            {(poll.option3En || poll.option3Hi) && (
+                            {poll.option3Hi && (
                               <button className="poll-option-btn" onClick={() => handlePollVote(3)}>
-                                {language === 'en' ? poll.option3En : poll.option3Hi}
+                                {poll.option3Hi}
                               </button>
                             )}
                           </div>
                         ) : (
                           <div style={{ background: 'rgba(255,255,255,0.01)', padding: '10px', borderRadius: 'var(--border-radius-sm)' }}>
                             {(() => {
-                              const totalVotes = (poll.votesOption1 || 0) + (poll.votesOption2 || 0) + ((poll.option3En || poll.option3Hi) ? (poll.votesOption3 || 0) : 0);
+                              const totalVotes = (poll.votesOption1 || 0) + (poll.votesOption2 || 0) + (poll.option3Hi ? (poll.votesOption3 || 0) : 0);
                               const pct1 = totalVotes > 0 ? Math.round(((poll.votesOption1 || 0) / totalVotes) * 100) : 0;
                               const pct2 = totalVotes > 0 ? Math.round(((poll.votesOption2 || 0) / totalVotes) * 100) : 0;
                               const pct3 = totalVotes > 0 ? Math.round(((poll.votesOption3 || 0) / totalVotes) * 100) : 0;
@@ -795,7 +739,7 @@ export default function Home() {
                                 <>
                                   <div className="poll-result-bar">
                                     <div className="poll-result-label">
-                                      <span>{language === 'en' ? poll.option1En : poll.option1Hi}</span>
+                                      <span>{poll.option1Hi}</span>
                                       <span>{pct1}%</span>
                                     </div>
                                     <div className="poll-bar-bg">
@@ -804,17 +748,17 @@ export default function Home() {
                                   </div>
                                   <div className="poll-result-bar">
                                     <div className="poll-result-label">
-                                      <span>{language === 'en' ? poll.option2En : poll.option2Hi}</span>
+                                      <span>{poll.option2Hi}</span>
                                       <span>{pct2}%</span>
                                     </div>
                                     <div className="poll-bar-bg">
                                       <div className="poll-bar-fill" style={{ width: `${pct2}%`, background: '#64748b' }}></div>
                                     </div>
                                   </div>
-                                  {(poll.option3En || poll.option3Hi) && (
+                                  {poll.option3Hi && (
                                     <div className="poll-result-bar">
                                       <div className="poll-result-label">
-                                        <span>{language === 'en' ? poll.option3En : poll.option3Hi}</span>
+                                        <span>{poll.option3Hi}</span>
                                         <span>{pct3}%</span>
                                       </div>
                                       <div className="poll-bar-bg">
@@ -823,7 +767,7 @@ export default function Home() {
                                     </div>
                                   )}
                                   <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)', display: 'block', textAlign: 'center', marginTop: '8px' }}>
-                                    {language === 'en' ? 'Thank you for your vote!' : 'वोट करने के लिए धन्यवाद!'}
+                                    वोट करने के लिए धन्यवाद!
                                   </span>
                                 </>
                               );
@@ -836,12 +780,10 @@ export default function Home() {
                     {/* LIVE Broadcast widget */}
                     <div className="sidebar-panel" style={{ background: 'linear-gradient(135deg, #ef4444 0%, #8b0000 100%)', color: '#fff', border: 'none' }}>
                       <h3 style={{ fontSize: '20px', fontWeight: 800, marginBottom: '8px' }}>
-                        {language === 'en' ? 'LIVE BROADCAST' : 'सीधा प्रसारण'}
+                        सीधा प्रसारण
                       </h3>
                       <p style={{ fontSize: '13px', opacity: 0.9, marginBottom: '15px' }}>
-                        {language === 'en'
-                          ? 'Watch our daily video bulletin and ground reports live from Khalilabad and subdivision desks.'
-                          : 'खलीलाबाद और उपखंड डेस्क से सीधे हमारी दैनिक वीडियो समाचार बुलेटिन और ग्राउंड रिपोर्ट देखें।'}
+                        खलीलाबाद और उपखंड डेस्क से सीधे हमारी दैनिक वीडियो समाचार बुलेटिन और ग्राउंड रिपोर्ट देखें।
                       </p>
                       <button
                         onClick={() => navigate('/city/All')}
@@ -860,7 +802,7 @@ export default function Home() {
                         }}
                       >
                         <Play size={12} fill="#8b0000" />
-                        {language === 'en' ? 'Watch Local News' : 'स्थानीय समाचार देखें'}
+                        स्थानीय समाचार देखें
                       </button>
                     </div>
                   </div>
@@ -929,17 +871,15 @@ export default function Home() {
             {/* Widget Title */}
             <div style={{ fontSize: '14px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <User size={16} />
-              {language === 'en' ? 'Editor Profile' : 'संपादक प्रोफ़ाइल'}
+              संपादक प्रोफ़ाइल
             </div>
 
-            {/* Image (Even Larger!) */}
+            {/* Image */}
             {editorInfo && editorInfo.photoUrl ? (
               <div style={{ width: '180px', height: '180px', borderRadius: '50%', overflow: 'hidden', border: '4px solid var(--color-primary)', boxShadow: 'var(--shadow-md)' }}>
                 <img
                   src={editorInfo.photoUrl}
-                  alt={language === 'en'
-                    ? (editorInfo.nameEn || 'SADRE ALAM KHAN')
-                    : (editorInfo.nameHi || 'सदरे आलम खान')}
+                  alt={editorInfo.nameHi || 'सदरे आलम खान'}
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
               </div>
@@ -952,26 +892,18 @@ export default function Home() {
             {/* Name & Role */}
             <div>
               <h3 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--color-text-primary)' }}>
-                {editorInfo
-                  ? (language === 'en' ? (editorInfo.nameEn || 'SADRE ALAM KHAN') : (editorInfo.nameHi || 'सदरे आलम खान'))
-                  : (language === 'en' ? 'SADRE ALAM KHAN' : 'सदरे आलम खान')}
+                {editorInfo ? (editorInfo.nameHi || 'सदरे आलम खान') : 'सदरे आलम खान'}
               </h3>
               <p style={{ fontSize: '14px', color: 'var(--color-primary)', fontWeight: 700, marginTop: '5px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                {editorInfo
-                  ? (language === 'en' ? (editorInfo.roleEn || 'Editor-in-Chief') : (editorInfo.roleHi || 'मुख्य संपादक'))
-                  : (language === 'en' ? 'Editor-in-Chief' : 'मुख्य संपादक')}
+                {editorInfo ? (editorInfo.roleHi || 'मुख्य संपादक') : 'मुख्य संपादक'}
               </p>
             </div>
 
             {/* Description */}
             <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: '1.6', fontStyle: 'italic', background: 'rgba(255,255,255,0.02)', padding: '15px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
               "{editorInfo
-                ? (language === 'en'
-                  ? (editorInfo.descriptionEn || 'Passionate journalist dedicated to delivering accurate and timely news to the local community.')
-                  : (editorInfo.descriptionHi || 'स्थानीय समुदाय तक सटीक और समय पर समाचार पहुंचाने के लिए समर्पित पत्रकार।'))
-                : (language === 'en'
-                  ? 'Passionate journalist dedicated to delivering accurate and timely news to the local community.'
-                  : 'स्थानीय समुदाय तक सटीक और समय पर समाचार पहुंचाने के लिए समर्पित पत्रकार।')}"
+                ? (editorInfo.descriptionHi || 'स्थानीय समुदाय तक सटीक और समय पर समाचार पहुंचाने के लिए समर्पित पत्रकार।')
+                : 'स्थानीय समुदाय तक सटीक और समय पर समाचार पहुंचाने के लिए समर्पित पत्रकार।'}"
             </p>
 
             {/* Details Section */}
@@ -981,7 +913,7 @@ export default function Home() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--color-text-primary)', fontSize: '15px' }}>
                 <Phone size={18} style={{ color: 'var(--color-primary)' }} />
                 <span>
-                  <strong>{language === 'en' ? 'Mobile:' : 'मोबाइल:'} </strong>
+                  <strong>मोबाइल: </strong>
                   {editorInfo && editorInfo.mobile ? (
                     <a href={`tel:${editorInfo.mobile}`} style={{ color: 'var(--color-primary)', textDecoration: 'none', fontWeight: 600 }}>
                       {editorInfo.mobile}
@@ -997,7 +929,7 @@ export default function Home() {
               {/* Social Channels */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', width: '100%', marginTop: '5px' }}>
                 <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--color-text-secondary)', marginRight: '10px' }}>
-                  {language === 'en' ? 'Social Links:' : 'सोशल लिंक्स:'}
+                  सोशल लिंक्स:
                 </span>
 
                 {/* Facebook */}

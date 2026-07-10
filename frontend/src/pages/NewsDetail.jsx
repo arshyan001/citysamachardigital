@@ -6,7 +6,7 @@ import LazyImage from '../components/LazyImage';
 
 export default function NewsDetail() {
   const { id } = useParams();
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const [news, setNews] = useState(null);
@@ -175,7 +175,7 @@ export default function NewsDetail() {
         onClick={() => ad.linkUrl && window.open(ad.linkUrl, '_blank')}
       >
         <span style={{ position: 'absolute', top: '5px', right: '5px', background: 'rgba(0,0,0,0.6)', color: 'rgba(255,255,255,0.7)', fontSize: '9px', padding: '2px 5px', borderRadius: '3px', zIndex: 1, fontWeight: 'bold' }}>
-          AD
+          विज्ञापन
         </span>
         <AdContent />
       </div>
@@ -302,7 +302,7 @@ export default function NewsDetail() {
 
   useEffect(() => {
     if (news) {
-      document.title = `${language === 'en' ? news.titleEn : news.titleHi} | City Samachar Digital`;
+      document.title = `${news.titleHi} | सिटी समाचार डिजिटल`;
       // Update description tag in document head
       let descMeta = document.querySelector('meta[name="description"]');
       if (!descMeta) {
@@ -310,9 +310,9 @@ export default function NewsDetail() {
         descMeta.name = 'description';
         document.head.appendChild(descMeta);
       }
-      descMeta.content = language === 'en' ? news.summaryEn : news.summaryHi;
+      descMeta.content = news.summaryHi;
     }
-  }, [news, language]);
+  }, [news]);
 
   if (loading) {
     return (
@@ -324,26 +324,26 @@ export default function NewsDetail() {
 
   if (!news) return null;
 
-  const title = language === 'en' ? news.titleEn : news.titleHi;
-  const content = language === 'en' ? news.contentEn : news.contentHi;
+  const title = news.titleHi;
+  const content = news.contentHi;
   const categoryName = news.categories && news.categories.length > 0 
-    ? (language === 'en' ? news.categories[0].nameEn : news.categories[0].nameHi) 
+    ? news.categories[0].nameHi 
     : '';
 
   const subName = news.subdivision && news.subdivision !== 'None'
-    ? (language === 'en' ? news.subdivision : t(news.subdivision.toLowerCase()))
+    ? t(news.subdivision.toLowerCase())
     : '';
 
   // Get Youtube ID
   const getYoutubeEmbedUrl = (url) => {
     if (!url) return '';
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\\&v=)([^#\\&\\?]*).*/;
     const match = url.match(regExp);
     return (match && match[2].length === 11) ? `https://www.youtube.com/embed/${match[2]}` : '';
   };
 
   const formattedDate = new Date(news.createdAt).toLocaleDateString(
-    language === 'en' ? 'en-US' : 'hi-IN',
+    'hi-IN',
     { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }
   );
 
@@ -367,7 +367,7 @@ export default function NewsDetail() {
         className="back-btn"
       >
         <ArrowLeft size={16} />
-        {language === 'en' ? 'Go Back' : 'पीछे जाएं'}
+        पीछे जाएं
       </button>
 
       <div className="detail-layout">
@@ -400,16 +400,16 @@ export default function NewsDetail() {
                   </span>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: hasLiked ? 'default' : 'pointer', color: hasLiked ? '#ef4444' : 'inherit', transition: 'color 0.2s' }} onClick={handleLike}>
                     <ThumbsUp size={14} style={{ fill: hasLiked ? '#ef4444' : 'none' }} />
-                    {likes} {language === 'en' ? 'Likes' : 'पसंद'}
+                    {likes} पसंद
                   </span>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <Share2 size={14} />
-                    {shares} {language === 'en' ? 'Shares' : 'शेयर'}
+                    {shares} शेयर
                   </span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>
-                    {language === 'en' ? 'Text Size:' : 'अक्षर आकार:'}
+                    अक्षर आकार:
                   </span>
                   <button className="resizer-btn" onClick={decreaseFont}>A-</button>
                   <span style={{ fontSize: '14px', fontWeight: 'bold' }}>{fontSize}px</span>
@@ -443,7 +443,7 @@ export default function NewsDetail() {
             {/* Social Share Bar */}
             <div style={{ marginTop: '30px', borderTop: '1px solid var(--border-color)', borderBottom: '1px solid var(--border-color)', padding: '15px 0' }}>
               <span style={{ fontSize: '14px', fontWeight: '800', color: 'var(--color-text-primary)', textTransform: 'uppercase', display: 'block', marginBottom: '10px' }}>
-                {language === 'en' ? 'Share this article:' : 'इस ख़बर को शेयर करें:'}
+                इस ख़बर को शेयर करें:
               </span>
               <div className="share-bar">
                 <button className="share-btn fb" onClick={() => handleShareClick(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`)}>
@@ -456,7 +456,7 @@ export default function NewsDetail() {
                   WhatsApp
                 </button>
                 <button className="share-btn link" onClick={handleCopyLink}>
-                  {copied ? (language === 'en' ? 'Copied!' : 'कॉपी हो गया!') : (language === 'en' ? 'Copy Link' : 'लिंक कॉपी करें')}
+                  {copied ? 'कॉपी हो गया!' : 'लिंक कॉपी करें'}
                 </button>
               </div>
             </div>
@@ -466,7 +466,7 @@ export default function NewsDetail() {
               <div style={{ marginTop: '40px' }}>
                 <h3 style={{ marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Video size={20} style={{ color: 'var(--color-primary)' }} />
-                  {language === 'en' ? 'Report Bulletin / Video' : 'समाचार रिपोर्ट / वीडियो'}
+                  समाचार रिपोर्ट / वीडियो
                 </h3>
                 <div className="video-container">
                   <iframe
@@ -502,9 +502,9 @@ export default function NewsDetail() {
                   </span>
                 </div>
                 <div style={{ display: 'flex', gap: '12px', fontSize: '13px', color: 'var(--color-text-secondary)' }}>
-                  <span>{comments.length} {language === 'en' ? 'Comments' : 'टिप्पणियाँ'}</span>
+                  <span>{comments.length} टिप्पणियाँ</span>
                   {shares > 0 && <span>•</span>}
-                  {shares > 0 && <span>{shares} {language === 'en' ? 'Shares' : 'शेयर'}</span>}
+                  {shares > 0 && <span>{shares} शेयर</span>}
                 </div>
               </div>
 
@@ -516,16 +516,16 @@ export default function NewsDetail() {
                   style={{ cursor: hasLiked ? 'default' : 'pointer' }}
                 >
                   <ThumbsUp size={16} style={{ fill: hasLiked ? '#1877f2' : 'none' }} />
-                  <span>{language === 'en' ? 'Like' : 'पसंद करें'}</span>
+                  <span>पसंद करें</span>
                 </button>
                 <button className="fb-action-btn" onClick={handleCommentBtnClick}>
                   <MessageSquare size={16} />
-                  <span>{language === 'en' ? 'Comment' : 'टिप्पणी करें'}</span>
+                  <span>टिप्पणी करें</span>
                 </button>
                 <button className="fb-action-btn" onClick={handleFbShareBtnClick}>
                   <Share2 size={16} />
                   <span>
-                    {copied ? (language === 'en' ? 'Copied!' : 'कॉपी हो गया!') : (language === 'en' ? 'Share' : 'शेयर करें')}
+                    {copied ? 'कॉपी हो गया!' : 'शेयर करें'}
                   </span>
                 </button>
               </div>
@@ -539,14 +539,14 @@ export default function NewsDetail() {
                   <input 
                     type="text" 
                     className="fb-composer-name" 
-                    placeholder={language === 'en' ? 'Your Name...' : 'आपका नाम...'} 
+                    placeholder="आपका नाम..." 
                     value={newCommentName}
                     onChange={(e) => setNewCommentName(e.target.value)}
                     required
                   />
                   <textarea 
                     className="fb-composer-text" 
-                    placeholder={language === 'en' ? 'Write a comment...' : 'अपनी टिप्पणी लिखें...'} 
+                    placeholder="अपनी टिप्पणी लिखें..." 
                     value={newCommentText}
                     onChange={(e) => setNewCommentText(e.target.value)}
                     rows="2"
@@ -558,7 +558,7 @@ export default function NewsDetail() {
                       className={`fb-submit-btn ${(newCommentName.trim() && newCommentText.trim()) ? 'active' : ''}`}
                       disabled={!newCommentName.trim() || !newCommentText.trim()}
                     >
-                      {language === 'en' ? 'Post' : 'प्रकाशित करें'}
+                      प्रकाशित करें
                     </button>
                   </div>
                 </div>
@@ -581,11 +581,11 @@ export default function NewsDetail() {
                           className={`fb-comment-action-link ${commentLikes[index] ? 'active' : ''}`}
                           onClick={() => toggleCommentLike(index)}
                         >
-                          {commentLikes[index] ? (language === 'en' ? 'Liked' : 'पसंद किया') : (language === 'en' ? 'Like' : 'पसंद')}
+                          {commentLikes[index] ? 'पसंद किया' : 'पसंद'}
                         </button>
                         <span>•</span>
                         <button className="fb-comment-action-link" onClick={() => handleReplyClick(comment.name)}>
-                          {language === 'en' ? 'Reply' : 'जवाब दें'}
+                          जवाब दें
                         </button>
                         <span>•</span>
                         <span className="fb-comment-date">{comment.date}</span>
@@ -616,18 +616,18 @@ export default function NewsDetail() {
                   <div style={{ width: '80px', height: '60px', borderRadius: '4px', overflow: 'hidden', flexShrink: 0, background: '#000' }}>
                     <img 
                       src={rel.images && rel.images.length > 0 ? rel.images[0] : 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=150&q=80'} 
-                      alt={language === 'en' ? rel.titleEn : rel.titleHi}
+                      alt={rel.titleHi}
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
                   </div>
                   <div>
                     <h4 style={{ fontSize: '14px', fontWeight: 600, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: 1.3 }}>
                       <Link to={`/news/${rel._id}`} style={{ color: 'var(--color-text-primary)' }}>
-                        {language === 'en' ? rel.titleEn : rel.titleHi}
+                        {rel.titleHi}
                       </Link>
                     </h4>
                     <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)', display: 'block', marginTop: '4px' }}>
-                      {new Date(rel.createdAt).toLocaleDateString(language === 'en' ? 'en-US' : 'hi-IN')}
+                      {new Date(rel.createdAt).toLocaleDateString('hi-IN')}
                     </span>
                   </div>
                 </div>

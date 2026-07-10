@@ -6,7 +6,7 @@ import { MapPin, Info } from 'lucide-react';
 
 export default function CityNews() {
   const { subdivision } = useParams();
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
 
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,30 +35,22 @@ export default function CityNews() {
     fetchCityNews();
   }, [subdivision]);
 
-  // Dynamic titles
+  // Dynamic titles - Hindi only
   const getPageTitle = () => {
     if (!subdivision || subdivision === 'All') {
-      return language === 'en' 
-        ? 'Sant Kabir Nagar - District News' 
-        : 'संत कबीर नगर - ज़िला समाचार';
+      return 'संत कबीर नगर - ज़िला समाचार';
     }
     
     const subTranslation = t(subdivision.toLowerCase());
-    return language === 'en' 
-      ? `Local Updates - ${subdivision}`
-      : `स्थानीय समाचार - ${subTranslation}`;
+    return `स्थानीय समाचार - ${subTranslation}`;
   };
 
   const getPageDesc = () => {
     if (!subdivision || subdivision === 'All') {
-      return language === 'en'
-        ? 'All local reports and headlines compiled from the Sant Kabir Nagar district.'
-        : 'संत कबीर नगर जिले से संकलित सभी स्थानीय रिपोर्ट और सुर्खियां।';
+      return 'संत कबीर नगर जिले से संकलित सभी स्थानीय रिपोर्ट और सुर्खियां।';
     }
     const subTranslation = t(subdivision.toLowerCase());
-    return language === 'en'
-      ? `Ground reports, video bulletins and stories directly from the ${subdivision} subdivision area.`
-      : `सीधे ${subTranslation} उपखंड क्षेत्र से ग्राउंड रिपोर्ट, वीडियो बुलेटिन और कहानियां।`;
+    return `सीधे ${subTranslation} उपखंड क्षेत्र से ग्राउंड रिपोर्ट, वीडियो बुलेटिन और कहानियां।`;
   };
 
   return (
@@ -98,7 +90,7 @@ export default function CityNews() {
             borderRadius: '4px'
           }}
         >
-          {news.length} {language === 'en' ? 'articles' : 'समाचार'}
+          {news.length} समाचार
         </span>
       </div>
 
@@ -112,8 +104,8 @@ export default function CityNews() {
             <div className="glass" style={{ textAlign: 'center', padding: '60px 20px', borderRadius: 'var(--border-radius-md)', color: 'var(--color-text-secondary)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
               <Info size={40} style={{ color: 'var(--color-secondary)' }} />
               <div>
-                <h3 style={{ color: '#fff', marginBottom: '8px' }}>{language === 'en' ? 'No News Found' : 'कोई समाचार नहीं मिला'}</h3>
-                <p>{language === 'en' ? 'We haven\'t published any stories for this subdivision yet. Check back soon!' : 'हमने अभी तक इस उपखंड के लिए कोई समाचार प्रकाशित नहीं किया है। कृपया जल्द ही दोबारा जांचें!'}</p>
+                <h3 style={{ color: '#fff', marginBottom: '8px' }}>कोई समाचार नहीं मिला</h3>
+                <p>हमने अभी तक इस उपखंड के लिए कोई समाचार प्रकाशित नहीं किया है। कृपया जल्द ही दोबारा जांचें!</p>
               </div>
             </div>
           ) : (

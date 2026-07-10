@@ -17,7 +17,7 @@ const Toast = Swal.mixin({
 });
 
 export default function AdminLogin() {
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const [username, setUsername] = useState('');
@@ -55,21 +55,21 @@ export default function AdminLogin() {
 
         Toast.fire({
           icon: 'success',
-          title: language === 'en' ? 'Logged in successfully!' : 'सफलतापूर्वक लॉग इन किया गया!'
+          title: 'सफलतापूर्वक लॉग इन किया गया!'
         });
 
         navigate('/admin/dashboard');
       } else {
         Toast.fire({
           icon: 'error',
-          title: data.message || (language === 'en' ? 'Login failed' : 'लॉगिन विफल रहा')
+          title: data.message || ('लॉगिन विफल रहा')
         });
       }
     } catch (err) {
       console.error('Login error:', err);
       Toast.fire({
         icon: 'error',
-        title: language === 'en' ? 'Connection to server failed. Please try again.' : 'सर्वर से कनेक्शन विफल रहा। कृपया पुन: प्रयास करें।'
+        title: 'सर्वर से कनेक्शन विफल रहा। कृपया पुन: प्रयास करें।'
       });
     } finally {
       setLoading(false);
@@ -81,10 +81,10 @@ export default function AdminLogin() {
       <div className="auth-wrapper glass">
         <div style={{ textAlign: 'center', marginBottom: '25px' }}>
           <h2 style={{ fontSize: '24px', color: 'var(--color-text-primary)' }}>
-            {language === 'en' ? 'Administrator Portal' : 'व्यवस्थापक पोर्टल'}
+            {'व्यवस्थापक पोर्टल'}
           </h2>
           <p style={{ color: 'var(--color-text-secondary)', fontSize: '13px', marginTop: '6px' }}>
-            {language === 'en' ? 'Log in to write and manage news updates.' : 'समाचार अपडेट लिखने और प्रबंधित करने के लिए लॉग इन करें।'}
+            {'समाचार अपडेट लिखने और प्रबंधित करने के लिए लॉग इन करें।'}
           </p>
         </div>
 
@@ -92,7 +92,7 @@ export default function AdminLogin() {
 
         <form onSubmit={handleSubmit}>
           <div className="form-group" style={{ position: 'relative' }}>
-            <label htmlFor="username">{language === 'en' ? 'Username' : 'उपयोगकर्ता नाम'}</label>
+            <label htmlFor="username">{'उपयोगकर्ता नाम'}</label>
             <div style={{ position: 'relative' }}>
               <input
                 type="text"
@@ -108,7 +108,7 @@ export default function AdminLogin() {
           </div>
 
           <div className="form-group" style={{ position: 'relative' }}>
-            <label htmlFor="password">{language === 'en' ? 'Password' : 'पासवर्ड'}</label>
+            <label htmlFor="password">{'पासवर्ड'}</label>
             <div style={{ position: 'relative' }}>
               <input
                 type="password"
@@ -125,8 +125,8 @@ export default function AdminLogin() {
 
           <button type="submit" className="btn" disabled={loading} style={{ marginTop: '10px' }}>
             {loading
-              ? (language === 'en' ? 'Logging in...' : 'लॉग इन किया जा रहा है...')
-              : (language === 'en' ? 'Secure Login' : 'सुरक्षित लॉगिन')}
+              ? ('लॉग इन किया जा रहा है...')
+              : ('सुरक्षित लॉगिन')}
           </button>
         </form>
 

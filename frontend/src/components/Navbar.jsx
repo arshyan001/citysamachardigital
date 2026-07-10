@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
-import { Clock, Globe, ChevronDown, Newspaper, Mail, UserCheck, MapPin, Sun, Moon, Menu, X } from 'lucide-react';
+import { Clock, ChevronDown, Newspaper, Mail, UserCheck, MapPin, Sun, Moon, Menu, X } from 'lucide-react';
 
 export default function Navbar() {
-  const { language, toggleLanguage, t } = useLanguage();
+  const { t } = useLanguage();
   const [time, setTime] = useState(new Date());
   const [isOpen, setIsOpen] = useState(false);
   const [theme, setTheme] = useState(() => localStorage.getItem('news_theme') || 'dark');
@@ -61,7 +61,7 @@ export default function Navbar() {
   }, []);
 
   const formatTime = (date) => {
-    return date.toLocaleTimeString(language === 'en' ? 'en-US' : 'hi-IN', {
+    return date.toLocaleTimeString('hi-IN', {
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
@@ -69,7 +69,7 @@ export default function Navbar() {
   };
 
   const formatDate = (date) => {
-    return date.toLocaleDateString(language === 'en' ? 'en-US' : 'hi-IN', {
+    return date.toLocaleDateString('hi-IN', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
@@ -159,7 +159,7 @@ export default function Navbar() {
           }}
         >
           <span style={{ fontSize: '14px' }}>📰</span>
-          {language === 'en' ? 'Newspaper' : 'अखबार'}
+          अखबार
         </NavLink>
       </li>
 
@@ -176,7 +176,7 @@ export default function Navbar() {
   return (
     <>
     <header ref={headerRef} className={`navbar-wrapper glass ${isAdminPage ? 'admin-navbar' : ''}`}>
-      {/* Top Bar for Clock and Language toggler */}
+      {/* Top Bar for Clock */}
       <div className="top-bar">
         <div className="container">
           <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
@@ -195,7 +195,7 @@ export default function Navbar() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', color: 'var(--color-success)' }}>
                   <UserCheck size={14} />
-                  Admin
+                  एडमिन
                 </span>
                 <button 
                   onClick={handleLogout}
@@ -208,21 +208,17 @@ export default function Navbar() {
                     fontWeight: 600 
                   }}
                 >
-                  Logout
+                  लॉगआउट
                 </button>
               </div>
             ) : (
               <Link to="/admin/login" style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px' }}>
-                Admin Login
+                एडमिन लॉगिन
               </Link>
             )}
-            <button className="lang-toggle" onClick={toggleTheme} title={theme === 'light' ? 'Dark Mode' : 'Light Mode'}>
+            <button className="lang-toggle" onClick={toggleTheme} title={theme === 'light' ? 'डार्क मोड' : 'लाइट मोड'}>
               {theme === 'light' ? <Moon size={14} /> : <Sun size={14} />}
-              {theme === 'light' ? (language === 'en' ? 'Dark' : 'डार्क') : (language === 'en' ? 'Light' : 'लाइट')}
-            </button>
-            <button className="lang-toggle" onClick={toggleLanguage}>
-              <Globe size={14} />
-              {language === 'en' ? 'हिन्दी' : 'English'}
+              {theme === 'light' ? 'डार्क' : 'लाइट'}
             </button>
           </div>
         </div>
@@ -264,7 +260,7 @@ export default function Navbar() {
       <div className="trending-tags-bar">
         <div className="container trending-tags-container">
           <span className="trending-label">
-            {language === 'en' ? 'Trending:' : 'ट्रेंडिंग:'}
+            ट्रेंडिंग:
           </span>
           <span className="trending-tag" onClick={() => navigate('/')}>#SantKabirNagar</span>
           <span className="trending-tag" onClick={() => navigate('/')}>#HeatwaveAlert</span>
