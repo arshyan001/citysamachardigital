@@ -246,7 +246,7 @@ export default function Home() {
         // Fetch news
         let newsUrl = '/api/news';
         const params = [];
-        if (selectedCategory) {
+        if (selectedCategory && selectedCategory !== 'uncategorized') {
           params.push(`category=${selectedCategory}`);
         }
         if (searchQuery) {
@@ -259,7 +259,11 @@ export default function Home() {
         const newsRes = await fetch(newsUrl);
         if (newsRes.ok) {
           const newsData = await newsRes.json();
-          setNews(newsData);
+          if (selectedCategory === 'uncategorized') {
+            setNews(newsData.filter(n => !n.categories || n.categories.length === 0));
+          } else {
+            setNews(newsData);
+          }
         }
       } catch (err) {
         console.error('Error fetching data:', err);
@@ -334,7 +338,7 @@ export default function Home() {
     );
   };
 
-  const renderCategoryShelf = (shelfNews, titleHi) => {
+  const renderCategoryShelf = (shelfNews, titleHi, catId = null) => {
     if (shelfNews.length === 0) return null;
     return (
       <div style={{ marginBottom: '40px' }}>
@@ -342,6 +346,34 @@ export default function Home() {
           <h3 className="category-shelf-title">
             {titleHi}
           </h3>
+          <button
+            onClick={() => {
+              setSelectedCategory(catId || 'uncategorized');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--color-primary)',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              fontSize: '14px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              transition: 'var(--transition-smooth)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = 'var(--color-primary-hover)';
+              e.currentTarget.style.transform = 'translateX(2px)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = 'var(--color-primary)';
+              e.currentTarget.style.transform = 'translateX(0)';
+            }}
+          >
+            {t('viewAll')} →
+          </button>
         </div>
         {renderNewsList(shelfNews)}
       </div>
@@ -379,6 +411,19 @@ export default function Home() {
             onClick={() => setSelectedCategory('')}
           >
             सभी ख़बरें
+          </button>
+
+          <button
+            className={`lang-toggle ${selectedCategory === 'uncategorized' ? 'active' : ''}`}
+            style={{
+              background: selectedCategory === 'uncategorized' ? 'var(--color-primary)' : 'transparent',
+              borderColor: selectedCategory === 'uncategorized' ? 'var(--color-primary)' : 'var(--border-color)',
+              color: '#fff',
+              whiteSpace: 'nowrap'
+            }}
+            onClick={() => setSelectedCategory('uncategorized')}
+          >
+            अन्य ख़बरें
           </button>
 
           {categories.map((cat) => (
@@ -420,7 +465,9 @@ export default function Home() {
                 <div style={{ margin: '30px 0' }}>
                   <div className="category-shelf-header">
                     <h3 className="category-shelf-title">
-                      {selectedCategory
+                      {selectedCategory === 'uncategorized'
+                        ? 'अन्य ख़बरें'
+                        : selectedCategory
                         ? (categories.find(c => c._id === selectedCategory)?.nameHi || t('latestNews'))
                         : `"${searchQuery}" के लिए खोज परिणाम`}
                     </h3>
@@ -489,7 +536,7 @@ export default function Home() {
                     {/* Uncategorized / More News Shelf */}
                     {(() => {
                       const uncategorizedNews = news.filter(n => !n.categories || n.categories.length === 0).slice(0, 3);
-                      return renderCategoryShelf(uncategorizedNews, 'अन्य ख़बरें');
+                      return renderCategoryShelf(uncategorizedNews, 'अन्य ख़बरें', null);
                     })()}
 
                     {/* Dynamic Category Shelves */}
@@ -497,7 +544,7 @@ export default function Home() {
                       const shelfNews = news.filter(n => n.categories && n.categories.some(c => c._id === cat._id)).slice(0, 3);
                       return (
                         <React.Fragment key={cat._id}>
-                          {renderCategoryShelf(shelfNews, cat.nameHi)}
+                          {renderCategoryShelf(shelfNews, cat.nameHi, cat._id)}
                         </React.Fragment>
                       );
                     })}

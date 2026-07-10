@@ -27,6 +27,7 @@ export const LanguageProvider = ({ children }) => {
     liveTv: 'लाइव टीवी',
     views: 'देखा गया',
     readMore: 'आगे पढ़ें',
+    viewAll: 'सभी देखें',
     categories: 'श्रेणियाँ',
     relatedNews: 'संबधित समाचार',
     noNews: 'कोई समाचार नहीं मिला।',
