@@ -297,6 +297,43 @@ export default function Home() {
     return (match && match[2].length === 11) ? `https://www.youtube.com/embed/${match[2]}` : '';
   };
 
+  const renderNewsList = (newsItems) => {
+    return (
+      <div className="news-list-layout">
+        {newsItems.map(n => {
+          const formattedDate = new Date(n.createdAt).toLocaleDateString(
+            'hi-IN',
+            { month: 'short', day: 'numeric', year: 'numeric' }
+          );
+          const imageUrl = n.images && n.images.length > 0 
+            ? n.images[0] 
+            : 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=600&q=80';
+          
+          return (
+            <div 
+              key={n._id} 
+              className="news-list-item"
+              onClick={() => navigate(`/news/${n._id}`)}
+            >
+              <div className="news-list-item-image">
+                <LazyImage src={imageUrl} alt={n.titleHi} />
+              </div>
+              <div className="news-list-item-content">
+                <h4>{n.titleHi}</h4>
+                <p className="news-list-item-summary">{n.summaryHi}</p>
+                <div className="news-list-item-meta">
+                  <span>{formattedDate}</span>
+                  <span>•</span>
+                  <span>{n.views || 0} {t('views')}</span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
   const renderCategoryShelf = (shelfNews, titleHi) => {
     if (shelfNews.length === 0) return null;
     return (
@@ -306,15 +343,7 @@ export default function Home() {
             {titleHi}
           </h3>
         </div>
-        <div className="grid grid-cols-3" style={{ gap: '20px' }}>
-          {shelfNews.map(n => (
-            <NewsCard
-              key={n._id}
-              news={n}
-              forcedCategoryName={titleHi}
-            />
-          ))}
-        </div>
+        {renderNewsList(shelfNews)}
       </div>
     );
   };
@@ -396,11 +425,7 @@ export default function Home() {
                         : `"${searchQuery}" के लिए खोज परिणाम`}
                     </h3>
                   </div>
-                  <div className="grid grid-cols-3" style={{ gap: '20px' }}>
-                    {news.map(n => (
-                      <NewsCard key={n._id} news={n} />
-                    ))}
-                  </div>
+                  {renderNewsList(news)}
                 </div>
               ) : (
                 /* Newspaper Dashboard View */
