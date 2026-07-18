@@ -9,7 +9,7 @@ export const LanguageProvider = ({ children }) => {
   // Static dictionary for structural layout translations (Hindi only)
   const translations = {
     brandName: 'सिटी समाचार डिजिटल',
-    tagline: 'आपका अपना न्यूज़ पोर्टल',
+    tagline: 'आपका अपना वेब न्यूज़ - ',
     home: 'मुख्य पृष्ठ',
     district: 'संत कबीर नगर',
     allLocations: 'सभी क्षेत्र',

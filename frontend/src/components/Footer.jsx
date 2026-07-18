@@ -61,7 +61,7 @@ export default function Footer() {
         <div className="footer-bottom">
           <p>&copy; {new Date().getFullYear()} {t('brandName')}। सर्वाधिकार सुरक्षित।</p>
           <p style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-            डिज़ाइन और विकास ARSHYAN KHAN ❤️
+            DESIGNED & DEVELOPED BY ARSHYAN KHAN ❤️
           </p>
         </div>
       </div>
