@@ -1,10 +1,9 @@
 import React, { useEffect } from 'react';
 
-const DEFAULT_SITE_NAME = 'सिटी समाचार डिजिटल , citysamachardigital';
+const DEFAULT_SITE_NAME = 'सिटी समाचार डिजिटल';
 const DEFAULT_SITE_TITLE = 'सिटी समाचार डिजिटल - ताज़ा हिंदी समाचार पोर्टल | Breaking News';
 const DEFAULT_DESCRIPTION = 'सिटी समाचार डिजिटल - भारत, उत्तर प्रदेश, संत कबीर नगर, खलीलाबाद, मेहदावल और धनघटा की ताज़ा ख़बरें, स्थानीय समाचार, राजनीति, खेल और मनोरंजन की निष्पक्ष रिपोर्ट।';
 const DEFAULT_KEYWORDS = 'सिटी समाचार डिजिटल, City Samachar Digital, Hindi News, ताज़ा ख़बरें, उत्तर प्रदेश समाचार, संत कबीर नगर न्यूज़, खलीलाबाद, मेहदावल, धनघटा, यूपी राजनीति, Breaking News in Hindi';
-const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1200&q=80';
 
 export default function SEO({
   title,
@@ -17,10 +16,21 @@ export default function SEO({
   jsonLd = null,
 }) {
   const currentUrl = url || window.location.href;
+  const siteOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://citysamachardigital.vercel.app';
+  
+  const getAbsoluteImageUrl = (img) => {
+    if (!img) return `${siteOrigin}/logo.png`;
+    if (img.startsWith('http://') || img.startsWith('https://')) return img;
+    if (img.startsWith('/')) return `${siteOrigin}${img}`;
+    return `${siteOrigin}/${img}`;
+  };
+
+  const rawImage = image || (news && news.images && news.images[0]) || `${siteOrigin}/logo.png`;
+  const pageImage = getAbsoluteImageUrl(rawImage);
+
   const pageTitle = title ? `${title} | ${DEFAULT_SITE_NAME}` : DEFAULT_SITE_TITLE;
   const pageDescription = description || DEFAULT_DESCRIPTION;
   const pageKeywords = Array.isArray(keywords) ? keywords.join(', ') : (keywords || DEFAULT_KEYWORDS);
-  const pageImage = image || (news && news.images && news.images[0]) || DEFAULT_IMAGE;
 
   useEffect(() => {
     // 1. Update Title
@@ -71,13 +81,17 @@ export default function SEO({
     // Canonical Tag
     setCanonicalLink(currentUrl);
 
-    // Open Graph / Facebook
+    // Open Graph / Facebook / WhatsApp Share Preview (Requires Absolute Image URL)
     setMetaTag('property', 'og:site_name', DEFAULT_SITE_NAME);
     setMetaTag('property', 'og:type', type === 'article' ? 'article' : 'website');
     setMetaTag('property', 'og:title', pageTitle);
     setMetaTag('property', 'og:description', pageDescription);
     setMetaTag('property', 'og:url', currentUrl);
     setMetaTag('property', 'og:image', pageImage);
+    setMetaTag('property', 'og:image:secure_url', pageImage);
+    setMetaTag('property', 'og:image:type', pageImage.endsWith('.png') ? 'image/png' : 'image/jpeg');
+    setMetaTag('property', 'og:image:width', '1200');
+    setMetaTag('property', 'og:image:height', '630');
     setMetaTag('property', 'og:locale', 'hi_IN');
 
     // Twitter Card
@@ -101,14 +115,14 @@ export default function SEO({
     const organizationSchema = {
       '@context': 'https://schema.org',
       '@type': 'NewsMediaOrganization',
-      'name': 'सिटी समाचार डिजिटल',
+      'name': DEFAULT_SITE_NAME,
       'alternateName': 'City Samachar Digital',
-      'url': window.location.origin,
+      'url': siteOrigin,
       'logo': {
         '@type': 'ImageObject',
-        'url': `${window.location.origin}/logo.png`,
+        'url': `${siteOrigin}/logo.png`,
         'width': 600,
-        'height': 60
+        'height': 600
       },
       'sameAs': [
         'https://facebook.com',
@@ -149,13 +163,13 @@ export default function SEO({
             '@type': 'ListItem',
             'position': 1,
             'name': 'मुख्य पृष्ठ (Home)',
-            'item': window.location.origin
+            'item': siteOrigin
           },
           {
             '@type': 'ListItem',
             'position': 2,
             'name': news.district || 'समाचार',
-            'item': `${window.location.origin}/city/${encodeURIComponent(news.subdivision || 'all')}`
+            'item': `${siteOrigin}/city/${encodeURIComponent(news.subdivision || 'all')}`
           },
           {
             '@type': 'ListItem',
@@ -172,10 +186,10 @@ export default function SEO({
         '@context': 'https://schema.org',
         '@type': 'WebSite',
         'name': DEFAULT_SITE_NAME,
-        'url': window.location.origin,
+        'url': siteOrigin,
         'potentialAction': {
           '@type': 'SearchAction',
-          'target': `${window.location.origin}/?search={search_term_string}`,
+          'target': `${siteOrigin}/?search={search_term_string}`,
           'query-input': 'required name=search_term_string'
         }
       };
@@ -184,7 +198,7 @@ export default function SEO({
 
     setJsonLd(schemaData);
 
-  }, [pageTitle, pageDescription, pageKeywords, pageImage, currentUrl, type, news, jsonLd]);
+  }, [pageTitle, pageDescription, pageKeywords, pageImage, currentUrl, type, news, jsonLd, siteOrigin]);
 
   return null;
 }
