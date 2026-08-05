@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { Mail, Phone, MapPin, Send, AlertTriangle } from 'lucide-react';
+import SEO from '../components/SEO';
 
 export default function ContactUs() {
   const { t } = useLanguage();
@@ -57,6 +58,11 @@ export default function ContactUs() {
 
   return (
     <div className="container" style={{ marginTop: '40px' }}>
+      <SEO
+        title="संपर्क करें (Contact Us)"
+        description="सिटी समाचार डिजिटल की संपादकीय एवं रिपोर्टिंग टीम से संपर्क करें। अपनी न्यूज़ टिप्स या शिकायतें भेजें।"
+        keywords={['संपर्क करें', 'Contact City Samachar Digital', 'न्यूज़ टिप', 'संत कबीर नगर रिपोर्टर']}
+      />
 
       <div style={{ textAlign: 'center', marginBottom: '40px' }}>
         <h2 style={{ fontSize: '32px', color: '#fff' }}>{t('contactTitle')}</h2>

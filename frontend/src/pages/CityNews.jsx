@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import NewsCard from '../components/NewsCard';
 import { MapPin, Info } from 'lucide-react';
+import LazyImage from '../components/LazyImage';
+import SEO from '../components/SEO';
 
 export default function CityNews() {
   const { subdivision } = useParams();
@@ -55,6 +57,11 @@ export default function CityNews() {
 
   return (
     <div className="container" style={{ marginTop: '30px' }}>
+      <SEO
+        title={getPageTitle()}
+        description={getPageDesc()}
+        keywords={[subdivision || 'Sant Kabir Nagar', 'स्थानीय समाचार', 'उत्तर प्रदेश समाचार', 'सिटी समाचार डिजिटल']}
+      />
       
       {/* City Header Panel */}
       <div 

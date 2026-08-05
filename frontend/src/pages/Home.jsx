@@ -4,6 +4,7 @@ import { useLanguage } from '../context/LanguageContext';
 import NewsCard from '../components/NewsCard';
 import WeatherWidget from '../components/WeatherWidget';
 import LazyImage from '../components/LazyImage';
+import SEO from '../components/SEO';
 import { Search, Play, Image, Video, Thermometer, Sun, Wind, CloudRain, Globe, Newspaper, User, Phone, Facebook, Instagram, Youtube, X, Eye, TrendingUp, BookOpen, Calendar } from 'lucide-react';
 
 export default function Home() {
@@ -382,6 +383,11 @@ export default function Home() {
 
   return (
     <div className="container" style={{ marginTop: '20px' }}>
+      <SEO
+        title="सिटी समाचार डिजिटल - ताज़ा हिंदी समाचार पोर्टल | UP, Sant Kabir Nagar News"
+        description="सिटी समाचार डिजिटल पर पढ़ें संत कबीर नगर, खलीलाबाद, मेहदावल, धनघटा, उत्तर प्रदेश और देश-विदेश की ताज़ा एवं निष्पक्ष ख़बरें।"
+        keywords={['सिटी समाचार डिजिटल', 'City Samachar Digital', 'हिंदी समाचार', 'संत कबीर नगर न्यूज़', 'खलीलाबाद समाचार', 'उत्तर प्रदेश ताज़ा ख़बरें', 'Breaking News Hindi']}
+      />
       {/* Search and Categories Bar */}
       <div className="glass" style={{ display: 'flex', gap: '15px', padding: '15px', borderRadius: 'var(--border-radius-md)', marginBottom: '30px', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
 

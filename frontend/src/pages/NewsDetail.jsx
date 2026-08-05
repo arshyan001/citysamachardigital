@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { Calendar, Eye, MapPin, ArrowLeft, Video, Newspaper, ThumbsUp, Share2, MessageSquare } from 'lucide-react';
 import LazyImage from '../components/LazyImage';
+import SEO from '../components/SEO';
 
 export default function NewsDetail() {
   const { id } = useParams();
@@ -349,6 +350,13 @@ export default function NewsDetail() {
 
   return (
     <div className="container" style={{ marginTop: '30px' }}>
+      <SEO
+        type="article"
+        news={news}
+        title={title}
+        description={news.summaryHi || news.summaryEn}
+        image={news.images && news.images.length > 0 ? news.images[0] : null}
+      />
       {/* Back button */}
       <button 
         onClick={() => navigate(-1)}

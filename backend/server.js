@@ -62,6 +62,91 @@ app.get('/', (req, res) => {
   res.send('News Channel API is running...');
 });
 
+// Dynamic Sitemap.xml Route for Google Search Console & Google News
+app.get('/sitemap.xml', async (req, res) => {
+  const frontendUrl = process.env.FRONTEND_URL || 'https://citysamachardigital.vercel.app';
+  
+  try {
+    const News = require('./models/News');
+    const jsonDb = require('./config/jsonDb');
+    
+    let newsArticles = [];
+    if (global.useJsonDb) {
+      newsArticles = jsonDb.getNews({});
+    } else {
+      newsArticles = await News.find({}).sort({ createdAt: -1 }).limit(500);
+    }
+
+    const staticPages = [
+      { url: `${frontendUrl}/`, changefreq: 'always', priority: '1.0' },
+      { url: `${frontendUrl}/epaper`, changefreq: 'daily', priority: '0.8' },
+      { url: `${frontendUrl}/city/Khalilabad`, changefreq: 'daily', priority: '0.8' },
+      { url: `${frontendUrl}/city/Mehdawal`, changefreq: 'daily', priority: '0.8' },
+      { url: `${frontendUrl}/city/Dhanghata`, changefreq: 'daily', priority: '0.8' },
+      { url: `${frontendUrl}/contact`, changefreq: 'monthly', priority: '0.5' },
+    ];
+
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+    xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">\n`;
+
+    staticPages.forEach((page) => {
+      xml += `  <url>\n`;
+      xml += `    <loc>${page.url}</loc>\n`;
+      xml += `    <changefreq>${page.changefreq}</changefreq>\n`;
+      xml += `    <priority>${page.priority}</priority>\n`;
+      xml += `  </url>\n`;
+    });
+
+    newsArticles.forEach((article) => {
+      const articleUrl = `${frontendUrl}/news/${article._id}`;
+      const lastMod = article.updatedAt ? new Date(article.updatedAt).toISOString() : new Date(article.createdAt || Date.now()).toISOString();
+      const title = (article.titleHi || article.titleEn || 'News Article')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+
+      xml += `  <url>\n`;
+      xml += `    <loc>${articleUrl}</loc>\n`;
+      xml += `    <lastmod>${lastMod}</lastmod>\n`;
+      xml += `    <changefreq>daily</changefreq>\n`;
+      xml += `    <priority>0.9</priority>\n`;
+      xml += `    <news:news>\n`;
+      xml += `      <news:publication>\n`;
+      xml += `        <news:name>सिटी समाचार डिजिटल</news:name>\n`;
+      xml += `        <news:language>hi</news:language>\n`;
+      xml += `      </news:publication>\n`;
+      xml += `      <news:publication_date>${lastMod}</news:publication_date>\n`;
+      xml += `      <news:title>${title}</news:title>\n`;
+      xml += `    </news:news>\n`;
+      xml += `  </url>\n`;
+    });
+
+    xml += `</urlset>`;
+
+    res.header('Content-Type', 'application/xml');
+    res.send(xml);
+  } catch (error) {
+    console.error('Error generating sitemap:', error);
+    res.status(500).send('Error generating sitemap');
+  }
+});
+
+// Dynamic Robots.txt Route
+app.get('/robots.txt', (req, res) => {
+  const host = req.protocol + '://' + req.get('host');
+  res.type('text/plain');
+  res.send(`User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/admin/
+
+Sitemap: ${host}/sitemap.xml
+Sitemap: https://citysamachardigital.vercel.app/sitemap.xml
+`);
+});
+
 // Share preview route for crawler bots and social previews
 app.get('/share/:id', async (req, res) => {
   const { id } = req.params;
@@ -110,31 +195,52 @@ app.get('/share/:id', async (req, res) => {
       const cleanSummary = summary.replace(/"/g, '&quot;').replace(/[\r\n]+/g, ' ').substring(0, 200);
       const cleanTitle = title.replace(/"/g, '&quot;').replace(/[\r\n]+/g, ' ');
       
+      const articleUrl = `${frontendUrl}/news/${id}`;
+      const jsonLdSchema = JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'NewsArticle',
+        'mainEntityOfPage': articleUrl,
+        'headline': cleanTitle,
+        'description': cleanSummary,
+        'image': [imageUrl],
+        'datePublished': news.createdAt || new Date().toISOString(),
+        'dateModified': news.updatedAt || news.createdAt || new Date().toISOString(),
+        'publisher': {
+          '@type': 'NewsMediaOrganization',
+          'name': 'सिटी समाचार डिजिटल',
+          'url': frontendUrl
+        }
+      });
+
       res.send(`<!DOCTYPE html>
-<html>
+<html lang="hi">
 <head>
   <meta charset="utf-8">
-  <title>${cleanTitle}</title>
+  <title>${cleanTitle} | सिटी समाचार डिजिटल</title>
   <meta name="description" content="${cleanSummary}">
+  <link rel="canonical" href="${articleUrl}" />
   
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="article">
-  <meta property="og:url" content="${frontendUrl}/news/${id}">
+  <meta property="og:url" content="${articleUrl}">
   <meta property="og:title" content="${cleanTitle}">
   <meta property="og:description" content="${cleanSummary}">
   <meta property="og:image" content="${imageUrl}">
   
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image">
-  <meta property="twitter:url" content="${frontendUrl}/news/${id}">
+  <meta property="twitter:url" content="${articleUrl}">
   <meta property="twitter:title" content="${cleanTitle}">
   <meta property="twitter:description" content="${cleanSummary}">
   <meta property="twitter:image" content="${imageUrl}">
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">${jsonLdSchema}</script>
 </head>
 <body>
   <h1>${cleanTitle}</h1>
   <p>${cleanSummary}</p>
-  <img src="${imageUrl}" />
+  <img src="${imageUrl}" alt="${cleanTitle}" />
 </body>
 </html>`);
     } else {

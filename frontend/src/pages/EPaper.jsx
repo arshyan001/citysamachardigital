@@ -3,6 +3,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { ArrowLeft, ZoomIn, ZoomOut, Download, Calendar, Printer, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import SEO from '../components/SEO';
 
 export default function EPaper() {
   const { t } = useLanguage();
@@ -72,6 +73,11 @@ export default function EPaper() {
 
   return (
     <div className="container" style={{ marginTop: '30px' }}>
+      <SEO
+        title={`ई-पेपर (ePaper) ${formattedDate}`}
+        description={`सिटी समाचार डिजिटल दैनिक ई-पेपर संस्करण ${formattedDate}। पढ़ें आज का डिजिटल समाचार पत्र।`}
+        keywords={['ई-पेपर', 'ePaper', 'सिटी समाचार डिजिटल ई-पेपर', 'दैनिक समाचार पत्र', 'हिंदी न्यूज़पेपर']}
+      />
       
       {/* EPaper Toolbar Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px', marginBottom: '25px' }} className="glass p-3 rounded-lg">
