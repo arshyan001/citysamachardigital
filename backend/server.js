@@ -28,7 +28,9 @@ const corsOptions = {
     'http://localhost:5173',
     'http://localhost:3000',
     'https://citysamachardigital.vercel.app',
-    'https://citysamachardigital.onrender.com'
+    'https://citysamachardigital.onrender.com',
+    "https://citysamachardigital.com",
+    "https://www.citysamachardigital.com"
   ],
   credentials: true,
   optionsSuccessStatus: 200
@@ -65,11 +67,11 @@ app.get('/', (req, res) => {
 // Dynamic Sitemap.xml Route for Google Search Console & Google News
 app.get('/sitemap.xml', async (req, res) => {
   const frontendUrl = process.env.FRONTEND_URL || 'https://citysamachardigital.vercel.app';
-  
+
   try {
     const News = require('./models/News');
     const jsonDb = require('./config/jsonDb');
-    
+
     let newsArticles = [];
     if (global.useJsonDb) {
       newsArticles = jsonDb.getNews({});
@@ -151,15 +153,15 @@ Sitemap: https://citysamachardigital.vercel.app/sitemap.xml
 app.get('/share/:id', async (req, res) => {
   const { id } = req.params;
   const userAgent = req.headers['user-agent'] || '';
-  
+
   // Detect search engine & social media bot user agents
   const isBot = /bot|crawler|spider|crawling|facebookexternalhit|whatsapp|telegrambot|slackbot|discordbot|googlebot|bingbot|linkedinbot|twitterbot|tumblr|embedly|quora link preview|paperli/i.test(userAgent);
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-  
+
   try {
     const News = require('./models/News');
     const jsonDb = require('./config/jsonDb');
-    
+
     let news = null;
     if (global.useJsonDb) {
       const newsList = jsonDb.getNews({});
@@ -170,15 +172,15 @@ app.get('/share/:id', async (req, res) => {
         news = await News.findById(id);
       }
     }
-    
+
     if (!news) {
       return res.redirect(frontendUrl);
     }
-    
+
     if (isBot) {
       const title = news.titleHi || news.titleEn || 'City Samachar Digital';
       const summary = news.summaryHi || news.summaryEn || news.contentHi || news.contentEn || 'City Samachar Digital - Read latest news';
-      
+
       let imageUrl = '';
       if (news.images && news.images.length > 0) {
         const img = news.images[0];
@@ -191,10 +193,10 @@ app.get('/share/:id', async (req, res) => {
       } else {
         imageUrl = 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=800&q=80';
       }
-      
+
       const cleanSummary = summary.replace(/"/g, '&quot;').replace(/[\r\n]+/g, ' ').substring(0, 200);
       const cleanTitle = title.replace(/"/g, '&quot;').replace(/[\r\n]+/g, ' ');
-      
+
       const articleUrl = `${frontendUrl}/news/${id}`;
       const jsonLdSchema = JSON.stringify({
         '@context': 'https://schema.org',

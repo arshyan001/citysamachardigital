@@ -14,7 +14,8 @@ import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import EPaper from './pages/EPaper';
 import NewspaperGenerator from './pages/NewspaperGenerator';
-
+import { Analytics } from "@vercel/analytics/next"
+<Analytics />
 // Custom Scroll Restoration Component for React Router DOM v6
 function ScrollRestoration() {
   const location = useLocation();
@@ -48,7 +49,7 @@ function ScrollRestoration() {
     const saveScroll = () => {
       // Avoid saving scroll if it has been reset on transition
       if (window.scrollY === 0 && navType === 'PUSH') return;
-      
+
       sessionStorage.setItem('scroll_' + location.key, window.scrollY);
       sessionStorage.setItem('scroll_' + location.pathname, window.scrollY);
     };
@@ -70,7 +71,7 @@ export default function App() {
         <div className="app-wrapper">
           {/* Header & Navbar */}
           <Navbar />
-          
+
           {/* Breaking News Headlines Ticker */}
           <BreakingNews />
 
