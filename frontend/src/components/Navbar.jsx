@@ -143,10 +143,11 @@ export default function Navbar() {
           style={{ 
             background: 'linear-gradient(135deg, #fbbf24 0%, #d97706 100%)', 
             color: '#000', 
-            padding: '8px 18px', 
-            borderRadius: '20px', 
-            fontWeight: '800', 
-            boxShadow: '0 2px 8px rgba(251, 191, 36, 0.3)',
+            padding: '5px 14px', 
+            borderRadius: '16px', 
+            fontWeight: '700', 
+            fontSize: '13px',
+            boxShadow: '0 2px 6px rgba(251, 191, 36, 0.25)',
             display: 'inline-flex',
             alignItems: 'center',
             gap: '5px',
@@ -166,17 +167,18 @@ export default function Navbar() {
           style={{ 
             background: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)', 
             color: '#fff', 
-            padding: '8px 18px', 
-            borderRadius: '20px', 
-            fontWeight: '800', 
-            boxShadow: '0 2px 8px rgba(239, 68, 68, 0.35)',
+            padding: '5px 14px', 
+            borderRadius: '16px', 
+            fontWeight: '700', 
+            fontSize: '13px',
+            boxShadow: '0 2px 6px rgba(239, 68, 68, 0.25)',
             display: 'inline-flex',
             alignItems: 'center',
             gap: '5px',
             width: 'auto'
           }}
         >
-          <span style={{ fontSize: '14px' }}>📰</span>
+          <span style={{ fontSize: '13px' }}>📰</span>
           अखबार
         </NavLink>
       </li>

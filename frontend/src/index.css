@@ -208,12 +208,9 @@ select {
 }
 
 .nav-main {
-  height: 70px;
+  height: 60px;
   display: flex;
   align-items: center;
-}
-
-.nav-main {
   background: var(--bg-nav);
 }
 
@@ -230,7 +227,7 @@ select {
 .brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   color: var(--color-text-primary);
   font-family: var(--font-display);
   text-decoration: none;
@@ -238,7 +235,7 @@ select {
 }
 
 .brand-logo {
-  height: 64px;
+  height: 40px;
   object-fit: contain;
   border-radius: 4px;
   transition: var(--transition-smooth);
@@ -246,7 +243,7 @@ select {
 
 .brand-text {
   font-family: 'Yatra One', 'Rozha One', 'Tiro Devanagari Hindi', serif;
-  font-size: 30px;
+  font-size: 22px;
   font-weight: 700;
   letter-spacing: 0.5px;
   color: var(--color-primary);
@@ -256,9 +253,9 @@ select {
 .live-badge {
   background: var(--color-live);
   color: white !important;
-  padding: 2px 8px;
+  padding: 2px 7px;
   border-radius: 4px;
-  font-size: 10px;
+  font-size: 9px;
   text-transform: uppercase;
   font-weight: 800;
   letter-spacing: 1px;
@@ -272,24 +269,24 @@ select {
   }
 
   .brand-logo {
-    height: 42px;
+    height: 34px;
   }
 
   .brand-text {
     font-family: 'Yatra One', 'Rozha One', 'Tiro Devanagari Hindi', serif;
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
   }
 
   .live-badge {
     font-size: 8px;
-    padding: 2px 6px;
+    padding: 2px 5px;
   }
 }
 
 .nav-links {
   display: flex;
-  gap: 18px;
+  gap: 14px;
   align-items: center;
   list-style: none;
 }
@@ -1662,8 +1659,8 @@ footer {
     width: 100%;
     display: flex;
     justify-content: space-between;
-    padding: 12px 4px;
-    font-size: 25px;
+    padding: 10px 4px;
+    font-size: 16px;
   }
 
   /* Pill-badge links (E-Paper, Newspaper) keep their own style */
@@ -2976,9 +2973,10 @@ footer {
   }
 }
 
-background: rgba(0, 0, 0, 0.05) !important;
-color: var(--color-text-primary) !important;
-border-color: var(--border-color) !important;
+.light-theme .btn-secondary {
+  background: rgba(0, 0, 0, 0.05) !important;
+  color: var(--color-text-primary) !important;
+  border-color: var(--border-color) !important;
 }
 
 .light-theme .btn-secondary:hover {
