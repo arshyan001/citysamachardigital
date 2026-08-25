@@ -192,89 +192,28 @@ select {
 .top-bar {
   background: #05080e;
   border-bottom: 1px solid var(--border-color);
-  padding: 5px 0;
-  font-size: 12.5px;
+  padding: 6px 0;
+  font-size: 13px;
   color: var(--color-text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
 }
 
 .light-theme .top-bar {
   background: #f8fafc;
 }
 
-.top-bar-container {
+.top-bar .container {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 10px;
-  flex-wrap: nowrap;
-  white-space: nowrap;
-}
-
-.top-bar-left,
-.top-bar-right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.top-bar-time,
-.top-bar-date {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  white-space: nowrap;
-}
-
-.top-bar-divider {
-  opacity: 0.4;
-}
-
-.admin-link {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 12.5px;
-  white-space: nowrap;
-}
-
-.admin-link-short {
-  display: none;
-}
-
-.top-bar-admin {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  white-space: nowrap;
-}
-
-.admin-status {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12.5px;
-  color: var(--color-success);
-  white-space: nowrap;
-}
-
-.logout-btn {
-  background: transparent;
-  border: none;
-  color: var(--color-primary);
-  cursor: pointer;
-  font-size: 12.5px;
-  font-weight: 600;
-  white-space: nowrap;
 }
 
 .nav-main {
-  height: 60px;
+  height: 70px;
   display: flex;
   align-items: center;
+}
+
+.nav-main {
   background: var(--bg-nav);
 }
 
@@ -291,7 +230,7 @@ select {
 .brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   color: var(--color-text-primary);
   font-family: var(--font-display);
   text-decoration: none;
@@ -299,7 +238,7 @@ select {
 }
 
 .brand-logo {
-  height: 40px;
+  height: 64px;
   object-fit: contain;
   border-radius: 4px;
   transition: var(--transition-smooth);
@@ -307,7 +246,7 @@ select {
 
 .brand-text {
   font-family: 'Yatra One', 'Rozha One', 'Tiro Devanagari Hindi', serif;
-  font-size: 22px;
+  font-size: 30px;
   font-weight: 700;
   letter-spacing: 0.5px;
   color: var(--color-primary);
@@ -317,9 +256,9 @@ select {
 .live-badge {
   background: var(--color-live);
   color: white !important;
-  padding: 2px 7px;
+  padding: 2px 8px;
   border-radius: 4px;
-  font-size: 9px;
+  font-size: 10px;
   text-transform: uppercase;
   font-weight: 800;
   letter-spacing: 1px;
@@ -333,24 +272,24 @@ select {
   }
 
   .brand-logo {
-    height: 34px;
+    height: 42px;
   }
 
   .brand-text {
     font-family: 'Yatra One', 'Rozha One', 'Tiro Devanagari Hindi', serif;
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 700;
   }
 
   .live-badge {
     font-size: 8px;
-    padding: 2px 5px;
+    padding: 2px 6px;
   }
 }
 
 .nav-links {
   display: flex;
-  gap: 14px;
+  gap: 18px;
   align-items: center;
   list-style: none;
 }
@@ -1670,7 +1609,7 @@ footer {
 
   .nav-main {
     position: relative;
-    height: 52px !important;
+    height: 70px;
   }
 
   /* navbar-wrapper must not clip the absolutely positioned menu */
@@ -1689,16 +1628,17 @@ footer {
     width: 100%;
     /* Fixed so it always renders below the header regardless of stacking context */
     position: fixed;
-    top: 90px;
+    top: 110px;
+    /* below top-bar (~40px) + nav-main (~70px) */
     left: 0;
     right: 0;
     background: var(--bg-card);
     border-bottom: 2px solid var(--color-primary);
-    padding: 12px 14px 16px;
-    gap: 2px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    padding: 20px 16px 24px;
+    gap: 4px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
     z-index: 200;
-    max-height: calc(100vh - 90px);
+    max-height: calc(100vh - 110px);
     overflow-y: auto;
   }
 
@@ -1709,7 +1649,7 @@ footer {
   .nav-links li {
     width: 100%;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 2px 0;
+    padding: 4px 0;
   }
 
   .nav-links li:last-child {
@@ -1722,19 +1662,16 @@ footer {
     width: 100%;
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding: 7px 4px !important;
-    font-size: 14px !important;
-    font-weight: 600;
+    padding: 12px 4px;
+    font-size: 25px;
   }
 
   /* Pill-badge links (E-Paper, Newspaper) keep their own style */
   .nav-links a[style*="border-radius"] {
     display: inline-flex;
     width: auto;
-    padding: 4px 12px !important;
-    font-size: 12px !important;
-    margin: 2px 0 !important;
+    padding: 8px 16px;
+    margin: 4px 0;
   }
 
   .dropdown-content {
@@ -1746,60 +1683,31 @@ footer {
     box-shadow: none;
     border: none;
     border-left: 2px solid var(--color-primary);
-    margin-top: 3px;
-    padding-left: 12px;
+    margin-top: 5px;
+    padding-left: 15px;
     display: flex;
     flex-direction: column;
   }
 
   .dropdown-content a {
-    padding: 5px 0 !important;
-    font-size: 13px !important;
+    padding: 10px 0;
   }
 
   .top-bar {
-    padding: 3px 0 !important;
-    font-size: 10.5px !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
+    padding: 10px 0;
   }
 
-  .top-bar-container {
-    display: flex !important;
-    flex-direction: row !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    gap: 4px !important;
-    white-space: nowrap !important;
+  .top-bar .container {
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+    text-align: center;
   }
 
-  .top-bar-left,
-  .top-bar-right {
-    gap: 4px !important;
-    white-space: nowrap !important;
-  }
-
-  .top-bar-day {
-    display: none !important;
-  }
-
-  .admin-link-text {
-    display: none !important;
-  }
-
-  .admin-link-short {
-    display: inline !important;
-    font-size: 10.5px !important;
-  }
-
-  .theme-toggle-text {
-    display: none !important;
-  }
-
-  .lang-toggle {
-    padding: 2px 6px !important;
-    border-radius: 12px !important;
-    font-size: 10.5px !important;
+  .top-bar div {
+    justify-content: center;
+    width: 100%;
+    flex-wrap: wrap;
   }
 }
 
@@ -2037,6 +1945,10 @@ footer {
 
   .desktop-nav {
     display: none !important;
+  }
+
+  .navbar-wrapper .glass {
+    padding: 10px 0 !important;
   }
 
   .brand {
@@ -3064,10 +2976,9 @@ footer {
   }
 }
 
-.light-theme .btn-secondary {
-  background: rgba(0, 0, 0, 0.05) !important;
-  color: var(--color-text-primary) !important;
-  border-color: var(--border-color) !important;
+background: rgba(0, 0, 0, 0.05) !important;
+color: var(--color-text-primary) !important;
+border-color: var(--border-color) !important;
 }
 
 .light-theme .btn-secondary:hover {
