@@ -245,10 +245,10 @@ select {
 }
 
 .brand-text {
-  font-size: 22px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: -0.5px;
+  font-family: 'Yatra One', 'Rozha One', 'Tiro Devanagari Hindi', serif;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
   color: var(--color-primary);
   transition: var(--transition-smooth);
 }
@@ -276,7 +276,9 @@ select {
   }
 
   .brand-text {
-    font-size: 14px;
+    font-family: 'Yatra One', 'Rozha One', 'Tiro Devanagari Hindi', serif;
+    font-size: 20px;
+    font-weight: 700;
   }
 
   .live-badge {
@@ -1661,7 +1663,7 @@ footer {
     display: flex;
     justify-content: space-between;
     padding: 12px 4px;
-    font-size: 16px;
+    font-size: 25px;
   }
 
   /* Pill-badge links (E-Paper, Newspaper) keep their own style */
@@ -3160,18 +3162,24 @@ border-color: var(--border-color) !important;
    News Reporter Mic ID Graphic Styles for About Us Hero
    ---------------------------------------------------- */
 @keyframes floatMicLeft {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px) rotate(-6deg);
   }
+
   50% {
     transform: translateY(-8px) rotate(-3deg);
   }
 }
 
 @keyframes floatMicRight {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px) rotate(6deg);
   }
+
   50% {
     transform: translateY(-8px) rotate(3deg);
   }
