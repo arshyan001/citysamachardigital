@@ -68,12 +68,15 @@ export default function Navbar() {
     });
   };
 
-  const formatDate = (date) => {
+  const formatWeekday = (date) => {
+    return date.toLocaleDateString('hi-IN', { weekday: 'long' });
+  };
+
+  const formatDateShort = (date) => {
     return date.toLocaleDateString('hi-IN', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
       day: 'numeric',
+      month: 'short',
+      year: 'numeric',
     });
   };
 
@@ -198,47 +201,39 @@ export default function Navbar() {
     <header ref={headerRef} className={`navbar-wrapper glass ${isAdminPage ? 'admin-navbar' : ''}`}>
       {/* Top Bar for Clock */}
       <div className="top-bar">
-        <div className="container">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <Clock size={14} style={{ color: 'var(--color-primary)' }} />
-              {formatTime(time)}
+        <div className="container top-bar-container">
+          <div className="top-bar-left">
+            <span className="top-bar-time">
+              <Clock size={13} style={{ color: 'var(--color-primary)', flexShrink: 0 }} />
+              <span>{formatTime(time)}</span>
             </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <span>|</span>
-              <span>{formatDate(time)}</span>
+            <span className="top-bar-divider">|</span>
+            <span className="top-bar-date">
+              <span className="top-bar-day">{formatWeekday(time)}, </span>
+              <span>{formatDateShort(time)}</span>
             </span>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div className="top-bar-right">
             {isAdminLoggedIn ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', color: 'var(--color-success)' }}>
-                  <UserCheck size={14} />
+              <div className="top-bar-admin">
+                <span className="admin-status">
+                  <UserCheck size={13} />
                   एडमिन
                 </span>
-                <button 
-                  onClick={handleLogout}
-                  style={{ 
-                    background: 'transparent', 
-                    border: 'none', 
-                    color: 'var(--color-primary)', 
-                    cursor: 'pointer', 
-                    fontSize: '13px', 
-                    fontWeight: 600 
-                  }}
-                >
+                <button onClick={handleLogout} className="logout-btn">
                   लॉगआउट
                 </button>
               </div>
             ) : (
-              <Link to="/admin/login" style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px' }}>
-                एडमिन लॉगिन
+              <Link to="/admin/login" className="admin-link">
+                <span className="admin-link-text">एडमिन लॉगिन</span>
+                <span className="admin-link-short">एडमिन</span>
               </Link>
             )}
             <button className="lang-toggle" onClick={toggleTheme} title={theme === 'light' ? 'डार्क मोड' : 'लाइट मोड'}>
-              {theme === 'light' ? <Moon size={14} /> : <Sun size={14} />}
-              {theme === 'light' ? 'डार्क' : 'लाइट'}
+              {theme === 'light' ? <Moon size={13} /> : <Sun size={13} />}
+              <span className="theme-toggle-text">{theme === 'light' ? 'डार्क' : 'लाइट'}</span>
             </button>
           </div>
         </div>
