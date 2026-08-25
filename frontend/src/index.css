@@ -1662,16 +1662,18 @@ footer {
     width: 100%;
     display: flex;
     justify-content: space-between;
-    padding: 12px 4px;
-    font-size: 25px;
+    align-items: center;
+    padding: 8px 4px;
+    font-size: 16px;
   }
 
   /* Pill-badge links (E-Paper, Newspaper) keep their own style */
   .nav-links a[style*="border-radius"] {
     display: inline-flex;
     width: auto;
-    padding: 8px 16px;
-    margin: 4px 0;
+    padding: 6px 14px;
+    margin: 3px 0;
+    font-size: 13px;
   }
 
   .dropdown-content {
@@ -1683,14 +1685,15 @@ footer {
     box-shadow: none;
     border: none;
     border-left: 2px solid var(--color-primary);
-    margin-top: 5px;
-    padding-left: 15px;
+    margin-top: 4px;
+    padding-left: 12px;
     display: flex;
     flex-direction: column;
   }
 
   .dropdown-content a {
-    padding: 10px 0;
+    padding: 6px 0;
+    font-size: 14px;
   }
 
   .top-bar {
