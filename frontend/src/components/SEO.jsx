@@ -2,8 +2,8 @@ import React, { useEffect } from 'react';
 
 const DEFAULT_SITE_NAME = 'सिटी समाचार डिजिटल';
 const DEFAULT_SITE_TITLE = 'सिटी समाचार डिजिटल - ताज़ा हिंदी समाचार पोर्टल | Breaking News';
-const DEFAULT_DESCRIPTION = 'सिटी समाचार डिजिटल - भारत, उत्तर प्रदेश, संत कबीर नगर, खलीलाबाद, मेहदावल और धनघटा की ताज़ा ख़बरें, स्थानीय समाचार, राजनीति, खेल और मनोरंजन की निष्पक्ष रिपोर्ट।';
-const DEFAULT_KEYWORDS = 'सिटी समाचार डिजिटल, City Samachar Digital, Hindi News, ताज़ा ख़बरें, उत्तर प्रदेश समाचार, संत कबीर नगर न्यूज़, खलीलाबाद, मेहदावल, धनघटा, यूपी राजनीति, Breaking News in Hindi';
+const DEFAULT_DESCRIPTION = 'सिटी समाचार डिजिटल - भारत, उत्तर प्रदेश और इसके सभी 75 जिलों की ताज़ा ख़बरें, स्थानीय समाचार, राजनीति, खेल और मनोरंजन की निष्पक्ष रिपोर्ट।';
+const DEFAULT_KEYWORDS = 'सिटी समाचार डिजिटल, CitySamacharDigital, City Samachar Digital, Hindi News, ताज़ा ख़बरें, उत्तर प्रदेश समाचार, यूपी 75 जिले न्यूज़, UP All Districts News, यूपी राजनीति, Breaking News in Hindi';
 
 export default function SEO({
   title,
@@ -17,7 +17,7 @@ export default function SEO({
 }) {
   const currentUrl = url || window.location.href;
   const siteOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://citysamachardigital.vercel.app';
-  
+
   const getAbsoluteImageUrl = (img) => {
     if (!img) return `${siteOrigin}/logo.png`;
     if (img.startsWith('http://') || img.startsWith('https://')) return img;

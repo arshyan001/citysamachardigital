@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
-import { Clock, ChevronDown, Newspaper, Mail, UserCheck, MapPin, Sun, Moon, Menu, X } from 'lucide-react';
+import { Clock, ChevronDown, Newspaper, Mail, UserCheck, MapPin, Sun, Moon, Menu, X, Info, ShieldCheck } from 'lucide-react';
 
 export default function Navbar() {
   const { t } = useLanguage();
@@ -106,6 +106,24 @@ export default function Navbar() {
           <Link to="/city/Mehdawal" onClick={() => isMobile && setIsOpen(false)}>{t('mehdawal')}</Link>
           <Link to="/city/Dhanghata" onClick={() => isMobile && setIsOpen(false)}>{t('dhanghata')}</Link>
         </div>
+      </li>
+
+      <li>
+        <NavLink to="/about" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => isMobile && setIsOpen(false)}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <Info size={16} />
+            {t('aboutUs')}
+          </span>
+        </NavLink>
+      </li>
+
+      <li>
+        <NavLink to="/privacy-policy" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => isMobile && setIsOpen(false)}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <ShieldCheck size={16} />
+            {t('privacyPolicy')}
+          </span>
+        </NavLink>
       </li>
 
       <li>

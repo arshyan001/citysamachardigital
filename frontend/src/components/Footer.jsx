@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
-import { Newspaper, Mail, Phone, MapPin } from 'lucide-react';
+import { Newspaper, Mail, Phone, MapPin, ShieldCheck } from 'lucide-react';
 
 export default function Footer() {
   const { t } = useLanguage();
@@ -40,8 +40,15 @@ export default function Footer() {
             <h4 style={{ color: '#fff', marginBottom: '16px', fontSize: '16px', textTransform: 'uppercase' }}>त्वरित लिंक</h4>
             <ul className="footer-links-list">
               <li><Link to="/">{t('home')}</Link></li>
-              <li><Link to="/city/All">{t('district')}</Link></li>
+              <li><Link to="/about">{t('aboutUs')}</Link></li>
               <li><Link to="/contact">{t('contactUs')}</Link></li>
+              <li>
+                <Link to="/privacy-policy" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#ef4444', fontWeight: '600' }}>
+                  <ShieldCheck size={14} />
+                  {t('privacyPolicy')}
+                </Link>
+              </li>
+              <li><Link to="/epaper">{t('epaper')}</Link></li>
               <li><Link to="/admin/login">{t('adminPanel')}</Link></li>
             </ul>
           </div>

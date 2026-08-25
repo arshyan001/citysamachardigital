@@ -58,6 +58,9 @@ export const LanguageProvider = ({ children }) => {
     saveBtn: 'सुरक्षित करें',
     actions: 'कार्रवाई',
     messages: 'प्राप्त संदेश',
+    aboutUs: 'हमारे बारे में',
+    privacyPolicy: 'गोपनीयता नीति',
+    editorialPolicy: 'संपादकीय नीति',
     delete: 'हटाएं',
     edit: 'संपादन',
   };

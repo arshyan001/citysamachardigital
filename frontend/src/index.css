@@ -3155,3 +3155,169 @@ border-color: var(--border-color) !important;
     gap: 6px;
   }
 }
+
+/* ----------------------------------------------------
+   News Reporter Mic ID Graphic Styles for About Us Hero
+   ---------------------------------------------------- */
+@keyframes floatMicLeft {
+  0%, 100% {
+    transform: translateY(0px) rotate(-6deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(-3deg);
+  }
+}
+
+@keyframes floatMicRight {
+  0%, 100% {
+    transform: translateY(0px) rotate(6deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(3deg);
+  }
+}
+
+.mic-id-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  filter: drop-shadow(0 12px 24px rgba(239, 68, 68, 0.35));
+  transition: all 0.3s ease;
+}
+
+.mic-id-badge:hover {
+  filter: drop-shadow(0 16px 32px rgba(239, 68, 68, 0.55));
+  transform: scale(1.05) !important;
+}
+
+.mic-id-left {
+  animation: floatMicLeft 4s ease-in-out infinite;
+}
+
+.mic-id-right {
+  animation: floatMicRight 4s ease-in-out infinite 0.5s;
+}
+
+/* Mic Foam Top */
+.mic-head-foam {
+  width: 52px;
+  height: 60px;
+  background: radial-gradient(circle at 35% 35%, #4b5563 0%, #1f2937 55%, #111827 100%);
+  border-radius: 26px 26px 8px 8px;
+  border: 2px solid #4b5563;
+  box-shadow: inset 0 4px 8px rgba(255, 255, 255, 0.2), 0 6px 12px rgba(0, 0, 0, 0.6);
+  position: relative;
+  overflow: hidden;
+}
+
+.mic-head-ring {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #ef4444;
+  box-shadow: 0 0 10px #ef4444;
+}
+
+.mic-head-mesh {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.2) 20%, transparent 20%);
+  background-size: 4px 4px;
+  opacity: 0.3;
+}
+
+/* Connector Metallic Ring */
+.mic-connector {
+  width: 42px;
+  height: 7px;
+  background: linear-gradient(90deg, #6b7280, #f3f4f6 50%, #4b5563);
+  border-radius: 2px;
+  margin: -1px 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+/* Mic Flag Cube Box */
+.mic-flag-box {
+  width: 115px;
+  background: linear-gradient(145deg, #1e293b, #0f172a);
+  border: 2.5px solid #ef4444;
+  border-radius: 12px;
+  padding: 8px 6px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.15);
+  text-align: center;
+  position: relative;
+}
+
+.mic-flag-header {
+  background: linear-gradient(90deg, #dc2626, #ef4444);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  padding: 3px 0;
+  border-radius: 6px 6px 0 0;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.mic-live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 8px #ffffff;
+  animation: pulse 1.2s infinite;
+}
+
+.mic-logo-holder {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 6px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.mic-logo-holder img {
+  max-height: 38px;
+  max-width: 95px;
+  object-fit: contain;
+}
+
+.mic-flag-footer {
+  height: 4px;
+  background: linear-gradient(90deg, #ef4444, #3b82f6, #ef4444);
+  border-radius: 0 0 6px 6px;
+  margin-top: 6px;
+}
+
+/* Mic Handle */
+.mic-handle {
+  width: 22px;
+  height: 65px;
+  background: linear-gradient(90deg, #1f2937, #374151 50%, #111827);
+  border-radius: 0 0 12px 12px;
+  border: 1.5px solid #4b5563;
+  border-top: none;
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.5);
+  position: relative;
+  overflow: hidden;
+}
+
+.mic-handle-ring {
+  width: 100%;
+  height: 2px;
+  background: #6b7280;
+  margin-top: 10px;
+  box-shadow: 0 12px 0 #6b7280, 0 24px 0 #6b7280, 0 36px 0 #6b7280;
+}
