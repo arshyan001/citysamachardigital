@@ -44,7 +44,6 @@ const newsSchema = new mongoose.Schema({
   },
   subdivision: {
     type: String,
-    enum: ['None', 'Khalilabad', 'Mehdawal', 'Dhanghata'],
     default: 'None',
   },
   isBreaking: {

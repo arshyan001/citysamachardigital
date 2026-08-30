@@ -13,6 +13,33 @@ export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const isAdminPage = location.pathname.startsWith('/admin');
+  const [subdivisions, setSubdivisions] = useState(['Khalilabad', 'Mehdawal', 'Dhanghata']);
+
+  useEffect(() => {
+    const fetchSubdivisions = async () => {
+      try {
+        const res = await fetch('/api/news');
+        if (res.ok) {
+          const news = await res.json();
+          const subs = news
+            .map(n => n.subdivision)
+            .filter(s => s && s !== 'None' && s !== 'All');
+          
+          let saved = [];
+          try {
+            const savedStr = localStorage.getItem('custom_subdivisions');
+            if (savedStr) saved = JSON.parse(savedStr);
+          } catch(e) {}
+          
+          const uniqueSubs = Array.from(new Set(['Khalilabad', 'Mehdawal', 'Dhanghata', ...subs, ...saved]));
+          setSubdivisions(uniqueSubs);
+        }
+      } catch (err) {
+        console.error('Error loading subdivisions in Navbar:', err);
+      }
+    };
+    fetchSubdivisions();
+  }, [location.pathname]);
 
   useEffect(() => {
     if (theme === 'light') {
@@ -102,9 +129,11 @@ export default function Navbar() {
         </button>
         <div className="dropdown-content">
           <Link to="/city/All" onClick={() => isMobile && setIsOpen(false)}>{t('allLocations')}</Link>
-          <Link to="/city/Khalilabad" onClick={() => isMobile && setIsOpen(false)}>{t('khalilabad')}</Link>
-          <Link to="/city/Mehdawal" onClick={() => isMobile && setIsOpen(false)}>{t('mehdawal')}</Link>
-          <Link to="/city/Dhanghata" onClick={() => isMobile && setIsOpen(false)}>{t('dhanghata')}</Link>
+          {subdivisions.map((sub) => (
+            <Link key={sub} to={`/city/${sub}`} onClick={() => isMobile && setIsOpen(false)}>
+              {t(sub.toLowerCase()) !== sub.toLowerCase() ? t(sub.toLowerCase()) : sub}
+            </Link>
+          ))}
         </div>
       </li>
 

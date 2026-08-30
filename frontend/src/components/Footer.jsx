@@ -1,10 +1,37 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { Newspaper, Mail, Phone, MapPin, ShieldCheck } from 'lucide-react';
 
 export default function Footer() {
   const { t } = useLanguage();
+  const [subdivisions, setSubdivisions] = useState(['Khalilabad', 'Mehdawal', 'Dhanghata']);
+
+  useEffect(() => {
+    const fetchSubdivisions = async () => {
+      try {
+        const res = await fetch('/api/news');
+        if (res.ok) {
+          const news = await res.json();
+          const subs = news
+            .map(n => n.subdivision)
+            .filter(s => s && s !== 'None' && s !== 'All');
+          
+          let saved = [];
+          try {
+            const savedStr = localStorage.getItem('custom_subdivisions');
+            if (savedStr) saved = JSON.parse(savedStr);
+          } catch(e) {}
+          
+          const uniqueSubs = Array.from(new Set(['Khalilabad', 'Mehdawal', 'Dhanghata', ...subs, ...saved]));
+          setSubdivisions(uniqueSubs);
+        }
+      } catch (err) {
+        console.error('Error loading subdivisions in Footer:', err);
+      }
+    };
+    fetchSubdivisions();
+  }, []);
 
   return (
     <footer>
@@ -57,9 +84,13 @@ export default function Footer() {
           <div>
             <h4 style={{ color: '#fff', marginBottom: '16px', fontSize: '16px', textTransform: 'uppercase' }}>{t('subdivision')}</h4>
             <ul className="footer-links-list">
-              <li><Link to="/city/Khalilabad">{t('khalilabad')}</Link></li>
-              <li><Link to="/city/Mehdawal">{t('mehdawal')}</Link></li>
-              <li><Link to="/city/Dhanghata">{t('dhanghata')}</Link></li>
+              {subdivisions.map((sub) => (
+                <li key={sub}>
+                  <Link to={`/city/${sub}`}>
+                    {t(sub.toLowerCase()) !== sub.toLowerCase() ? t(sub.toLowerCase()) : sub}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
         </div>

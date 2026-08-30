@@ -44,7 +44,8 @@ export default function CityNews() {
     }
     
     const subTranslation = t(subdivision.toLowerCase());
-    return `स्थानीय समाचार - ${subTranslation}`;
+    const displaySub = subTranslation !== subdivision.toLowerCase() ? subTranslation : subdivision;
+    return `स्थानीय समाचार - ${displaySub}`;
   };
 
   const getPageDesc = () => {
@@ -52,7 +53,8 @@ export default function CityNews() {
       return 'संत कबीर नगर जिले से संकलित सभी स्थानीय रिपोर्ट और सुर्खियां।';
     }
     const subTranslation = t(subdivision.toLowerCase());
-    return `सीधे ${subTranslation} उपखंड क्षेत्र से ग्राउंड रिपोर्ट, वीडियो बुलेटिन और कहानियां।`;
+    const displaySub = subTranslation !== subdivision.toLowerCase() ? subTranslation : subdivision;
+    return `सीधे ${displaySub} उपखंड क्षेत्र से ग्राउंड रिपोर्ट, वीडियो बुलेटिन और कहानियां।`;
   };
 
   return (

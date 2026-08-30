@@ -11,7 +11,7 @@ export const LanguageProvider = ({ children }) => {
     brandName: 'सिटी समाचार डिजिटल',
     tagline: 'आपका अपना वेब न्यूज़ -',
     home: 'मुख्य पृष्ठ',
-    district: 'संत कबीर नगर',
+    district: 'उत्तर प्रदेश',
     allLocations: 'सभी क्षेत्र',
     subdivision: 'उपखंड',
     khalilabad: 'खलीलाबाद',

@@ -79,6 +79,16 @@ export default function AdminDashboard() {
   const [summaryHi, setSummaryHi] = useState('');
   const [selectedCats, setSelectedCats] = useState([]);
   const [subdivision, setSubdivision] = useState('None');
+  const [customSubdivisions, setCustomSubdivisions] = useState(() => {
+    try {
+      const saved = localStorage.getItem('custom_subdivisions');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+  const [isAddingCustomSubdivision, setIsAddingCustomSubdivision] = useState(false);
+  const [newSubdivisionInput, setNewSubdivisionInput] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
   const [imageFiles, setImageFiles] = useState([]);
   const [imageUrlStr, setImageUrlStr] = useState('');
@@ -363,6 +373,63 @@ export default function AdminDashboard() {
     Toast.fire({
       icon: type === 'error' ? 'error' : 'success',
       title: text
+    });
+  };
+
+  const defaultSubdivisions = ['Khalilabad', 'Mehdawal', 'Dhanghata'];
+  const newsSubdivisions = newsList
+    ? newsList.map(n => n.subdivision).filter(s => s && s !== 'None' && s !== 'All')
+    : [];
+  const allSubdivisions = Array.from(new Set([...defaultSubdivisions, ...customSubdivisions, ...newsSubdivisions]));
+
+  const handleAddSubdivision = () => {
+    const trimmedVal = newSubdivisionInput.trim();
+    if (!trimmedVal) {
+      triggerAlert('error', language === 'hi' ? 'कृपया क्षेत्र का नाम दर्ज करें' : 'Please enter a region name');
+      return;
+    }
+    
+    const exists = allSubdivisions.some(sub => sub.toLowerCase() === trimmedVal.toLowerCase());
+    if (exists) {
+      triggerAlert('error', language === 'hi' ? 'यह क्षेत्र पहले से मौजूद है!' : 'This region already exists!');
+      const existingName = allSubdivisions.find(sub => sub.toLowerCase() === trimmedVal.toLowerCase());
+      setSubdivision(existingName);
+      setIsAddingCustomSubdivision(false);
+      setNewSubdivisionInput('');
+      return;
+    }
+
+    const updatedList = [...customSubdivisions, trimmedVal];
+    setCustomSubdivisions(updatedList);
+    localStorage.setItem('custom_subdivisions', JSON.stringify(updatedList));
+    setSubdivision(trimmedVal);
+    setIsAddingCustomSubdivision(false);
+    setNewSubdivisionInput('');
+    triggerAlert('success', language === 'hi' ? `नया क्षेत्र "${trimmedVal}" सफलतापूर्वक जोड़ा गया!` : `Region "${trimmedVal}" added successfully!`);
+  };
+
+  const handleDeleteSubdivision = (subToDelete) => {
+    Swal.fire({
+      title: language === 'hi' ? 'क्या आप आश्वस्त हैं?' : 'Are you sure?',
+      text: language === 'hi' 
+        ? `क्या आप क्षेत्र "${subToDelete}" को हटाना चाहते हैं?` 
+        : `Do you want to delete the region "${subToDelete}"?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: language === 'hi' ? 'हाँ, हटाएं!' : 'Yes, delete it!',
+      cancelButtonText: language === 'hi' ? 'रद्द करें' : 'Cancel'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const updatedList = customSubdivisions.filter(sub => sub !== subToDelete);
+        setCustomSubdivisions(updatedList);
+        localStorage.setItem('custom_subdivisions', JSON.stringify(updatedList));
+        if (subdivision === subToDelete) {
+          setSubdivision('None');
+        }
+        triggerAlert('success', language === 'hi' ? 'क्षेत्र सफलतापूर्वक हटाया गया!' : 'Region removed successfully!');
+      }
     });
   };
 
@@ -1420,17 +1487,117 @@ export default function AdminDashboard() {
               <div className="grid grid-cols-2">
                 {/* Location select dropdown */}
                 <div className="form-group">
-                  <label>{t('locationLabel')}</label>
-                  <select
-                    className="form-control"
-                    value={subdivision}
-                    onChange={(e) => setSubdivision(e.target.value)}
-                  >
-                    <option value="None">{language === 'en' ? 'General / District Wide' : 'सामान्य / संपूर्ण जिला'}</option>
-                    <option value="Khalilabad">{t('khalilabad')}</option>
-                    <option value="Mehdawal">{t('mehdawal')}</option>
-                    <option value="Dhanghata">{t('dhanghata')}</option>
-                  </select>
+                  <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>{t('locationLabel')}</span>
+                    {!isAddingCustomSubdivision && (
+                      <button
+                        type="button"
+                        style={{
+                          fontSize: '11px',
+                          padding: '2px 8px',
+                          background: 'var(--color-primary)',
+                          color: '#fff',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer'
+                        }}
+                        onClick={() => setIsAddingCustomSubdivision(true)}
+                      >
+                        + नया क्षेत्र जोड़ें
+                      </button>
+                    )}
+                  </label>
+                  {isAddingCustomSubdivision ? (
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="नए क्षेत्र का नाम (जैसे: सेमरियावां)"
+                        value={newSubdivisionInput}
+                        onChange={(e) => setNewSubdivisionInput(e.target.value)}
+                        autoFocus
+                      />
+                      <button
+                        type="button"
+                        style={{
+                          padding: '6px 14px',
+                          background: 'var(--color-primary)',
+                          color: '#fff',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          whiteSpace: 'nowrap'
+                        }}
+                        onClick={handleAddSubdivision}
+                      >
+                        जोड़ें
+                      </button>
+                      <button
+                        type="button"
+                        style={{
+                          padding: '6px 10px',
+                          background: 'rgba(255,255,255,0.1)',
+                          color: '#ccc',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          whiteSpace: 'nowrap'
+                        }}
+                        onClick={() => {
+                          setIsAddingCustomSubdivision(false);
+                          setNewSubdivisionInput('');
+                        }}
+                      >
+                        रद्द करें
+                      </button>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <select
+                        className="form-control"
+                        style={{ flex: 1 }}
+                        value={subdivision}
+                        onChange={(e) => {
+                          if (e.target.value === '__ADD_NEW__') {
+                            setIsAddingCustomSubdivision(true);
+                          } else {
+                            setSubdivision(e.target.value);
+                          }
+                        }}
+                      >
+                        <option value="None">{language === 'en' ? 'General / District Wide' : 'सामान्य / संपूर्ण जिला'}</option>
+                        {allSubdivisions.map((sub) => (
+                          <option key={sub} value={sub}>
+                            {t(sub.toLowerCase()) !== sub.toLowerCase() ? t(sub.toLowerCase()) : sub}
+                          </option>
+                        ))}
+                        <option value="__ADD_NEW__">+ नया क्षेत्र जोड़ें...</option>
+                      </select>
+                      {!defaultSubdivisions.includes(subdivision) && subdivision !== 'None' && (
+                        <button
+                          type="button"
+                          className="btn btn-danger"
+                          title="इस क्षेत्र को हटाएँ"
+                          style={{
+                            padding: '4px 8px',
+                            background: '#ef4444',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            height: '32px',
+                            width: '32px'
+                          }}
+                          onClick={() => handleDeleteSubdivision(subdivision)}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Video URL */}
