@@ -89,6 +89,14 @@ export default function AdminDashboard() {
   });
   const [isAddingCustomSubdivision, setIsAddingCustomSubdivision] = useState(false);
   const [newSubdivisionInput, setNewSubdivisionInput] = useState('');
+  const [deletedSubdivisions, setDeletedSubdivisions] = useState(() => {
+    try {
+      const saved = localStorage.getItem('deleted_subdivisions');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
+  });
   const [videoUrl, setVideoUrl] = useState('');
   const [imageFiles, setImageFiles] = useState([]);
   const [imageUrlStr, setImageUrlStr] = useState('');
@@ -376,11 +384,13 @@ export default function AdminDashboard() {
     });
   };
 
-  const defaultSubdivisions = ['Khalilabad', 'Mehdawal', 'Dhanghata'];
+  const baseDefaultSubdivisions = ['Khalilabad', 'Mehdawal', 'Dhanghata'];
+  const defaultSubdivisions = baseDefaultSubdivisions.filter(sub => !deletedSubdivisions.includes(sub));
   const newsSubdivisions = newsList
     ? newsList.map(n => n.subdivision).filter(s => s && s !== 'None' && s !== 'All')
     : [];
-  const allSubdivisions = Array.from(new Set([...defaultSubdivisions, ...customSubdivisions, ...newsSubdivisions]));
+  const allSubdivisions = Array.from(new Set([...defaultSubdivisions, ...customSubdivisions, ...newsSubdivisions]))
+    .filter(sub => !deletedSubdivisions.includes(sub));
 
   const handleAddSubdivision = () => {
     const trimmedVal = newSubdivisionInput.trim();
@@ -397,6 +407,13 @@ export default function AdminDashboard() {
       setIsAddingCustomSubdivision(false);
       setNewSubdivisionInput('');
       return;
+    }
+
+    // If it was previously deleted, restore it
+    if (deletedSubdivisions.includes(trimmedVal)) {
+      const updatedDeletedList = deletedSubdivisions.filter(sub => sub !== trimmedVal);
+      setDeletedSubdivisions(updatedDeletedList);
+      localStorage.setItem('deleted_subdivisions', JSON.stringify(updatedDeletedList));
     }
 
     const updatedList = [...customSubdivisions, trimmedVal];
@@ -422,9 +439,18 @@ export default function AdminDashboard() {
       cancelButtonText: language === 'hi' ? 'रद्द करें' : 'Cancel'
     }).then((result) => {
       if (result.isConfirmed) {
-        const updatedList = customSubdivisions.filter(sub => sub !== subToDelete);
-        setCustomSubdivisions(updatedList);
-        localStorage.setItem('custom_subdivisions', JSON.stringify(updatedList));
+        // Remove from customSubdivisions if present
+        const updatedCustomList = customSubdivisions.filter(sub => sub !== subToDelete);
+        setCustomSubdivisions(updatedCustomList);
+        localStorage.setItem('custom_subdivisions', JSON.stringify(updatedCustomList));
+
+        // Add to deletedSubdivisions if not already there
+        if (!deletedSubdivisions.includes(subToDelete)) {
+          const updatedDeletedList = [...deletedSubdivisions, subToDelete];
+          setDeletedSubdivisions(updatedDeletedList);
+          localStorage.setItem('deleted_subdivisions', JSON.stringify(updatedDeletedList));
+        }
+
         if (subdivision === subToDelete) {
           setSubdivision('None');
         }
@@ -1573,7 +1599,7 @@ export default function AdminDashboard() {
                         ))}
                         <option value="__ADD_NEW__">+ नया क्षेत्र जोड़ें...</option>
                       </select>
-                      {!defaultSubdivisions.includes(subdivision) && subdivision !== 'None' && (
+                      {subdivision !== 'None' && (
                         <button
                           type="button"
                           className="btn btn-danger"

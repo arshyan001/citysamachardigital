@@ -30,8 +30,15 @@ export default function Navbar() {
             const savedStr = localStorage.getItem('custom_subdivisions');
             if (savedStr) saved = JSON.parse(savedStr);
           } catch(e) {}
+
+          let deleted = [];
+          try {
+            const deletedStr = localStorage.getItem('deleted_subdivisions');
+            if (deletedStr) deleted = JSON.parse(deletedStr);
+          } catch(e) {}
           
-          const uniqueSubs = Array.from(new Set(['Khalilabad', 'Mehdawal', 'Dhanghata', ...subs, ...saved]));
+          const uniqueSubs = Array.from(new Set(['Khalilabad', 'Mehdawal', 'Dhanghata', ...subs, ...saved]))
+            .filter(sub => !deleted.includes(sub));
           setSubdivisions(uniqueSubs);
         }
       } catch (err) {
