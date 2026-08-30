@@ -1607,7 +1607,7 @@ export default function AdminDashboard() {
                           }
                         }}
                       >
-                        <option value="None">{language === 'en' ? 'General / District Wide' : 'सामान्य / संपूर्ण जिला'}</option>
+                        <option value="None">{language === 'en' ? 'Uttar Pradesh' : 'उत्तर प्रदेश'}</option>
                         {allSubdivisions.map((sub) => (
                           <option key={sub} value={sub}>
                             {t(sub.toLowerCase()) !== sub.toLowerCase() ? t(sub.toLowerCase()) : sub}
