@@ -46,7 +46,7 @@ const getDashboardStats = async (req, res) => {
       let totalComments = 0;
 
       // Grouping stats
-      const subdivisionCounts = { None: 0, Khalilabad: 0, Mehdawal: 0, Dhanghata: 0 };
+      const subdivisionCounts = { None: 0 };
       const categoryCounts = {};
       categories.forEach(cat => {
         categoryCounts[cat.nameEn] = 0;
@@ -148,7 +148,7 @@ const getDashboardStats = async (req, res) => {
 
     // Subdivision stats
     const dbSubdivisions = await News.distinct('subdivision');
-    const subdivisions = Array.from(new Set(['None', 'Khalilabad', 'Mehdawal', 'Dhanghata', ...dbSubdivisions.filter(Boolean)]));
+    const subdivisions = Array.from(new Set(['None', ...dbSubdivisions.filter(Boolean)]));
     const subdivisionStats = await Promise.all(
       subdivisions.map(async (name) => {
         const count = await News.countDocuments({ subdivision: name });

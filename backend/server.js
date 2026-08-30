@@ -368,7 +368,7 @@ connectDB()
           videoUrl: '',
           categories: [categories.find(c => c.nameEn === 'Local News')?._id || categories[0]._id],
           district: 'Sant Kabir Nagar',
-          subdivision: 'Khalilabad',
+          subdivision: 'None',
           isBreaking: false
         },
         {
@@ -382,7 +382,7 @@ connectDB()
           videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
           categories: [categories.find(c => c.nameEn === 'Sports')?._id || categories[0]._id],
           district: 'Sant Kabir Nagar',
-          subdivision: 'Mehdawal',
+          subdivision: 'None',
           isBreaking: true
         }
       ];

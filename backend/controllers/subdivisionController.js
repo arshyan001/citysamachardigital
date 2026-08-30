@@ -1,7 +1,7 @@
 const Subdivision = require('../models/Subdivision');
 const jsonDb = require('../config/jsonDb');
 
-const defaultSubdivisions = ['Khalilabad', 'Mehdawal', 'Dhanghata'];
+const defaultSubdivisions = [];
 
 // @desc    Get all subdivisions (default + custom)
 // @route   GET /api/subdivisions

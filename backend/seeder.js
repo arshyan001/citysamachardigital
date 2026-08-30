@@ -27,7 +27,7 @@ const sampleNews = [
     images: ['https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=800&q=80'],
     videoUrl: '',
     district: 'Sant Kabir Nagar',
-    subdivision: 'Khalilabad',
+    subdivision: 'None',
     isBreaking: false
   },
   {
@@ -40,7 +40,7 @@ const sampleNews = [
     images: ['https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=800&q=80'],
     videoUrl: '',
     district: 'Sant Kabir Nagar',
-    subdivision: 'Dhanghata',
+    subdivision: 'None',
     isBreaking: false
   },
   {
@@ -53,7 +53,7 @@ const sampleNews = [
     images: ['https://images.unsplash.com/photo-1531415074968-036ba1b575da?auto=format&fit=crop&w=800&q=80'],
     videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
     district: 'Sant Kabir Nagar',
-    subdivision: 'Mehdawal',
+    subdivision: 'None',
     isBreaking: true
   }
 ];

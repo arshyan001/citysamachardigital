@@ -13,7 +13,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const isAdminPage = location.pathname.startsWith('/admin');
-  const [subdivisions, setSubdivisions] = useState(['Khalilabad', 'Mehdawal', 'Dhanghata']);
+  const [subdivisions, setSubdivisions] = useState([]);
 
   useEffect(() => {
     const fetchSubdivisions = async () => {

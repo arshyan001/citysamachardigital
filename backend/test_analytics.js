@@ -49,8 +49,8 @@ const test = async () => {
     );
     console.log('Category stats:', categoryStats);
 
-    // Subdivision stats
-    const subdivisions = ['None', 'Khalilabad', 'Mehdawal', 'Dhanghata'];
+    const dbSubdivisions = await News.distinct('subdivision');
+    const subdivisions = Array.from(new Set(['None', ...dbSubdivisions.filter(Boolean)]));
     const subdivisionStats = await Promise.all(
       subdivisions.map(async (name) => {
         const count = await News.countDocuments({ subdivision: name });

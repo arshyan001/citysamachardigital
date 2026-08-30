@@ -323,7 +323,7 @@ export default function AdminDashboard() {
       const res = await fetch('/api/subdivisions');
       if (res.ok) {
         const data = await res.json();
-        const baseDefaultSubdivisions = ['Khalilabad', 'Mehdawal', 'Dhanghata'];
+        const baseDefaultSubdivisions = [];
         const customOnly = data.filter(sub => sub && typeof sub === 'string' && !baseDefaultSubdivisions.map(s => s.toLowerCase()).includes(sub.toLowerCase()));
         setCustomSubdivisions(customOnly);
       }
@@ -384,7 +384,7 @@ export default function AdminDashboard() {
     });
   };
 
-  const baseDefaultSubdivisions = ['Khalilabad', 'Mehdawal', 'Dhanghata'];
+  const baseDefaultSubdivisions = [];
   const defaultSubdivisions = baseDefaultSubdivisions;
   const newsSubdivisions = newsList
     ? newsList.map(n => n.subdivision).filter(s => s && s !== 'None' && s !== 'All')

@@ -5,7 +5,7 @@ import { Newspaper, Mail, Phone, MapPin, ShieldCheck } from 'lucide-react';
 
 export default function Footer() {
   const { t } = useLanguage();
-  const [subdivisions, setSubdivisions] = useState(['Khalilabad', 'Mehdawal', 'Dhanghata']);
+  const [subdivisions, setSubdivisions] = useState([]);
 
   useEffect(() => {
     const fetchSubdivisions = async () => {
