@@ -386,10 +386,7 @@ export default function AdminDashboard() {
 
   const baseDefaultSubdivisions = [];
   const defaultSubdivisions = baseDefaultSubdivisions;
-  const newsSubdivisions = newsList
-    ? newsList.map(n => n.subdivision).filter(s => s && s !== 'None' && s !== 'All')
-    : [];
-  const allSubdivisions = Array.from(new Set([...defaultSubdivisions, ...customSubdivisions, ...newsSubdivisions]))
+  const allSubdivisions = Array.from(new Set([...defaultSubdivisions, ...customSubdivisions]))
     .filter(sub => sub && typeof sub === 'string');
 
   const handleAddSubdivision = async () => {
