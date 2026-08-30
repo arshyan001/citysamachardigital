@@ -15,6 +15,7 @@ const cricketRoutes = require('./routes/cricketRoutes');
 const adRoutes = require('./routes/adRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes');
 const editorRoutes = require('./routes/editorRoutes');
+const subdivisionRoutes = require('./routes/subdivisionRoutes');
 
 const User = require('./models/User');
 const Category = require('./models/Category');
@@ -58,6 +59,7 @@ app.use('/api/cricket', cricketRoutes);
 app.use('/api/ads', adRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/editor', editorRoutes);
+app.use('/api/subdivisions', subdivisionRoutes);
 
 // Simple status route
 app.get('/', (req, res) => {

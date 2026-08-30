@@ -79,24 +79,9 @@ export default function AdminDashboard() {
   const [summaryHi, setSummaryHi] = useState('');
   const [selectedCats, setSelectedCats] = useState([]);
   const [subdivision, setSubdivision] = useState('None');
-  const [customSubdivisions, setCustomSubdivisions] = useState(() => {
-    try {
-      const saved = localStorage.getItem('custom_subdivisions');
-      return saved ? JSON.parse(saved) : [];
-    } catch (e) {
-      return [];
-    }
-  });
+  const [customSubdivisions, setCustomSubdivisions] = useState([]);
   const [isAddingCustomSubdivision, setIsAddingCustomSubdivision] = useState(false);
   const [newSubdivisionInput, setNewSubdivisionInput] = useState('');
-  const [deletedSubdivisions, setDeletedSubdivisions] = useState(() => {
-    try {
-      const saved = localStorage.getItem('deleted_subdivisions');
-      return saved ? JSON.parse(saved) : [];
-    } catch (e) {
-      return [];
-    }
-  });
   const [videoUrl, setVideoUrl] = useState('');
   const [imageFiles, setImageFiles] = useState([]);
   const [imageUrlStr, setImageUrlStr] = useState('');
@@ -333,6 +318,20 @@ export default function AdminDashboard() {
     }
   };
 
+  const fetchSubdivisions = async () => {
+    try {
+      const res = await fetch('/api/subdivisions');
+      if (res.ok) {
+        const data = await res.json();
+        const baseDefaultSubdivisions = ['Khalilabad', 'Mehdawal', 'Dhanghata'];
+        const customOnly = data.filter(sub => sub && typeof sub === 'string' && !baseDefaultSubdivisions.map(s => s.toLowerCase()).includes(sub.toLowerCase()));
+        setCustomSubdivisions(customOnly);
+      }
+    } catch (err) {
+      console.error('Error fetching subdivisions:', err);
+    }
+  };
+
   useEffect(() => {
     if (token) {
       fetchNews();
@@ -343,6 +342,7 @@ export default function AdminDashboard() {
       fetchComments();
       fetchAds();
       fetchEditorInfo();
+      fetchSubdivisions();
     }
   }, [token]);
 
@@ -385,44 +385,54 @@ export default function AdminDashboard() {
   };
 
   const baseDefaultSubdivisions = ['Khalilabad', 'Mehdawal', 'Dhanghata'];
-  const defaultSubdivisions = baseDefaultSubdivisions.filter(sub => !deletedSubdivisions.includes(sub));
+  const defaultSubdivisions = baseDefaultSubdivisions;
   const newsSubdivisions = newsList
     ? newsList.map(n => n.subdivision).filter(s => s && s !== 'None' && s !== 'All')
     : [];
   const allSubdivisions = Array.from(new Set([...defaultSubdivisions, ...customSubdivisions, ...newsSubdivisions]))
-    .filter(sub => !deletedSubdivisions.includes(sub));
+    .filter(sub => sub && typeof sub === 'string');
 
-  const handleAddSubdivision = () => {
+  const handleAddSubdivision = async () => {
     const trimmedVal = newSubdivisionInput.trim();
     if (!trimmedVal) {
       triggerAlert('error', language === 'hi' ? 'कृपया क्षेत्र का नाम दर्ज करें' : 'Please enter a region name');
       return;
     }
     
-    const exists = allSubdivisions.some(sub => sub.toLowerCase() === trimmedVal.toLowerCase());
+    const exists = allSubdivisions.some(sub => sub && sub.toLowerCase() === trimmedVal.toLowerCase());
     if (exists) {
       triggerAlert('error', language === 'hi' ? 'यह क्षेत्र पहले से मौजूद है!' : 'This region already exists!');
-      const existingName = allSubdivisions.find(sub => sub.toLowerCase() === trimmedVal.toLowerCase());
+      const existingName = allSubdivisions.find(sub => sub && sub.toLowerCase() === trimmedVal.toLowerCase());
       setSubdivision(existingName);
       setIsAddingCustomSubdivision(false);
       setNewSubdivisionInput('');
       return;
     }
 
-    // If it was previously deleted, restore it
-    if (deletedSubdivisions.includes(trimmedVal)) {
-      const updatedDeletedList = deletedSubdivisions.filter(sub => sub !== trimmedVal);
-      setDeletedSubdivisions(updatedDeletedList);
-      localStorage.setItem('deleted_subdivisions', JSON.stringify(updatedDeletedList));
-    }
+    try {
+      const res = await fetch('/api/subdivisions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ name: trimmedVal })
+      });
 
-    const updatedList = [...customSubdivisions, trimmedVal];
-    setCustomSubdivisions(updatedList);
-    localStorage.setItem('custom_subdivisions', JSON.stringify(updatedList));
-    setSubdivision(trimmedVal);
-    setIsAddingCustomSubdivision(false);
-    setNewSubdivisionInput('');
-    triggerAlert('success', language === 'hi' ? `नया क्षेत्र "${trimmedVal}" सफलतापूर्वक जोड़ा गया!` : `Region "${trimmedVal}" added successfully!`);
+      if (res.ok) {
+        setSubdivision(trimmedVal);
+        setIsAddingCustomSubdivision(false);
+        setNewSubdivisionInput('');
+        fetchSubdivisions();
+        triggerAlert('success', language === 'hi' ? `नया क्षेत्र "${trimmedVal}" सफलतापूर्वक जोड़ा गया!` : `Region "${trimmedVal}" added successfully!`);
+      } else {
+        const errData = await res.json();
+        triggerAlert('error', errData.message || 'Operation failed');
+      }
+    } catch (err) {
+      console.error(err);
+      triggerAlert('error', 'Network communication error');
+    }
   };
 
   const handleDeleteSubdivision = (subToDelete) => {
@@ -437,24 +447,30 @@ export default function AdminDashboard() {
       cancelButtonColor: '#3085d6',
       confirmButtonText: language === 'hi' ? 'हाँ, हटाएं!' : 'Yes, delete it!',
       cancelButtonText: language === 'hi' ? 'रद्द करें' : 'Cancel'
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        // Remove from customSubdivisions if present
-        const updatedCustomList = customSubdivisions.filter(sub => sub !== subToDelete);
-        setCustomSubdivisions(updatedCustomList);
-        localStorage.setItem('custom_subdivisions', JSON.stringify(updatedCustomList));
+        try {
+          const res = await fetch(`/api/subdivisions/${encodeURIComponent(subToDelete)}`, {
+            method: 'DELETE',
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
 
-        // Add to deletedSubdivisions if not already there
-        if (!deletedSubdivisions.includes(subToDelete)) {
-          const updatedDeletedList = [...deletedSubdivisions, subToDelete];
-          setDeletedSubdivisions(updatedDeletedList);
-          localStorage.setItem('deleted_subdivisions', JSON.stringify(updatedDeletedList));
+          if (res.ok) {
+            if (subdivision === subToDelete) {
+              setSubdivision('None');
+            }
+            fetchSubdivisions();
+            triggerAlert('success', language === 'hi' ? 'क्षेत्र सफलतापूर्वक हटाया गया!' : 'Region removed successfully!');
+          } else {
+            const errData = await res.json();
+            triggerAlert('error', errData.message || 'Operation failed');
+          }
+        } catch (err) {
+          console.error(err);
+          triggerAlert('error', 'Network communication error');
         }
-
-        if (subdivision === subToDelete) {
-          setSubdivision('None');
-        }
-        triggerAlert('success', language === 'hi' ? 'क्षेत्र सफलतापूर्वक हटाया गया!' : 'Region removed successfully!');
       }
     });
   };

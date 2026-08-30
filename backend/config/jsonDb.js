@@ -118,6 +118,10 @@ const getDb = () => {
       };
       changed = true;
     }
+    if (!db.subdivisions) {
+      db.subdivisions = [];
+      changed = true;
+    }
     if (changed) {
       fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
     }
@@ -655,6 +659,38 @@ const jsonDb = {
     };
     saveDb(db);
     return db.editorInfo;
+  },
+
+  // Subdivision Operations
+  getSubdivisions: () => {
+    const db = getDb();
+    return db.subdivisions || [];
+  },
+
+  createSubdivision: (name) => {
+    const db = getDb();
+    if (!db.subdivisions) {
+      db.subdivisions = [];
+    }
+    const exists = db.subdivisions.some(s => s.toLowerCase() === name.toLowerCase());
+    if (exists) {
+      return null;
+    }
+    db.subdivisions.push(name);
+    saveDb(db);
+    return name;
+  },
+
+  deleteSubdivision: (name) => {
+    const db = getDb();
+    if (!db.subdivisions) {
+      db.subdivisions = [];
+      return false;
+    }
+    const originalLength = db.subdivisions.length;
+    db.subdivisions = db.subdivisions.filter(s => s.toLowerCase() !== name.toLowerCase());
+    saveDb(db);
+    return db.subdivisions.length !== originalLength;
   }
 };
 

@@ -10,28 +10,11 @@ export default function Footer() {
   useEffect(() => {
     const fetchSubdivisions = async () => {
       try {
-        const res = await fetch('/api/news');
+        const res = await fetch('/api/subdivisions');
         if (res.ok) {
-          const news = await res.json();
-          const subs = news
-            .map(n => n.subdivision)
-            .filter(s => s && s !== 'None' && s !== 'All');
-          
-          let saved = [];
-          try {
-            const savedStr = localStorage.getItem('custom_subdivisions');
-            if (savedStr) saved = JSON.parse(savedStr);
-          } catch(e) {}
-
-          let deleted = [];
-          try {
-            const deletedStr = localStorage.getItem('deleted_subdivisions');
-            if (deletedStr) deleted = JSON.parse(deletedStr);
-          } catch(e) {}
-          
-          const uniqueSubs = Array.from(new Set(['Khalilabad', 'Mehdawal', 'Dhanghata', ...subs, ...saved]))
-            .filter(sub => !deleted.includes(sub));
-          setSubdivisions(uniqueSubs);
+          const data = await res.json();
+          const filtered = data.filter(sub => sub && typeof sub === 'string');
+          setSubdivisions(filtered);
         }
       } catch (err) {
         console.error('Error loading subdivisions in Footer:', err);
