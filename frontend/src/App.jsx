@@ -13,8 +13,6 @@ import ContactUs from './pages/ContactUs';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import EPaper from './pages/EPaper';
-import AboutUs from './pages/AboutUs';
-import PrivacyPolicy from './pages/PrivacyPolicy';
 import NewspaperGenerator from './pages/NewspaperGenerator';
 
 // Custom Scroll Restoration Component for React Router DOM v6
@@ -82,9 +80,6 @@ export default function App() {
               <Route path="/" element={<Home />} />
               <Route path="/news/:id" element={<NewsDetail />} />
               <Route path="/city/:subdivision" element={<CityNews />} />
-              <Route path="/about" element={<AboutUs />} />
-              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-              <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/contact" element={<ContactUs />} />
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/admin/dashboard" element={<AdminDashboard />} />

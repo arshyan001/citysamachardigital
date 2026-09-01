@@ -8,6 +8,7 @@ import SEO from '../components/SEO';
 
 export default function CityNews() {
   const { subdivision } = useParams();
+  const navigate = useNavigate();
   const { t } = useLanguage();
 
   const [news, setNews] = useState([]);

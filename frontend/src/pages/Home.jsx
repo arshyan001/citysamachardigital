@@ -516,25 +516,77 @@ export default function Home() {
                         </div>
                       )}
 
-                      {/* Headlines List */}
-                      <div className="glass" style={{ padding: '15px', borderRadius: 'var(--border-radius-md)', display: 'flex', flexDirection: 'column', height: '100%', minHeight: '380px' }}>
-                        <h3 style={{ fontSize: '15px', borderBottom: '2px solid var(--color-primary)', paddingBottom: '6px', marginBottom: '12px', textTransform: 'uppercase', color: 'var(--color-text-primary)' }}>
-                          बड़ी ख़बरें
-                        </h3>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', flexGrow: 1, overflowY: 'auto' }}>
-                          {news.slice(1, 5).map((item, idx) => (
-                            <div key={item._id} style={{ display: 'flex', gap: '8px', borderBottom: idx === 3 ? 'none' : '1px solid var(--border-color)', paddingBottom: '10px', cursor: 'pointer' }} onClick={() => navigate(`/news/${item._id}`)}>
-                              <span style={{ color: 'var(--color-primary)', fontWeight: '800', fontSize: '16px' }}>•</span>
-                              <div>
-                                <h4 style={{ fontSize: '13px', fontWeight: '600', lineHeight: '1.3', display: '-webkit-box', WebkitLineClamp: '2', WebkitBoxOrient: 'vertical', overflow: 'hidden', color: 'var(--color-text-primary)' }}>
-                                  {item.titleHi}
-                                </h4>
-                                <span style={{ fontSize: '10px', color: 'var(--color-text-secondary)' }}>
-                                  {new Date(item.createdAt).toLocaleDateString('hi-IN')}
-                                </span>
+                      {/* ताज़ा ख़बरें – Latest News with Images (all news, scrollable) */}
+                      <div className="glass" style={{ padding: '15px', borderRadius: 'var(--border-radius-md)', display: 'flex', flexDirection: 'column', height: '100%', minHeight: '380px', maxHeight: '520px' }}>
+                        {/* Header */}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '2px solid var(--color-primary)', paddingBottom: '8px', marginBottom: '12px', flexShrink: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+                            <span style={{
+                              width: '8px', height: '8px', borderRadius: '50%',
+                              background: 'var(--color-primary)',
+                              display: 'inline-block',
+                              boxShadow: '0 0 0 0 rgba(239,68,68,0.7)',
+                              animation: 'liveping 1.5s ease-in-out infinite'
+                            }} />
+                            <h3 style={{ fontSize: '14px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--color-text-primary)', margin: 0 }}>
+                              ताज़ा ख़बरें
+                            </h3>
+                          </div>
+                          <span style={{ fontSize: '10px', color: '#ef4444', background: 'rgba(239,68,68,0.12)', padding: '2px 8px', borderRadius: '20px', border: '1px solid rgba(239,68,68,0.25)', fontWeight: 700, letterSpacing: '0.5px' }}>
+                            LIVE
+                          </span>
+                        </div>
+
+                        {/* Scrollable news list – all news with images */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0px', flexGrow: 1, overflowY: 'auto', paddingRight: '2px' }}>
+                          {news.slice(1).map((item, idx) => {
+                            const imgUrl = item.images && item.images.length > 0
+                              ? item.images[0]
+                              : 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=200&q=60';
+                            const dateStr = new Date(item.createdAt).toLocaleDateString('hi-IN', { day: 'numeric', month: 'short' });
+                            return (
+                              <div
+                                key={item._id}
+                                onClick={() => navigate(`/news/${item._id}`)}
+                                style={{
+                                  display: 'flex', gap: '10px', alignItems: 'flex-start',
+                                  padding: '8px 6px',
+                                  borderBottom: idx === news.slice(1).length - 1 ? 'none' : '1px solid var(--border-color)',
+                                  cursor: 'pointer',
+                                  borderRadius: '6px',
+                                  transition: 'background 0.18s'
+                                }}
+                                onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.06)'}
+                                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                              >
+                                {/* Thumbnail */}
+                                <div style={{ width: '68px', height: '52px', borderRadius: '6px', overflow: 'hidden', flexShrink: 0, border: '1px solid var(--border-color)' }}>
+                                  <img
+                                    src={imgUrl}
+                                    alt={item.titleHi}
+                                    loading="lazy"
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                                    onError={e => { e.currentTarget.src = 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=200&q=60'; }}
+                                  />
+                                </div>
+                                {/* Text */}
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <h4 style={{
+                                    fontSize: '12.5px', fontWeight: 700, lineHeight: '1.35', margin: '0 0 4px 0',
+                                    display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+                                    color: 'var(--color-text-primary)'
+                                  }}>
+                                    {item.titleHi}
+                                  </h4>
+                                  <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                                    <span style={{ fontSize: '10px', color: 'var(--color-primary)', fontWeight: 600 }}>{dateStr}</span>
+                                    <span style={{ fontSize: '9px', color: 'var(--color-text-secondary)' }}>•</span>
+                                    <span style={{ fontSize: '10px', color: 'var(--color-text-secondary)' }}>{item.views || 0} views</span>
+                                  </div>
+                                </div>
                               </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
                     </div>

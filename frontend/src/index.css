@@ -1192,17 +1192,26 @@ footer {
 }
 
 /* Animations */
-@keyframes pulse {
-  0% {
-    opacity: 0.3;
-  }
-
-  50% {
+@keyframes latestPulse {
+  0%, 100% {
+    box-shadow: 0 0 4px 2px rgba(239, 68, 68, 0.7);
     opacity: 1;
   }
+  50% {
+    box-shadow: 0 0 10px 4px rgba(239, 68, 68, 0.2);
+    opacity: 0.6;
+  }
+}
 
+@keyframes liveping {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 7px rgba(239, 68, 68, 0);
+  }
   100% {
-    opacity: 0.3;
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
   }
 }
 
@@ -1626,17 +1635,15 @@ footer {
     flex-direction: column;
     align-items: flex-start;
     width: 100%;
-    /* Fixed so it always renders below the header regardless of stacking context */
     position: fixed;
     top: 110px;
-    /* below top-bar (~40px) + nav-main (~70px) */
     left: 0;
     right: 0;
     background: var(--bg-card);
     border-bottom: 2px solid var(--color-primary);
-    padding: 20px 16px 24px;
-    gap: 4px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+    padding: 10px 20px 28px;
+    gap: 0;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
     z-index: 200;
     max-height: calc(100vh - 110px);
     overflow-y: auto;
@@ -1646,63 +1653,115 @@ footer {
     display: flex !important;
   }
 
+  /* Each menu list item */
   .nav-links li {
     width: 100%;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 4px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    padding: 0;
   }
 
   .nav-links li:last-child {
     border-bottom: none;
   }
 
-  /* Plain text nav links get full-width style */
+  /* Plain nav links — large tap targets */
   .nav-links a:not([style*="border-radius"]),
   .nav-links .dropdown-trigger {
     width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 4px;
-    font-size: 16px;
+    padding: 14px 6px;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
   }
 
-  /* Pill-badge links (E-Paper, Newspaper) keep their own style */
+  /* Pill-badge links (E-Paper, Newspaper) */
   .nav-links a[style*="border-radius"] {
     display: inline-flex;
     width: auto;
-    padding: 6px 14px;
-    margin: 3px 0;
-    font-size: 13px;
+    padding: 10px 20px;
+    margin: 8px 0;
+    font-size: 15px;
+    font-weight: 800;
   }
 
+  /* Subdivision dropdown inside mobile menu — collapsed by default */
+  .dropdown-content.mobile-dropdown-closed {
+    display: none !important;
+  }
+
+  .dropdown-content.mobile-dropdown-open {
+    position: static !important;
+    transform: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: flex !important;
+    flex-direction: column;
+    background: rgba(255, 255, 255, 0.03);
+    box-shadow: none;
+    border: none;
+    border-left: 3px solid var(--color-primary);
+    margin: 4px 0 8px 0;
+    padding-left: 16px;
+    gap: 0;
+    max-height: 260px;
+    overflow-y: auto;
+  }
+
+  .dropdown-content.mobile-dropdown-open a {
+    padding: 12px 6px;
+    font-size: 16px;
+    font-weight: 500;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    width: 100%;
+    display: block;
+    color: var(--color-text-primary);
+  }
+
+  .dropdown-content.mobile-dropdown-open a:last-child {
+    border-bottom: none;
+  }
+
+  /* Override the always-visible rule from previous block for mobile */
   .dropdown-content {
     position: static;
     transform: none !important;
     opacity: 1;
     visibility: visible;
-    background: rgba(255, 255, 255, 0.02);
+    background: rgba(255, 255, 255, 0.03);
     box-shadow: none;
     border: none;
-    border-left: 2px solid var(--color-primary);
-    margin-top: 4px;
-    padding-left: 12px;
+    border-left: 3px solid var(--color-primary);
+    margin-top: 0;
+    margin-bottom: 8px;
+    padding-left: 16px;
     display: flex;
     flex-direction: column;
+    gap: 0;
   }
 
   .dropdown-content a {
-    padding: 6px 0;
-    font-size: 14px;
+    padding: 12px 6px;
+    font-size: 16px;
+    font-weight: 500;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    width: 100%;
+    display: block;
+  }
+
+  .dropdown-content a:last-child {
+    border-bottom: none;
   }
 
   .top-bar {
-    padding: 10px 0;
+    padding: 8px 0;
   }
 
   .top-bar .container {
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
     align-items: center;
     text-align: center;
   }

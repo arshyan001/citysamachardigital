@@ -7,6 +7,7 @@ export default function Navbar() {
   const { t } = useLanguage();
   const [time, setTime] = useState(new Date());
   const [isOpen, setIsOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [theme, setTheme] = useState(() => localStorage.getItem('news_theme') || 'dark');
   const [headerHeight, setHeaderHeight] = useState(110);
   const headerRef = useRef(null);
@@ -61,9 +62,10 @@ export default function Navbar() {
     return () => window.removeEventListener('resize', measure);
   }, []);
 
-  // Close mobile menu on route change
+  // Close mobile menu (and reset dropdown) on route change
   useEffect(() => {
     setIsOpen(false);
+    setDropdownOpen(false);
   }, [location.pathname]);
 
   useEffect(() => {
@@ -111,16 +113,29 @@ export default function Navbar() {
       </li>
 
       {/* Dropdown for Sant Kabir Nagar locations */}
-      <li className="dropdown-menu">
-        <button className="dropdown-trigger">
-          <MapPin size={16} style={{ color: 'var(--color-primary)' }} />
-          {t('district')}
-          <ChevronDown size={14} />
+      <li className={`dropdown-menu ${isMobile ? 'mobile-dropdown-item' : ''}`}>
+        <button
+          className="dropdown-trigger"
+          onClick={() => isMobile && setDropdownOpen(prev => !prev)}
+          style={isMobile ? { width: '100%', justifyContent: 'space-between' } : {}}
+        >
+          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <MapPin size={16} style={{ color: 'var(--color-primary)' }} />
+            {t('district')}
+          </span>
+          <ChevronDown
+            size={16}
+            style={{
+              transition: 'transform 0.25s',
+              transform: isMobile && dropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)'
+            }}
+          />
         </button>
-        <div className="dropdown-content">
-          <Link to="/city/All" onClick={() => isMobile && setIsOpen(false)}>{t('allLocations')}</Link>
+        {/* Desktop: CSS hover. Mobile: toggle via state */}
+        <div className={`dropdown-content${isMobile ? (dropdownOpen ? ' mobile-dropdown-open' : ' mobile-dropdown-closed') : ''}`}>
+          <Link to="/city/All" onClick={() => { if (isMobile) { setIsOpen(false); setDropdownOpen(false); } }}>{t('allLocations')}</Link>
           {subdivisions.map((sub) => (
-            <Link key={sub} to={`/city/${sub}`} onClick={() => isMobile && setIsOpen(false)}>
+            <Link key={sub} to={`/city/${sub}`} onClick={() => { if (isMobile) { setIsOpen(false); setDropdownOpen(false); } }}>
               {t(sub.toLowerCase()) !== sub.toLowerCase() ? t(sub.toLowerCase()) : sub}
             </Link>
           ))}
@@ -293,17 +308,32 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Trending Topics Bar */}
+      {/* क्षेत्र / Subdivision Quick-Access Bar */}
       <div className="trending-tags-bar">
         <div className="container trending-tags-container">
-          <span className="trending-label">
-            ट्रेंडिंग:
+          <span className="trending-label" style={{ display: 'flex', alignItems: 'center', gap: '5px', whiteSpace: 'nowrap' }}>
+            <MapPin size={13} style={{ color: 'var(--color-primary)' }} />
+            क्षेत्र:
           </span>
-          <span className="trending-tag" onClick={() => navigate('/')}>#SantKabirNagar</span>
-          <span className="trending-tag" onClick={() => navigate('/')}>#HeatwaveAlert</span>
-          <span className="trending-tag" onClick={() => navigate('/')}>#UPBoardResults</span>
-          <span className="trending-tag" onClick={() => navigate('/')}>#BhojpuriFilmShoot</span>
-          <span className="trending-tag" onClick={() => navigate('/city/Khalilabad')}>#KhalilabadLibrary</span>
+          {/* "सभी" pill – always first */}
+          <span
+            className="trending-tag"
+            style={{ cursor: 'pointer' }}
+            onClick={() => navigate('/city/All')}
+          >
+            📍 सभी क्षेत्र
+          </span>
+          {/* Dynamic subdivisions from API */}
+          {subdivisions.map((sub) => (
+            <span
+              key={sub}
+              className="trending-tag"
+              style={{ cursor: 'pointer' }}
+              onClick={() => navigate(`/city/${sub}`)}
+            >
+              {sub}
+            </span>
+          ))}
         </div>
       </div>
     </header>
