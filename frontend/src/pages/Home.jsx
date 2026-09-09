@@ -21,6 +21,7 @@ export default function Home() {
   const [isEditorModalOpen, setIsEditorModalOpen] = useState(false);
   const [trendingNews, setTrendingNews] = useState([]);
   const [latestEPaper, setLatestEPaper] = useState(null);
+  const [showAllVideos, setShowAllVideos] = useState(false);
 
   const [selectedZodiac, setSelectedZodiac] = useState('');
   const zodiacList = [
@@ -610,15 +611,38 @@ export default function Home() {
                     {/* Video Bulletins inside left block */}
                     {videoNews.length > 0 && (
                       <section className="media-section" style={{ marginTop: '40px' }}>
-                        <div className="section-header">
+                        <div className="section-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                           <h3 className="section-title-line" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <Video size={20} style={{ color: 'var(--color-primary)' }} />
                             {t('videoNews')}
                           </h3>
+                          {videoNews.length > 4 && (
+                            <button
+                              onClick={() => setShowAllVideos(prev => !prev)}
+                              style={{
+                                background: 'var(--color-primary)',
+                                color: '#fff',
+                                border: 'none',
+                                borderRadius: '20px',
+                                padding: '6px 16px',
+                                fontSize: '13px',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                transition: 'opacity 0.2s'
+                              }}
+                              onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
+                              onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+                            >
+                              {showAllVideos ? '↑ कम देखें' : `सभी देखें (${videoNews.length})`}
+                            </button>
+                          )}
                         </div>
 
                         <div className="grid grid-cols-2" style={{ gap: '20px' }}>
-                          {videoNews.slice(0, 2).map((vn) => (
+                          {(showAllVideos ? videoNews : videoNews.slice(0, 4)).map((vn) => (
                             <div key={vn._id} className="glass" style={{ padding: '12px', borderRadius: 'var(--border-radius-md)' }}>
                               <div className="video-container">
                                 <iframe
@@ -638,6 +662,29 @@ export default function Home() {
                             </div>
                           ))}
                         </div>
+
+                        {videoNews.length > 4 && (
+                          <div style={{ textAlign: 'center', marginTop: '20px' }}>
+                            <button
+                              onClick={() => setShowAllVideos(prev => !prev)}
+                              style={{
+                                background: 'transparent',
+                                color: 'var(--color-primary)',
+                                border: '2px solid var(--color-primary)',
+                                borderRadius: '24px',
+                                padding: '8px 28px',
+                                fontSize: '14px',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                transition: 'all 0.2s'
+                              }}
+                              onMouseEnter={e => { e.currentTarget.style.background = 'var(--color-primary)'; e.currentTarget.style.color = '#fff'; }}
+                              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--color-primary)'; }}
+                            >
+                              {showAllVideos ? '↑ कम देखें' : `▼ सभी ${videoNews.length} वीडियो देखें`}
+                            </button>
+                          </div>
+                        )}
                       </section>
                     )}
                   </div>
