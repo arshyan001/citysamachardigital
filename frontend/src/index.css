@@ -1599,6 +1599,17 @@ footer {
    Full Responsiveness Styles
    ========================================================== */
 
+/* Mobile Notification Bell button wrapper — hidden on desktop */
+.mobile-notif-btn {
+  display: none;
+}
+
+/* Desktop Notification Bell button wrapper — visible on desktop, hidden on mobile */
+.desktop-notif-btn {
+  display: flex;
+  align-items: center;
+}
+
 /* 1. Mobile Menu and Header Toggle styles */
 .menu-toggle-btn {
   display: none;
@@ -1614,6 +1625,23 @@ footer {
   .menu-toggle-btn {
     display: block;
     z-index: 201;
+  }
+
+  /* Show notification bell next to hamburger on mobile */
+  .mobile-notif-btn {
+    display: flex;
+    align-items: center;
+    z-index: 201;
+  }
+
+  /* Hide top-bar bell on mobile */
+  .desktop-notif-btn {
+    display: none !important;
+  }
+
+  /* Hide the top-bar notification bell on mobile (shown in nav header instead) */
+  .top-bar .mobile-notif-btn {
+    display: none !important;
   }
 
   .nav-main {

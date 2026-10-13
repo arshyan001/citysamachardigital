@@ -6,7 +6,7 @@
                 {
                     "type": "header",
                     "key": "User-Agent",
-                    "value": "(.*)(WhatsApp|facebookexternalhit|Twitterbot|TelegramBot|Slackbot|Discordbot|Googlebot|Bingbot|LinkedInBot)(.*)"
+                    "value": "(.*)(WhatsApp|whatsapp|facebookexternalhit|FacebookBot|Twitterbot|twitterbot|TelegramBot|telegrambot|Slackbot|slackbot|Discordbot|discordbot|Googlebot|googlebot|Bingbot|bingbot|LinkedInBot|linkedinbot)(.*)"
                 }
             ],
             "destination": "https://citysamachardigital.onrender.com/share/:id"

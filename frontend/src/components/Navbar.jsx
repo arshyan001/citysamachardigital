@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { Clock, ChevronDown, Newspaper, Mail, UserCheck, MapPin, Sun, Moon, Menu, X, Info, ShieldCheck } from 'lucide-react';
+import NotificationBell from './NotificationBell';
 
 export default function Navbar() {
   const { t } = useLanguage();
@@ -268,6 +269,10 @@ export default function Navbar() {
                 एडमिन लॉगिन
               </Link>
             )}
+            {/* Desktop only — hidden on mobile (mobile has bell near hamburger) */}
+            <div className="desktop-notif-btn">
+              <NotificationBell />
+            </div>
             <button className="lang-toggle" onClick={toggleTheme} title={theme === 'light' ? 'डार्क मोड' : 'लाइट मोड'}>
               {theme === 'light' ? <Moon size={14} /> : <Sun size={14} />}
               {theme === 'light' ? 'डार्क' : 'लाइट'}
@@ -297,14 +302,21 @@ export default function Navbar() {
             {renderNavLinks(false)}
           </ul>
 
-          {/* Hamburger Menu Toggle Button */}
-          <button 
-            className="menu-toggle-btn" 
-            onClick={() => setIsOpen(!isOpen)}
-            aria-label="Toggle navigation"
-          >
-            {isOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          {/* Mobile: NotificationBell + Hamburger side by side */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {/* NotificationBell - mobile only (hidden on desktop) */}
+            <div className="mobile-notif-btn">
+              <NotificationBell />
+            </div>
+            {/* Hamburger Menu Toggle Button */}
+            <button 
+              className="menu-toggle-btn" 
+              onClick={() => setIsOpen(!isOpen)}
+              aria-label="Toggle navigation"
+            >
+              {isOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
         </div>
       </nav>
 
@@ -344,6 +356,22 @@ export default function Navbar() {
       style={{ top: `${headerHeight}px` }}
     >
       {renderNavLinks(true)}
+
+      {/* Notification toggle row inside mobile menu */}
+      <li style={{
+        padding: '12px 20px 16px 20px',
+        borderTop: '1px solid var(--border-color)',
+        marginTop: '8px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '10px',
+      }}>
+        <span style={{ fontSize: '14px', color: 'var(--color-text-secondary)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '7px' }}>
+          🔔 ब्रेकिंग न्यूज़ सूचना
+        </span>
+        <NotificationBell />
+      </li>
     </ul>
 
     {/* Mobile backdrop — click outside to close menu */}

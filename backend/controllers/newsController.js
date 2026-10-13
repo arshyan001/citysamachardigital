@@ -2,6 +2,31 @@ const News = require('../models/News');
 const Category = require('../models/Category');
 const jsonDb = require('../config/jsonDb');
 const { uploadToCloudinary, deleteFromCloudinary } = require('../config/cloudinary');
+const webpush = require('web-push');
+
+// Configure VAPID for push (only if keys are set)
+if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+  webpush.setVapidDetails(
+    process.env.VAPID_EMAIL || 'mailto:admin@citysamachardigital.com',
+    process.env.VAPID_PUBLIC_KEY,
+    process.env.VAPID_PRIVATE_KEY
+  );
+}
+
+// Helper: send push notification to all subscribers
+const sendPushToAll = async (title, body, url) => {
+  if (!global.pushSubscriptions || global.pushSubscriptions.length === 0) return;
+  const payload = JSON.stringify({ title, body, url, icon: '/logo.png', badge: '/logo.png' });
+  const failed = [];
+  await Promise.all(global.pushSubscriptions.map(async (sub) => {
+    try { await webpush.sendNotification(sub, payload); }
+    catch (err) { if (err.statusCode === 410 || err.statusCode === 404) failed.push(sub.endpoint); }
+  }));
+  if (failed.length) {
+    global.pushSubscriptions = global.pushSubscriptions.filter(s => !failed.includes(s.endpoint));
+  }
+  console.log(`[Push] Notified ${global.pushSubscriptions.length} subscribers about new news.`);
+};
 
 // @desc    Get all news articles with optional filters
 // @route   GET /api/news
@@ -155,6 +180,12 @@ const createNews = async (req, res) => {
         subdivision: subdivision || 'None',
         isBreaking: isBreaking === 'true' || isBreaking === true,
       });
+      // Send push notification to all subscribers
+      sendPushToAll(
+        '🔴 ' + (titleHi || titleEn || 'नई खबर'),
+        summaryHi || summaryEn || 'सिटी समाचार डिजिटल पर नई खबर पढ़ें।',
+        `/news/${createdNews._id || createdNews.id}`
+      );
       return res.status(201).json(createdNews);
     } catch (error) {
       return res.status(500).json({ message: error.message });
@@ -201,6 +232,12 @@ const createNews = async (req, res) => {
     });
 
     const createdNews = await news.save();
+    // Send push notification to all subscribers
+    sendPushToAll(
+      '🔴 ' + (titleHi || titleEn || 'नई खबर'),
+      summaryHi || summaryEn || 'सिटी समाचार डिजिटल पर नई खबर पढ़ें।',
+      `/news/${createdNews._id}`
+    );
     res.status(201).json(createdNews);
   } catch (error) {
     res.status(500).json({ message: error.message });

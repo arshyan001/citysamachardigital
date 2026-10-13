@@ -16,6 +16,7 @@ const adRoutes = require('./routes/adRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes');
 const editorRoutes = require('./routes/editorRoutes');
 const subdivisionRoutes = require('./routes/subdivisionRoutes');
+const pushRoutes = require('./routes/pushRoutes');
 
 const User = require('./models/User');
 const Category = require('./models/Category');
@@ -60,6 +61,7 @@ app.use('/api/ads', adRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/editor', editorRoutes);
 app.use('/api/subdivisions', subdivisionRoutes);
+app.use('/api/push', pushRoutes);
 
 // Simple status route
 app.get('/', (req, res) => {
@@ -151,6 +153,135 @@ Sitemap: https://citysamachardigital.vercel.app/sitemap.xml
 `);
 });
 
+// =====================================================================
+// /news/:id — OG meta tag handler for WhatsApp, Telegram, Facebook bots
+// Bots get proper OG HTML; real users get redirected to frontend React app
+// =====================================================================
+app.get('/news/:id', async (req, res) => {
+  const { id } = req.params;
+  const userAgent = req.headers['user-agent'] || '';
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+
+  // Detect social/crawler bots
+  const isBot = /facebookexternalhit|whatsapp|telegrambot|slackbot|discordbot|googlebot|bingbot|linkedinbot|twitterbot|bot|crawler|spider|crawling|embedly|quora link preview|rogerbot|vkshare|w3c_validator|outbrain|showyoubot|pinterest|applebot|redditbot|skypeuripreview|nuzzel|Datanyze/i.test(userAgent);
+
+  if (!isBot) {
+    // Real user — redirect to React frontend
+    return res.redirect(`${frontendUrl}/news/${id}`);
+  }
+
+  // It's a bot — serve OG meta tags HTML
+  try {
+    const News = require('./models/News');
+    const jsonDb = require('./config/jsonDb');
+
+    let news = null;
+    if (global.useJsonDb) {
+      const newsList = jsonDb.getNews({});
+      news = newsList.find(n => n._id === id || String(n._id) === id);
+    } else {
+      const mongoose = require('mongoose');
+      if (mongoose.Types.ObjectId.isValid(id)) {
+        news = await News.findById(id).populate('categories');
+      }
+    }
+
+    if (!news) {
+      return res.redirect(frontendUrl);
+    }
+
+    const siteUrl = process.env.SITE_URL || frontendUrl;
+    const articleUrl = `${siteUrl}/news/${id}`;
+    const title = (news.titleHi || news.titleEn || 'सिटी समाचार डिजिटल')
+      .replace(/"/g, '&quot;').replace(/[\r\n]+/g, ' ');
+    const summary = (news.summaryHi || news.summaryEn || news.contentHi || 'सिटी समाचार डिजिटल पर ताज़ा खबरें पढ़ें।')
+      .replace(/"/g, '&quot;').replace(/[\r\n]+/g, ' ').substring(0, 250);
+
+    // Pick best image — news image > fallback logo
+    let imageUrl = `${siteUrl}/logo.png`;
+    if (news.images && news.images.length > 0) {
+      const img = news.images[0];
+      imageUrl = img.startsWith('http') ? img : `${siteUrl}${img}`;
+    }
+
+    const logoUrl = `${siteUrl}/logo.png`;
+
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.send(`<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8">
+  <title>${title} | सिटी समाचार डिजिटल</title>
+  <meta name="description" content="${summary}">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="${articleUrl}">
+
+  <!-- Site Favicon & Brand Icon for link previews (WhatsApp, Google, etc.) -->
+  <link rel="icon" type="image/png" sizes="192x192" href="${logoUrl}">
+  <link rel="icon" type="image/png" sizes="32x32" href="${logoUrl}">
+  <link rel="shortcut icon" href="${logoUrl}">
+  <link rel="apple-touch-icon" sizes="180x180" href="${logoUrl}">
+  <link rel="apple-touch-icon" href="${logoUrl}">
+
+  <!-- Open Graph (WhatsApp / Facebook / Telegram) -->
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="सिटी समाचार डिजिटल">
+  <meta property="og:url" content="${articleUrl}">
+  <meta property="og:title" content="${title}">
+  <meta property="og:description" content="${summary}">
+  <meta property="og:image" content="${imageUrl}">
+  <meta property="og:image:secure_url" content="${imageUrl}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="${title}">
+  <meta property="og:locale" content="hi_IN">
+
+  <!-- WhatsApp specifically reads these -->
+  <meta name="thumbnail" content="${imageUrl}">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@CityKhabar">
+  <meta name="twitter:title" content="${title}">
+  <meta name="twitter:description" content="${summary}">
+  <meta name="twitter:image" content="${imageUrl}">
+  <meta name="twitter:image:alt" content="${title}">
+
+  <!-- JSON-LD -->
+  <script type="application/ld+json">${JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    "mainEntityOfPage": { "@type": "WebPage", "@id": articleUrl },
+    "headline": news.titleHi || news.titleEn,
+    "description": news.summaryHi || news.summaryEn,
+    "image": [imageUrl],
+    "datePublished": news.createdAt,
+    "dateModified": news.updatedAt || news.createdAt,
+    "author": { "@type": "Person", "name": news.author || "संपादकीय टीम" },
+    "publisher": {
+      "@type": "NewsMediaOrganization",
+      "name": "सिटी समाचार डिजिटल",
+      "logo": { "@type": "ImageObject", "url": logoUrl }
+    }
+  })}</script>
+
+  <!-- Redirect real users quickly -->
+  <meta http-equiv="refresh" content="0;url=${articleUrl}">
+</head>
+<body>
+  <h1>${title}</h1>
+  <p>${summary}</p>
+  <img src="${imageUrl}" alt="${title}" style="max-width:100%;height:auto;">
+  <p><a href="${articleUrl}">पूरी खबर पढ़ें — सिटी समाचार डिजिटल</a></p>
+</body>
+</html>`);
+
+  } catch (err) {
+    console.error('[OG] Error serving /news/:id for bot:', err);
+    res.redirect(`${frontendUrl}/news/${id}`);
+  }
+});
+
 // Share preview route for crawler bots and social previews
 app.get('/share/:id', async (req, res) => {
   const { id } = req.params;
@@ -158,7 +289,9 @@ app.get('/share/:id', async (req, res) => {
 
   // Detect search engine & social media bot user agents
   const isBot = /bot|crawler|spider|crawling|facebookexternalhit|whatsapp|telegrambot|slackbot|discordbot|googlebot|bingbot|linkedinbot|twitterbot|tumblr|embedly|quora link preview|paperli/i.test(userAgent);
-  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  const frontendUrl = process.env.FRONTEND_URL || 'https://citysamachardigital.vercel.app';
+  const siteUrl = process.env.SITE_URL || frontendUrl;
+  const logoUrl = `${siteUrl}/logo.png`;
 
   try {
     const News = require('./models/News');
@@ -167,7 +300,7 @@ app.get('/share/:id', async (req, res) => {
     let news = null;
     if (global.useJsonDb) {
       const newsList = jsonDb.getNews({});
-      news = newsList.find(n => n._id === id);
+      news = newsList.find(n => n._id === id || String(n._id) === id);
     } else {
       const mongoose = require('mongoose');
       if (mongoose.Types.ObjectId.isValid(id)) {
@@ -180,10 +313,12 @@ app.get('/share/:id', async (req, res) => {
     }
 
     if (isBot) {
-      const title = news.titleHi || news.titleEn || 'City Samachar Digital';
-      const summary = news.summaryHi || news.summaryEn || news.contentHi || news.contentEn || 'City Samachar Digital - Read latest news';
+      const title = (news.titleHi || news.titleEn || 'सिटी समाचार डिजिटल')
+        .replace(/"/g, '&quot;').replace(/[\r\n]+/g, ' ');
+      const summary = (news.summaryHi || news.summaryEn || news.contentHi || news.contentEn || 'सिटी समाचार डिजिटल पर ताज़ा ख़बरें पढ़ें।')
+        .replace(/"/g, '&quot;').replace(/[\r\n]+/g, ' ').substring(0, 250);
 
-      let imageUrl = '';
+      let imageUrl = `${siteUrl}/logo.png`;
       if (news.images && news.images.length > 0) {
         const img = news.images[0];
         if (img.startsWith('http')) {
@@ -192,59 +327,78 @@ app.get('/share/:id', async (req, res) => {
           const backendUrl = req.protocol + '://' + req.get('host');
           imageUrl = backendUrl + img;
         }
-      } else {
-        imageUrl = 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=800&q=80';
       }
-
-      const cleanSummary = summary.replace(/"/g, '&quot;').replace(/[\r\n]+/g, ' ').substring(0, 200);
-      const cleanTitle = title.replace(/"/g, '&quot;').replace(/[\r\n]+/g, ' ');
 
       const articleUrl = `${frontendUrl}/news/${id}`;
       const jsonLdSchema = JSON.stringify({
         '@context': 'https://schema.org',
         '@type': 'NewsArticle',
         'mainEntityOfPage': articleUrl,
-        'headline': cleanTitle,
-        'description': cleanSummary,
+        'headline': title,
+        'description': summary,
         'image': [imageUrl],
         'datePublished': news.createdAt || new Date().toISOString(),
         'dateModified': news.updatedAt || news.createdAt || new Date().toISOString(),
         'publisher': {
           '@type': 'NewsMediaOrganization',
           'name': 'सिटी समाचार डिजिटल',
-          'url': frontendUrl
+          'url': frontendUrl,
+          'logo': {
+            '@type': 'ImageObject',
+            'url': logoUrl
+          }
         }
       });
 
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
       res.send(`<!DOCTYPE html>
 <html lang="hi">
 <head>
   <meta charset="utf-8">
-  <title>${cleanTitle} | सिटी समाचार डिजिटल</title>
-  <meta name="description" content="${cleanSummary}">
-  <link rel="canonical" href="${articleUrl}" />
-  
-  <!-- Open Graph / Facebook -->
+  <title>${title} | सिटी समाचार डिजिटल</title>
+  <meta name="description" content="${summary}">
+  <link rel="canonical" href="${articleUrl}">
+
+  <!-- Favicon & Brand Logo for Link Previews (WhatsApp, Google, etc.) -->
+  <link rel="icon" type="image/png" sizes="192x192" href="${logoUrl}">
+  <link rel="icon" type="image/png" sizes="32x32" href="${logoUrl}">
+  <link rel="shortcut icon" href="${logoUrl}">
+  <link rel="apple-touch-icon" sizes="180x180" href="${logoUrl}">
+  <link rel="apple-touch-icon" href="${logoUrl}">
+
+  <!-- Open Graph / WhatsApp / Facebook -->
   <meta property="og:type" content="article">
+  <meta property="og:site_name" content="सिटी समाचार डिजिटल">
   <meta property="og:url" content="${articleUrl}">
-  <meta property="og:title" content="${cleanTitle}">
-  <meta property="og:description" content="${cleanSummary}">
+  <meta property="og:title" content="${title}">
+  <meta property="og:description" content="${summary}">
   <meta property="og:image" content="${imageUrl}">
-  
+  <meta property="og:image:secure_url" content="${imageUrl}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="${title}">
+  <meta property="og:locale" content="hi_IN">
+  <meta name="thumbnail" content="${imageUrl}">
+
   <!-- Twitter -->
-  <meta property="twitter:card" content="summary_large_image">
-  <meta property="twitter:url" content="${articleUrl}">
-  <meta property="twitter:title" content="${cleanTitle}">
-  <meta property="twitter:description" content="${cleanSummary}">
-  <meta property="twitter:image" content="${imageUrl}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@CityKhabar">
+  <meta name="twitter:url" content="${articleUrl}">
+  <meta name="twitter:title" content="${title}">
+  <meta name="twitter:description" content="${summary}">
+  <meta name="twitter:image" content="${imageUrl}">
 
   <!-- Structured Data -->
   <script type="application/ld+json">${jsonLdSchema}</script>
+
+  <!-- Instant redirect for real users -->
+  <meta http-equiv="refresh" content="0;url=${articleUrl}">
 </head>
 <body>
-  <h1>${cleanTitle}</h1>
-  <p>${cleanSummary}</p>
-  <img src="${imageUrl}" alt="${cleanTitle}" />
+  <h1>${title}</h1>
+  <p>${summary}</p>
+  <img src="${imageUrl}" alt="${title}">
+  <p><a href="${articleUrl}">पूरी खबर पढ़ें — सिटी समाचार डिजिटल</a></p>
 </body>
 </html>`);
     } else {
@@ -254,6 +408,17 @@ app.get('/share/:id', async (req, res) => {
     console.error('Error in share handler:', error);
     res.redirect(frontendUrl);
   }
+});
+
+// Favicon & Logo direct routes
+app.get('/favicon.ico', (req, res) => {
+  const frontendUrl = process.env.FRONTEND_URL || 'https://citysamachardigital.vercel.app';
+  res.redirect(`${frontendUrl}/logo.png`);
+});
+
+app.get('/logo.png', (req, res) => {
+  const frontendUrl = process.env.FRONTEND_URL || 'https://citysamachardigital.vercel.app';
+  res.redirect(`${frontendUrl}/logo.png`);
 });
 
 
