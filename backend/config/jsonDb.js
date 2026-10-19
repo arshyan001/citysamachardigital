@@ -691,6 +691,54 @@ const jsonDb = {
     db.subdivisions = db.subdivisions.filter(s => s.toLowerCase() !== name.toLowerCase());
     saveDb(db);
     return db.subdivisions.length !== originalLength;
+  },
+
+  // Push Subscription Operations
+  getPushSubscriptions: () => {
+    const db = getDb();
+    return db.pushSubscriptions || [];
+  },
+
+  savePushSubscription: (sub) => {
+    const db = getDb();
+    if (!db.pushSubscriptions) {
+      db.pushSubscriptions = [];
+    }
+    const idx = db.pushSubscriptions.findIndex(s => s.endpoint === sub.endpoint);
+    if (idx >= 0) {
+      db.pushSubscriptions[idx] = { ...db.pushSubscriptions[idx], ...sub, updatedAt: new Date().toISOString() };
+    } else {
+      db.pushSubscriptions.push({
+        _id: 'sub_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+        ...sub,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+    }
+    saveDb(db);
+    return true;
+  },
+
+  removePushSubscription: (endpoint) => {
+    const db = getDb();
+    if (!db.pushSubscriptions) return false;
+    const len = db.pushSubscriptions.length;
+    db.pushSubscriptions = db.pushSubscriptions.filter(s => s.endpoint !== endpoint);
+    saveDb(db);
+    return db.pushSubscriptions.length !== len;
+  },
+
+  removePushSubscriptionsBatch: (endpoints) => {
+    if (!endpoints || !endpoints.length) return;
+    const db = getDb();
+    if (!db.pushSubscriptions) return;
+    db.pushSubscriptions = db.pushSubscriptions.filter(s => !endpoints.includes(s.endpoint));
+    saveDb(db);
+  },
+
+  countPushSubscriptions: () => {
+    const db = getDb();
+    return (db.pushSubscriptions || []).length;
   }
 };
 

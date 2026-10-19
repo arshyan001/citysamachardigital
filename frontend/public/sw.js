@@ -1,8 +1,6 @@
 // City Samachar Digital - Push Notification Service Worker
 // File: public/sw.js
 
-const CACHE_NAME = 'city-samachar-v1';
-
 self.addEventListener('install', (event) => {
   console.log('[SW] Service Worker installed');
   self.skipWaiting();
@@ -15,7 +13,7 @@ self.addEventListener('activate', (event) => {
 
 // Handle Push Notifications
 self.addEventListener('push', (event) => {
-  console.log('[SW] Push notification received:', event);
+  console.log('[SW] Push notification event received');
 
   let data = {
     title: 'सिटी समाचार डिजिटल',
@@ -27,30 +25,26 @@ self.addEventListener('push', (event) => {
 
   if (event.data) {
     try {
-      data = { ...data, ...event.data.json() };
+      const parsed = event.data.json();
+      data = { ...data, ...parsed };
     } catch (e) {
-      data.body = event.data.text();
+      data.body = event.data.text() || data.body;
     }
   }
 
+  const iconUrl = new URL(data.icon || '/logo.png', self.location.origin).href;
+  const badgeUrl = new URL(data.badge || '/logo.png', self.location.origin).href;
+
   const options = {
     body: data.body,
-    icon: data.icon || '/logo.png',
-    badge: data.badge || '/logo.png',
+    icon: iconUrl,
+    badge: badgeUrl,
     vibrate: [200, 100, 200],
-    data: { url: data.url || '/' },
-    actions: [
-      {
-        action: 'open',
-        title: 'खबर पढ़ें',
-      },
-      {
-        action: 'close',
-        title: 'बंद करें',
-      },
-    ],
+    data: {
+      url: data.url || '/'
+    },
     requireInteraction: false,
-    tag: 'city-samachar-news',
+    tag: data.tag || 'city-samachar-news',
     renotify: true,
   };
 
@@ -61,26 +55,29 @@ self.addEventListener('push', (event) => {
 
 // Handle Notification Click
 self.addEventListener('notificationclick', (event) => {
-  console.log('[SW] Notification clicked:', event.action);
+  console.log('[SW] Notification clicked');
   event.notification.close();
 
   if (event.action === 'close') return;
 
-  const urlToOpen = event.notification.data?.url || '/';
+  const rawUrl = event.notification.data?.url || '/';
+  const targetUrl = new URL(rawUrl, self.location.origin).href;
 
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      // If app is already open, focus and navigate
+      // If a tab is already open with our site, focus it and navigate
       for (const client of clientList) {
-        if (client.url && 'focus' in client) {
+        if ('focus' in client) {
           client.focus();
-          client.navigate(urlToOpen);
+          if ('navigate' in client) {
+            client.navigate(targetUrl);
+          }
           return;
         }
       }
       // Otherwise open new window
       if (self.clients.openWindow) {
-        return self.clients.openWindow(urlToOpen);
+        return self.clients.openWindow(targetUrl);
       }
     })
   );

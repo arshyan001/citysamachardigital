@@ -2,30 +2,22 @@ const News = require('../models/News');
 const Category = require('../models/Category');
 const jsonDb = require('../config/jsonDb');
 const { uploadToCloudinary, deleteFromCloudinary } = require('../config/cloudinary');
-const webpush = require('web-push');
+const pushService = require('../services/pushService');
 
-// Configure VAPID for push (only if keys are set)
-if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
-  webpush.setVapidDetails(
-    process.env.VAPID_EMAIL || 'mailto:admin@citysamachardigital.com',
-    process.env.VAPID_PUBLIC_KEY,
-    process.env.VAPID_PRIVATE_KEY
-  );
-}
-
-// Helper: send push notification to all subscribers
+// Helper: send push notification to all subscribers via pushService
 const sendPushToAll = async (title, body, url) => {
-  if (!global.pushSubscriptions || global.pushSubscriptions.length === 0) return;
-  const payload = JSON.stringify({ title, body, url, icon: '/logo.png', badge: '/logo.png' });
-  const failed = [];
-  await Promise.all(global.pushSubscriptions.map(async (sub) => {
-    try { await webpush.sendNotification(sub, payload); }
-    catch (err) { if (err.statusCode === 410 || err.statusCode === 404) failed.push(sub.endpoint); }
-  }));
-  if (failed.length) {
-    global.pushSubscriptions = global.pushSubscriptions.filter(s => !failed.includes(s.endpoint));
+  try {
+    await pushService.sendNotificationToAll({
+      title,
+      body,
+      url,
+      icon: '/logo.png',
+      badge: '/logo.png',
+      tag: 'news-' + Date.now()
+    });
+  } catch (err) {
+    console.error('[Push News] Error broadcasting notification:', err.message);
   }
-  console.log(`[Push] Notified ${global.pushSubscriptions.length} subscribers about new news.`);
 };
 
 // @desc    Get all news articles with optional filters

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
-import { Plus, Edit, Trash2, Mail, FolderPlus, Newspaper, CheckCircle, XCircle, FileText, ChevronRight, Languages, BarChart2, MessageSquare, ChevronDown, LogOut, Settings, Image, Globe, Share2, ThumbsUp, Eye } from 'lucide-react';
+import { Plus, Edit, Trash2, Mail, FolderPlus, Newspaper, CheckCircle, XCircle, FileText, ChevronRight, Languages, BarChart2, MessageSquare, ChevronDown, LogOut, Settings, Image, Globe, Share2, ThumbsUp, Eye, Bell, BellRing, Send, Radio } from 'lucide-react';
 import Swal from 'sweetalert2';
 
 export default function AdminDashboard() {
@@ -88,6 +88,93 @@ export default function AdminDashboard() {
   const [existingImages, setExistingImages] = useState([]);
   const [isBreaking, setIsBreaking] = useState(false);
   const [isNewsSaving, setIsNewsSaving] = useState(false);
+
+  // Push Notification States
+  const [subscribersCount, setSubscribersCount] = useState(0);
+  const [customNotifTitle, setCustomNotifTitle] = useState('');
+  const [customNotifBody, setCustomNotifBody] = useState('');
+  const [customNotifUrl, setCustomNotifUrl] = useState('/');
+  const [isSendingNotif, setIsSendingNotif] = useState(false);
+  const [isTestingNotif, setIsTestingNotif] = useState(false);
+
+  const fetchSubscribersCount = async () => {
+    try {
+      const res = await fetch('/api/push/count');
+      if (res.ok) {
+        const data = await res.json();
+        setSubscribersCount(data.count || 0);
+      }
+    } catch (err) {
+      console.error('Error fetching subscribers count:', err);
+    }
+  };
+
+  const handleSendTestNotification = async () => {
+    setIsTestingNotif(true);
+    try {
+      const res = await fetch('/api/push/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: '🔔 परीक्षण सूचना - सिटी समाचार',
+          body: 'सूचना सेवा ठीक से काम कर रही है! आप ताज़ा खबरों से अपडेट रहेंगे।'
+        })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        Swal.fire({
+          icon: 'success',
+          title: 'टेस्ट नोटिफिकेशन भेजा गया!',
+          text: `सफलतापूर्वक ${data.sent || 0} डिवाइस पर सूचना भेजी गई। (कुल सक्रिय सब्सक्राइबर: ${data.total || 0})`,
+        });
+        fetchSubscribersCount();
+      } else {
+        Swal.fire({ icon: 'error', title: 'त्रुटि', text: data.error || 'भेजने में विफल' });
+      }
+    } catch (err) {
+      Swal.fire({ icon: 'error', title: 'नेटवर्क त्रुटि', text: err.message });
+    } finally {
+      setIsTestingNotif(false);
+    }
+  };
+
+  const handleSendCustomNotification = async (e) => {
+    e.preventDefault();
+    if (!customNotifTitle.trim() || !customNotifBody.trim()) {
+      Swal.fire({ icon: 'warning', title: 'कृपया शीर्षक और संदेश दोनों दर्ज करें' });
+      return;
+    }
+    setIsSendingNotif(true);
+    try {
+      const res = await fetch('/api/push/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: customNotifTitle,
+          body: customNotifBody,
+          url: customNotifUrl || '/'
+        })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        Swal.fire({
+          icon: 'success',
+          title: 'सूचना सफलतापूर्वक भेजी गई!',
+          text: `${data.sent || 0} पाठकों तक पहुंचाई गई।`,
+        });
+        setCustomNotifTitle('');
+        setCustomNotifBody('');
+        setCustomNotifUrl('/');
+        fetchSubscribersCount();
+      } else {
+        Swal.fire({ icon: 'error', title: 'त्रुटि', text: data.error || 'भेजने में विफल' });
+      }
+    } catch (err) {
+      Swal.fire({ icon: 'error', title: 'नेटवर्क त्रुटि', text: err.message });
+    } finally {
+      setIsSendingNotif(false);
+    }
+  };
 
   // Translation States & Function
   const [isAutoTranslate, setIsAutoTranslate] = useState(true);
@@ -1256,13 +1343,28 @@ export default function AdminDashboard() {
               <span style={{ marginRight: '5px' }}>📰</span>
               {language === 'en' ? 'Auto Newspaper' : 'ऑटो अखबार'}
             </button>
+
+            {/* Push Notifications Tab */}
+            <button
+              className={`admin-tab ${activeTab === 'notifications' ? 'active' : ''}`}
+              onClick={() => { setActiveTab('notifications'); fetchSubscribersCount(); }}
+              style={{ borderColor: activeTab === 'notifications' ? 'var(--color-primary)' : 'rgba(239,68,68,0.3)' }}
+            >
+              <Bell size={16} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+              {language === 'en' ? 'Push Notifications' : 'पुश सूचनाएं'}
+              {subscribersCount > 0 && (
+                <span style={{ background: '#22c55e', color: 'white', fontSize: '10px', padding: '2px 7px', borderRadius: '10px', marginLeft: '6px', fontWeight: 700 }}>
+                  {subscribersCount}
+                </span>
+              )}
+            </button>
           </div>
 
           {/* Mobile-only grouped dropdown */}
           <div className="admin-mobile-dropdown">
             <div className="dropdown-menu" style={{ position: 'relative' }}>
               <button
-                className={`admin-tab ${['form', 'categories', 'epaper', 'poll', 'ads', 'adForm'].includes(activeTab) ? 'active' : ''}`}
+                className={`admin-tab ${['form', 'categories', 'epaper', 'poll', 'ads', 'adForm', 'notifications'].includes(activeTab) ? 'active' : ''}`}
                 onClick={() => setIsEditMenuOpen(!isEditMenuOpen)}
                 style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
               >
@@ -1273,6 +1375,18 @@ export default function AdminDashboard() {
 
               {isEditMenuOpen && (
                 <div className="admin-dropdown-content">
+                  <button
+                    style={{ background: 'transparent', border: 'none', color: activeTab === 'notifications' ? 'var(--color-primary)' : 'var(--color-text-primary)', padding: '10px 15px', textAlign: 'left', cursor: 'pointer', fontWeight: 600, fontSize: '14px', width: '100%', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '8px' }}
+                    onClick={() => { setActiveTab('notifications'); fetchSubscribersCount(); setIsEditMenuOpen(false); }}
+                  >
+                    <Bell size={14} color="#ef4444" />
+                    {language === 'en' ? 'Push Notifications' : '🔔 पुश सूचनाएं'}
+                    {subscribersCount > 0 && (
+                      <span style={{ background: '#22c55e', color: 'white', fontSize: '10px', padding: '1px 6px', borderRadius: '10px', marginLeft: 'auto' }}>
+                        {subscribersCount}
+                      </span>
+                    )}
+                  </button>
                   <button
                     style={{ background: 'transparent', border: 'none', color: activeTab === 'form' ? 'var(--color-primary)' : 'var(--color-text-primary)', padding: '10px 15px', textAlign: 'left', cursor: 'pointer', fontWeight: 600, fontSize: '14px', width: '100%', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '8px' }}
                     onClick={() => { if (!editingId) resetForm(); setActiveTab('form'); setIsEditMenuOpen(false); }}
@@ -3106,6 +3220,250 @@ export default function AdminDashboard() {
                 </button>
               </div>
             </form>
+          </div>
+        )}
+
+        {/* TAB: PUSH NOTIFICATIONS MANAGEMENT */}
+        {activeTab === 'notifications' && (
+          <div style={{ maxWidth: '850px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            
+            {/* Top Stat Cards */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+              <div style={{
+                background: 'var(--card-bg, #ffffff)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '16px',
+                padding: '20px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '16px',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.04)'
+              }}>
+                <div style={{
+                  width: '50px',
+                  height: '50px',
+                  borderRadius: '12px',
+                  background: 'linear-gradient(135deg, rgba(34,197,94,0.15) 0%, rgba(21,128,61,0.2) 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#16a34a'
+                }}>
+                  <BellRing size={26} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 600 }}>
+                    कुल सक्रिय सब्सक्राइबर्स
+                  </div>
+                  <div style={{ fontSize: '28px', fontWeight: 800, color: 'var(--color-text-primary)', marginTop: '2px' }}>
+                    {subscribersCount}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{
+                background: 'var(--card-bg, #ffffff)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '16px',
+                padding: '20px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '16px',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.04)'
+              }}>
+                <div style={{
+                  width: '50px',
+                  height: '50px',
+                  borderRadius: '12px',
+                  background: 'linear-gradient(135deg, rgba(239,68,68,0.15) 0%, rgba(185,28,28,0.2) 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#ef4444'
+                }}>
+                  <Radio size={26} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 600 }}>
+                    ऑटो-नोटिफिकेशन स्थिति
+                  </div>
+                  <div style={{ fontSize: '15px', fontWeight: 700, color: '#16a34a', marginTop: '4px' }}>
+                    ✅ नई खबर पर सक्रिय
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Test Box */}
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(239,68,68,0.08) 0%, rgba(59,130,246,0.05) 100%)',
+              border: '1.5px dashed rgba(239,68,68,0.35)',
+              borderRadius: '16px',
+              padding: '22px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '16px'
+            }}>
+              <div>
+                <h4 style={{ margin: '0 0 4px 0', fontSize: '16px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                  🔔 नोटिफिकेशन टेस्ट करें
+                </h4>
+                <p style={{ margin: 0, fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: 1.5 }}>
+                  यह जांचने के लिए कि नोटिफिकेशन आपके ब्राउज़र पर काम कर रही है या नहीं, एक टेस्ट नोटिफिकेशन भेजें।
+                </p>
+              </div>
+              <button
+                type="button"
+                className="btn"
+                onClick={handleSendTestNotification}
+                disabled={isTestingNotif}
+                style={{
+                  width: 'auto',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  background: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)',
+                  boxShadow: '0 4px 12px rgba(239,68,68,0.3)',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                {isTestingNotif ? (
+                  <>
+                    <span style={{ width: '14px', height: '14px', border: '2px solid #fff', borderTopColor: 'transparent', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.6s linear infinite' }} />
+                    भेजा जा रहा है...
+                  </>
+                ) : (
+                  <>
+                    <Send size={15} />
+                    📢 टेस्ट नोटिफिकेशन भेजें
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Manual Broadcast Form */}
+            <div style={{
+              background: 'var(--card-bg, #ffffff)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '18px',
+              padding: '28px',
+              boxShadow: '0 6px 20px rgba(0,0,0,0.05)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+                <Send size={20} color="var(--color-primary)" />
+                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                  कस्टम सूचना भेजें (Broadcast to All Readers)
+                </h3>
+              </div>
+              <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: '20px', lineHeight: 1.5 }}>
+                यहाँ से आप सभी सब्सक्राइबर्स को ब्रेकिंग न्यूज़, महत्वपूर्ण घोषणा या किसी विशेष खबर का नोटिफिकेशन तुरंत भेज सकते हैं।
+              </p>
+
+              <form onSubmit={handleSendCustomNotification}>
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px', color: 'var(--color-text-primary)' }}>
+                    सूचना का शीर्षक (Title) *
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="उदा: 🔴 ब्रेकिंग न्यूज़: संतकबीरनगर में बड़ा फैसला..."
+                    value={customNotifTitle}
+                    onChange={(e) => setCustomNotifTitle(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px', color: 'var(--color-text-primary)' }}>
+                    संदेश (Message / Body) *
+                  </label>
+                  <textarea
+                    className="form-control"
+                    rows="3"
+                    placeholder="उदा: पूरी खबर पढ़ने के लिए तुरंत टैप करें..."
+                    value={customNotifBody}
+                    onChange={(e) => setCustomNotifBody(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div style={{ marginBottom: '22px' }}>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px', color: 'var(--color-text-primary)' }}>
+                    क्लिक करने पर खुलने वाला लिंक (URL)
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="/ या /news/xyz-id"
+                    value={customNotifUrl}
+                    onChange={(e) => setCustomNotifUrl(e.target.value)}
+                  />
+                  <small style={{ color: 'var(--color-text-secondary)', fontSize: '12px' }}>
+                    डिफ़ॉल्ट रूप से होमपेज ('/') खुलेगा। किसी खास खबर के लिए उसका लिंक डालें।
+                  </small>
+                </div>
+
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                  <button
+                    type="submit"
+                    className="btn"
+                    disabled={isSendingNotif}
+                    style={{
+                      width: 'auto',
+                      padding: '12px 24px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      fontWeight: 700
+                    }}
+                  >
+                    {isSendingNotif ? (
+                      <>
+                        <span style={{ width: '14px', height: '14px', border: '2px solid #fff', borderTopColor: 'transparent', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.6s linear infinite' }} />
+                        भेजा जा रहा है...
+                      </>
+                    ) : (
+                      <>
+                        <Send size={16} />
+                        सभी पाठकों को भेजें ({subscribersCount} सब्सक्राइबर्स)
+                      </>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={fetchSubscribersCount}
+                    style={{ width: 'auto', padding: '12px 18px', fontSize: '13px' }}
+                  >
+                    🔄 संख्या रिफ्रेश करें
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Help / Guide Box */}
+            <div style={{
+              background: 'var(--fb-hover-bg, #f3f4f6)',
+              borderRadius: '16px',
+              padding: '20px',
+              fontSize: '13px',
+              color: 'var(--color-text-secondary)',
+              lineHeight: 1.6
+            }}>
+              <h5 style={{ margin: '0 0 8px 0', fontSize: '14px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                ℹ️ जरूरी जानकारी:
+              </h5>
+              <ul style={{ margin: 0, paddingLeft: '20px' }}>
+                <li>वेब पुश नोटिफिकेशन के लिए वेबसाइट का <strong>HTTPS</strong> पर होना जरूरी है (लोकलहोस्ट पर यह सीधे काम करता है)।</li>
+                <li>जब कोई पाठक वेबसाइट पर <strong>🔔 सूचना</strong> बटन दबाकर 'Allow' करता है, तो उसका डिवाइस डेटाबेस में सुरक्षित सेव हो जाता है।</li>
+                <li>जब भी आप कोई <strong>नया समाचार</strong> प्रकाशित करते हैं, तो सभी सब्सक्राइबर्स को स्वचालित रूप से नोटिफिकेशन भेजा जाता है।</li>
+                <li>यदि किसी पाठक ने ब्राउज़र सेटिंग से सूचना ब्लॉक कर दी है, तो उसे ब्राउज़र सेटिंग्स में जाकर 'Reset Permission' करना होगा।</li>
+              </ul>
+            </div>
+
           </div>
         )}
 
