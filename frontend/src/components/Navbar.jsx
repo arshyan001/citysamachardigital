@@ -113,6 +113,19 @@ export default function Navbar() {
         </NavLink>
       </li>
 
+      {/* Explicit Notification Button in Menu */}
+      {isMobile && (
+        <li style={{ padding: '8px 0', borderBottom: '1px solid var(--border-color)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--color-primary)', textTransform: 'uppercase', letterSpacing: '0.4px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <BellRing size={13} />
+              सूचनाएं (Notification Alert):
+            </span>
+            <NotificationBell fullWidth={true} />
+          </div>
+        </li>
+      )}
+
       {/* Dropdown for Sant Kabir Nagar locations */}
       <li className={`dropdown-menu ${isMobile ? 'mobile-dropdown-item' : ''}`}>
         <button

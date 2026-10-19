@@ -63,16 +63,12 @@ export default function NotificationBell({ fullWidth = false }) {
     };
     window.addEventListener('city_push_sync', handleSync);
 
-    // Show prompt automatically once per session if not decided
-    const promptDismissed = sessionStorage.getItem('notif_prompt_shown');
-    if (!promptDismissed && Notification.permission === 'default') {
+    // Show prompt automatically when website opens if not yet subscribed or decided
+    if (Notification.permission === 'default' && !promptShownRef.current) {
       const timer = setTimeout(() => {
-        if (!promptShownRef.current) {
-          setShowPrompt(true);
-          promptShownRef.current = true;
-          sessionStorage.setItem('notif_prompt_shown', '1');
-        }
-      }, 3500);
+        setShowPrompt(true);
+        promptShownRef.current = true;
+      }, 1200);
       return () => {
         clearTimeout(timer);
         window.removeEventListener('city_push_sync', handleSync);
@@ -358,7 +354,7 @@ export default function NotificationBell({ fullWidth = false }) {
             style={{
               position: 'fixed',
               inset: 0,
-              zIndex: 99998,
+              zIndex: 100001,
               background: 'rgba(0, 0, 0, 0.7)',
               backdropFilter: 'blur(5px)',
               WebkitBackdropFilter: 'blur(5px)',
@@ -373,7 +369,7 @@ export default function NotificationBell({ fullWidth = false }) {
               top: '50%',
               left: '50%',
               transform: 'translate(-50%, -50%)',
-              zIndex: 99999,
+              zIndex: 100002,
               width: '360px',
               maxWidth: 'calc(100vw - 32px)',
               background: '#ffffff',
