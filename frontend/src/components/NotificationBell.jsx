@@ -16,7 +16,7 @@ function urlBase64ToUint8Array(base64String) {
   return outputArray;
 }
 
-export default function NotificationBell() {
+export default function NotificationBell({ fullWidth = false }) {
   const [permission, setPermission] = useState('default'); // 'default' | 'granted' | 'denied'
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [showPrompt, setShowPrompt] = useState(false);
@@ -274,7 +274,26 @@ export default function NotificationBell() {
             ? 'सूचनाएं बंद करें'
             : 'ताज़ा खबरों की सूचनाएं चालू करें'
         }
-        style={{
+        style={fullWidth ? {
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '8px',
+          width: '100%',
+          background: isSubscribed
+            ? 'linear-gradient(135deg, rgba(34,197,94,0.15) 0%, rgba(21,128,61,0.18) 100%)'
+            : 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)',
+          border: isSubscribed ? '1.5px solid rgba(34,197,94,0.5)' : 'none',
+          borderRadius: '12px',
+          padding: '11px 16px',
+          cursor: loading ? 'wait' : 'pointer',
+          color: isSubscribed ? '#16a34a' : '#fff',
+          fontSize: '13px',
+          fontWeight: 700,
+          boxShadow: isSubscribed ? 'none' : '0 4px 14px rgba(239,68,68,0.35)',
+          transition: 'all 0.2s ease',
+          opacity: loading ? 0.7 : 1,
+        } : {
           display: 'flex',
           alignItems: 'center',
           gap: '5px',
@@ -295,30 +314,38 @@ export default function NotificationBell() {
           whiteSpace: 'nowrap',
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.borderColor = 'var(--color-primary)';
-          e.currentTarget.style.color = 'var(--color-primary)';
+          if (!fullWidth) {
+            e.currentTarget.style.borderColor = 'var(--color-primary)';
+            e.currentTarget.style.color = 'var(--color-primary)';
+          }
         }}
         onMouseLeave={(e) => {
-          if (!isSubscribed) {
-            e.currentTarget.style.borderColor = 'var(--border-color)';
-            e.currentTarget.style.color = 'var(--color-text-secondary)';
-          } else {
-            e.currentTarget.style.borderColor = 'rgba(239,68,68,0.6)';
-            e.currentTarget.style.color = 'var(--color-primary)';
+          if (!fullWidth) {
+            if (!isSubscribed) {
+              e.currentTarget.style.borderColor = 'var(--border-color)';
+              e.currentTarget.style.color = 'var(--color-text-secondary)';
+            } else {
+              e.currentTarget.style.borderColor = 'rgba(239,68,68,0.6)';
+              e.currentTarget.style.color = 'var(--color-primary)';
+            }
           }
         }}
       >
         {loading ? (
           <span style={{ width: '13px', height: '13px', border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.6s linear infinite' }} />
         ) : permission === 'denied' ? (
-          <BellOff size={14} color="#ef4444" />
+          <BellOff size={fullWidth ? 16 : 14} color={fullWidth ? 'currentColor' : '#ef4444'} />
         ) : isSubscribed ? (
-          <BellRing size={14} color="#ef4444" style={{ animation: 'bellRing 1s ease-in-out' }} />
+          <BellRing size={fullWidth ? 16 : 14} color={fullWidth ? '#16a34a' : '#ef4444'} style={{ animation: 'bellRing 1s ease-in-out' }} />
         ) : (
-          <Bell size={14} />
+          <Bell size={fullWidth ? 16 : 14} />
         )}
         <span>
-          {isSubscribed ? 'सूचना चालू' : permission === 'denied' ? 'ब्लॉक' : 'सूचना'}
+          {fullWidth ? (
+            isSubscribed ? '✅ सूचना चालू है (टैप कर बंद करें)' : permission === 'denied' ? '❌ सूचनाएं ब्लॉक हैं (Allow करें)' : '🔔 सूचना चालू करें'
+          ) : (
+            isSubscribed ? 'सूचना चालू' : permission === 'denied' ? 'ब्लॉक' : 'सूचना'
+          )}
         </span>
       </button>
 

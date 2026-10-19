@@ -1225,37 +1225,52 @@ footer {
   }
 }
 
-/* Custom news styling */
+/* Custom news styling — Smooth Slidable Horizontal Bar */
 .trending-tags-bar {
   background: var(--bg-card);
   border-bottom: 1px solid var(--border-color);
-  padding: 10px 0;
+  padding: 8px 0;
   font-size: 13px;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
   white-space: nowrap;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.trending-tags-bar::-webkit-scrollbar,
+.categories-slidable-bar::-webkit-scrollbar {
+  display: none;
 }
 
 .trending-tags-container {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 15px;
+  gap: 10px;
+  padding: 0 16px;
+  width: max-content;
+  min-width: 100%;
 }
 
 .trending-label {
   font-weight: 800;
   color: var(--color-primary);
   text-transform: uppercase;
+  flex-shrink: 0;
 }
 
 .trending-tag {
   background: rgba(239, 68, 68, 0.08);
   border: 1px solid var(--border-color);
-  padding: 4px 10px;
-  border-radius: 15px;
+  padding: 5px 12px;
+  border-radius: 16px;
   color: var(--color-text-primary);
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 12px;
   cursor: pointer;
   transition: var(--transition-smooth);
+  flex-shrink: 0;
 }
 
 .trending-tag:hover {
@@ -1596,7 +1611,7 @@ footer {
 }
 
 /* ==========================================================
-   Full Responsiveness Styles
+   Full Responsiveness Styles & Slidable Mobile Drawer
    ========================================================== */
 
 /* Mobile Notification Bell button wrapper — hidden on desktop */
@@ -1610,194 +1625,261 @@ footer {
   align-items: center;
 }
 
-/* 1. Mobile Menu and Header Toggle styles */
 .menu-toggle-btn {
   display: none;
-  background: transparent;
-  border: none;
-  color: var(--color-text-primary);
-  cursor: pointer;
-  padding: 6px;
-  transition: var(--transition-smooth);
 }
 
-@media (max-width: 768px) {
+/* Slidable Mobile Drawer Backdrop Overlay */
+.mobile-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 99998;
+  animation: fadeInOverlay 0.25s ease;
+}
+
+/* Slidable Mobile Navigation Drawer (App-like smooth slide from right) */
+.mobile-slide-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 330px;
+  max-width: 86vw;
+  height: 100vh;
+  background: var(--bg-card);
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -10px 0 45px rgba(0, 0, 0, 0.65);
+  transform: translateX(100%);
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  border-left: 1px solid var(--border-color);
+}
+
+.mobile-slide-drawer.drawer-open {
+  transform: translateX(0);
+}
+
+.drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
+  background: rgba(0, 0, 0, 0.12);
+  flex-shrink: 0;
+}
+
+.drawer-close-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-color);
+  color: var(--color-text-primary);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.drawer-close-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: var(--color-primary);
+}
+
+.drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 18px 18px 30px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Dedicated Notification Box inside Drawer */
+.drawer-notif-box {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(185, 28, 28, 0.16) 100%);
+  border: 1.5px solid rgba(239, 68, 68, 0.45);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.15);
+}
+
+.drawer-notif-icon-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(239, 68, 68, 0.35);
+  animation: bellRing 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.drawer-nav-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.drawer-section-title {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--color-text-secondary);
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+
+.drawer-links-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.drawer-links-list li {
+  border-bottom: 1px solid var(--border-color);
+  width: 100%;
+}
+
+.drawer-links-list li:last-child {
+  border-bottom: none;
+}
+
+.drawer-links-list a,
+.drawer-links-list .dropdown-trigger {
+  padding: 13px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.drawer-links-list a.active {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.drawer-links-list .dropdown-content.mobile-dropdown-open {
+  position: static !important;
+  transform: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: none;
+  border: none;
+  border-left: 3px solid var(--color-primary);
+  margin: 4px 0 8px 12px;
+  padding-left: 12px;
+  gap: 0;
+}
+
+.drawer-links-list .dropdown-content.mobile-dropdown-closed {
+  display: none !important;
+}
+
+.drawer-links-list .dropdown-content a {
+  padding: 10px 4px;
+  font-size: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* Quick Slidable Regions Pills inside Drawer */
+.drawer-regions-section {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.drawer-regions-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 8px;
+}
+
+.drawer-region-pill {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-color);
+  color: var(--color-text-primary);
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.drawer-region-pill:hover,
+.drawer-region-pill:active {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
+.drawer-footer {
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-color);
+}
+
+@media (max-width: 992px) {
   .menu-toggle-btn {
-    display: block;
-    z-index: 201;
+    display: flex !important;
   }
 
-  /* Show notification bell next to hamburger on mobile */
+  .mobile-header-actions {
+    display: flex !important;
+  }
+
   .mobile-notif-btn {
-    display: flex;
-    align-items: center;
-    z-index: 201;
-  }
-
-  /* Hide top-bar bell on mobile */
-  .desktop-notif-btn {
-    display: none !important;
-  }
-
-  /* Hide the top-bar notification bell on mobile (shown in nav header instead) */
-  .top-bar .mobile-notif-btn {
-    display: none !important;
-  }
-
-  .nav-main {
-    position: relative;
-    height: 70px;
-  }
-
-  /* navbar-wrapper must not clip the absolutely positioned menu */
-  .navbar-wrapper {
-    overflow: visible !important;
+    display: flex !important;
   }
 
   .desktop-nav {
     display: none !important;
   }
 
-  .mobile-nav {
-    display: none;
-    flex-direction: column;
-    align-items: flex-start;
-    width: 100%;
-    position: fixed;
-    top: 110px;
-    left: 0;
-    right: 0;
-    background: var(--bg-card);
-    border-bottom: 2px solid var(--color-primary);
-    padding: 10px 20px 28px;
-    gap: 0;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
-    z-index: 200;
-    max-height: calc(100vh - 110px);
-    overflow-y: auto;
-  }
-
-  .mobile-nav.mobile-open {
-    display: flex !important;
-  }
-
-  /* Each menu list item */
-  .nav-links li {
-    width: 100%;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-    padding: 0;
-  }
-
-  .nav-links li:last-child {
-    border-bottom: none;
-  }
-
-  /* Plain nav links — large tap targets */
-  .nav-links a:not([style*="border-radius"]),
-  .nav-links .dropdown-trigger {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 14px 6px;
-    font-size: 17px;
-    font-weight: 600;
-    letter-spacing: 0.2px;
-  }
-
-  /* Pill-badge links (E-Paper, Newspaper) */
-  .nav-links a[style*="border-radius"] {
-    display: inline-flex;
-    width: auto;
-    padding: 10px 20px;
-    margin: 8px 0;
-    font-size: 15px;
-    font-weight: 800;
-  }
-
-  /* Subdivision dropdown inside mobile menu — collapsed by default */
-  .dropdown-content.mobile-dropdown-closed {
+  .desktop-notif-btn {
     display: none !important;
   }
 
-  .dropdown-content.mobile-dropdown-open {
-    position: static !important;
-    transform: none !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    display: flex !important;
-    flex-direction: column;
-    background: rgba(255, 255, 255, 0.03);
-    box-shadow: none;
-    border: none;
-    border-left: 3px solid var(--color-primary);
-    margin: 4px 0 8px 0;
-    padding-left: 16px;
-    gap: 0;
-    max-height: 260px;
-    overflow-y: auto;
+  .desktop-only-link {
+    display: none !important;
   }
 
-  .dropdown-content.mobile-dropdown-open a {
-    padding: 12px 6px;
-    font-size: 16px;
-    font-weight: 500;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    width: 100%;
-    display: block;
-    color: var(--color-text-primary);
-  }
-
-  .dropdown-content.mobile-dropdown-open a:last-child {
-    border-bottom: none;
-  }
-
-  /* Override the always-visible rule from previous block for mobile */
-  .dropdown-content {
-    position: static;
-    transform: none !important;
-    opacity: 1;
-    visibility: visible;
-    background: rgba(255, 255, 255, 0.03);
-    box-shadow: none;
-    border: none;
-    border-left: 3px solid var(--color-primary);
-    margin-top: 0;
-    margin-bottom: 8px;
-    padding-left: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .dropdown-content a {
-    padding: 12px 6px;
-    font-size: 16px;
-    font-weight: 500;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    width: 100%;
-    display: block;
-  }
-
-  .dropdown-content a:last-child {
-    border-bottom: none;
+  .nav-main {
+    height: 64px;
   }
 
   .top-bar {
-    padding: 8px 0;
+    padding: 6px 0;
+    font-size: 12px;
   }
 
   .top-bar .container {
-    flex-direction: column;
-    gap: 6px;
+    flex-direction: row;
+    justify-content: space-between;
     align-items: center;
-    text-align: center;
-  }
-
-  .top-bar div {
-    justify-content: center;
-    width: 100%;
-    flex-wrap: wrap;
   }
 }
 

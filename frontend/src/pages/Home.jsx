@@ -405,8 +405,21 @@ export default function Home() {
           <Search size={18} style={{ position: 'absolute', left: '12px', top: '11px', color: 'var(--color-text-secondary)' }} />
         </div>
 
-        {/* Categories Pills */}
-        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px', maxWidth: '100%' }}>
+        {/* Categories Pills — Smooth Slidable Bar */}
+        <div 
+          className="categories-slidable-bar"
+          style={{ 
+            display: 'flex', 
+            gap: '8px', 
+            overflowX: 'auto', 
+            WebkitOverflowScrolling: 'touch',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            paddingBottom: '4px', 
+            maxWidth: '100%',
+            flex: '1 1 auto'
+          }}
+        >
           <button
             className={`lang-toggle ${selectedCategory === '' ? 'active' : ''}`}
             style={{
