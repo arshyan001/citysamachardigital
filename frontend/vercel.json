@@ -1,6 +1,14 @@
 {
     "rewrites": [
         {
+            "source": "/api/:path*",
+            "destination": "https://citysamachardigital.onrender.com/api/:path*"
+        },
+        {
+            "source": "/uploads/:path*",
+            "destination": "https://citysamachardigital.onrender.com/uploads/:path*"
+        },
+        {
             "source": "/news/:id",
             "has": [
                 {

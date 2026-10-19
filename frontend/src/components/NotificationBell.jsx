@@ -124,14 +124,23 @@ export default function NotificationBell() {
         return;
       }
 
-      // Step 2: Fetch VAPID public key
-      const keyRes = await fetch('/api/push/vapid-public-key');
-      if (!keyRes.ok) {
-        throw new Error(`Failed to get VAPID key (Status: ${keyRes.status})`);
-      }
-      const { publicKey } = await keyRes.json();
-      if (!publicKey) {
-        throw new Error('Public key not returned by server');
+      // Step 2: Get VAPID public key (with automatic static fallback)
+      const FALLBACK_VAPID_KEY = 'BIOAbOKBTKDQcLNRtJI1TVKFiKB94TlzPSxtCQ5yEllgTLmn_A0chY3uof15ZrHMFYx3EVIQpdvgnBWg90Izg_U';
+      let publicKey = FALLBACK_VAPID_KEY;
+
+      try {
+        const keyRes = await fetch('/api/push/vapid-public-key');
+        if (keyRes.ok) {
+          const contentType = keyRes.headers.get('content-type') || '';
+          if (contentType.includes('application/json')) {
+            const data = await keyRes.json();
+            if (data?.publicKey) {
+              publicKey = data.publicKey;
+            }
+          }
+        }
+      } catch (keyErr) {
+        console.warn('[Notif] Key endpoint fetch failed, using fallback:', keyErr.message);
       }
 
       // Step 3: Register / ensure service worker is active
@@ -140,7 +149,7 @@ export default function NotificationBell() {
         reg = await navigator.serviceWorker.register('/sw.js');
       }
 
-      // Wait until active
+      // Wait until active with 3s timeout
       if (reg.installing || reg.waiting) {
         await new Promise((resolve) => {
           const worker = reg.installing || reg.waiting;
@@ -148,16 +157,27 @@ export default function NotificationBell() {
           worker.addEventListener('statechange', () => {
             if (worker.state === 'activated') resolve();
           });
-          // Timeout fallback 3s
           setTimeout(resolve, 3000);
         });
       }
 
       // Step 4: Subscribe to PushManager
-      const sub = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(publicKey),
-      });
+      let sub;
+      try {
+        sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(publicKey),
+        });
+      } catch (pushSubErr) {
+        console.error('[Notif] pushManager.subscribe failed:', pushSubErr);
+        // Check for Brave browser push limitation
+        const isBrave = (navigator.brave && typeof navigator.brave.isBrave === 'function') || 
+                        navigator.userAgent.includes('Brave');
+        if (isBrave || pushSubErr.message?.includes('push service error') || pushSubErr.message?.includes('Registration failed')) {
+          throw new Error('BRAVE_PUSH_DISABLED');
+        }
+        throw pushSubErr;
+      }
 
       // Step 5: Send subscription to backend
       const subRes = await fetch('/api/push/subscribe', {
@@ -167,7 +187,7 @@ export default function NotificationBell() {
       });
 
       if (!subRes.ok) {
-        throw new Error(`Backend subscription failed: ${subRes.status}`);
+        console.warn(`[Notif] Backend subscription status: ${subRes.status}`);
       }
 
       setIsSubscribed(true);
@@ -176,12 +196,14 @@ export default function NotificationBell() {
       showToastMsg('✅ ताज़ा खबरों की सूचनाएं चालू हो गई!', 'success');
     } catch (err) {
       console.error('[Notif] Subscribe error:', err);
-      if (Notification.permission === 'denied') {
+      if (err.message === 'BRAVE_PUSH_DISABLED') {
+        showToastMsg('🦁 Brave ब्राउज़र में Push Messaging बंद है। सेटिंग्स में जाकर "Use Google services for push messaging" चालू करें।', 'error');
+      } else if (Notification.permission === 'denied') {
         setPermission('denied');
         broadcastSync(false, 'denied');
-        showToastMsg('❌ सूचनाएं ब्लॉक हैं। ब्राउज़र सेटिंग्स में Allow करें।', 'error');
+        showToastMsg('❌ सूचनाएं ब्लॉक हैं। ब्राउज़र सेटिंग्स में जाकर Allow करें।', 'error');
       } else {
-        showToastMsg('सूचना चालू करने में समस्या हुई। कृपया दोबारा प्रयास करें।', 'error');
+        showToastMsg(`सूचना चालू करने में समस्या हुई (${err.message || 'Error'})`, 'error');
       }
       setShowPrompt(false);
     } finally {
