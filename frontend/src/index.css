@@ -1842,6 +1842,16 @@ footer {
   border-top: 1px solid var(--border-color);
 }
 
+.mobile-header-actions {
+  display: none;
+  align-items: center;
+  gap: 8px;
+}
+
+.mobile-notif-btn {
+  display: none;
+}
+
 @media (max-width: 992px) {
   .menu-toggle-btn {
     display: flex !important;
@@ -1849,10 +1859,15 @@ footer {
 
   .mobile-header-actions {
     display: flex !important;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
   }
 
   .mobile-notif-btn {
     display: flex !important;
+    align-items: center;
+    flex-shrink: 0;
   }
 
   .desktop-nav {

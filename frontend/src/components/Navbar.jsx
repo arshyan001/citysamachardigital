@@ -356,7 +356,7 @@ export default function Navbar() {
             </ul>
 
             {/* Mobile Controls: Bell + Hamburger side-by-side */}
-            <div className="mobile-header-actions" style={{ display: 'none', alignItems: 'center', gap: '10px' }}>
+            <div className="mobile-header-actions">
               {/* Direct Quick Bell for mobile header */}
               <div className="mobile-notif-btn">
                 <NotificationBell />
