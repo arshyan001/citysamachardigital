@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
-import { Plus, CheckCircle, Clock, XCircle, FileText, Upload, Image, Video, LogOut, ArrowLeft, RefreshCw, Send, AlertCircle, Eye, ThumbsUp, Calendar } from 'lucide-react';
+import { Plus, CheckCircle, Clock, XCircle, FileText, Upload, Image, Video, LogOut, RefreshCw, Send, AlertCircle, Eye, Calendar, Lock } from 'lucide-react';
 import Swal from 'sweetalert2';
 
 const Toast = Swal.mixin({
@@ -16,16 +16,97 @@ const Toast = Swal.mixin({
   }
 });
 
+// Hindi display names for districts
+const DISTRICT_LABELS = {
+  'Sant Kabir Nagar': 'संतकबीरनगर',
+  'Kushinagar': 'कुशीनगर',
+  'Basti': 'बस्ती',
+  'Gorakhpur': 'गोरखपुर',
+  'Siddharthnagar': 'सिद्धार्थनगर',
+  'Maharajganj': 'महराजगंज',
+  'Deoria': 'देवरिया',
+  'Lucknow': 'लखनऊ',
+  'Other': 'अन्य'
+};
+
+// District-specific sub-areas / tehsils
+const DISTRICT_SUBDIVISIONS = {
+  'Sant Kabir Nagar': [
+    { value: 'None', label: 'सामान्य / पूरा जिला' },
+    { value: 'Khalilabad', label: 'खलीलाबाद' },
+    { value: 'Mehdawal', label: 'मेंहदावल' },
+    { value: 'Dhanghata', label: 'धनघटा' }
+  ],
+  'Kushinagar': [
+    { value: 'None', label: 'सामान्य / पूरा जिला' },
+    { value: 'Padrauna', label: 'पडरौना' },
+    { value: 'Hata', label: 'हाटा' },
+    { value: 'Tamkuhi Raj', label: 'तमकुही राज' },
+    { value: 'Kasya', label: 'कसया' },
+    { value: 'Khadda', label: 'खड्डा' },
+    { value: 'Fazilnagar', label: 'फाजिलनगर' }
+  ],
+  'Basti': [
+    { value: 'None', label: 'सामान्य / पूरा जिला' },
+    { value: 'Basti Sadar', label: 'बस्ती सदर' },
+    { value: 'Harraiya', label: 'हर्रैया' },
+    { value: 'Rudhauli', label: 'रुधौली' },
+    { value: 'Bhanpur', label: 'भानपुर' }
+  ],
+  'Gorakhpur': [
+    { value: 'None', label: 'सामान्य / पूरा जिला' },
+    { value: 'Gorakhpur Sadar', label: 'गोरखपुर सदर' },
+    { value: 'Chauri Chaura', label: 'चौरी चौरा' },
+    { value: 'Sahjanwa', label: 'सहजनवा' },
+    { value: 'Khajani', label: 'खजनी' },
+    { value: 'Campierganj', label: 'कैंपियरगंज' },
+    { value: 'Bansgaon', label: 'बांसगांव' },
+    { value: 'Gola', label: 'गोला' }
+  ],
+  'Siddharthnagar': [
+    { value: 'None', label: 'सामान्य / पूरा जिला' },
+    { value: 'Naugarh', label: 'नौगढ़' },
+    { value: 'Bansi', label: 'बांसी' },
+    { value: 'Itwa', label: 'इटवा' },
+    { value: 'Shohratgarh', label: 'शोहरतगढ़' },
+    { value: 'Domariyaganj', label: 'डुमरियागंज' }
+  ],
+  'Maharajganj': [
+    { value: 'None', label: 'सामान्य / पूरा जिला' },
+    { value: 'Maharajganj Sadar', label: 'महराजगंज सदर' },
+    { value: 'Nautanwa', label: 'नौतनवा' },
+    { value: 'Nichlaul', label: 'निचलौल' },
+    { value: 'Pharenda', label: 'फरेंदा' }
+  ],
+  'Deoria': [
+    { value: 'None', label: 'सामान्य / पूरा जिला' },
+    { value: 'Deoria Sadar', label: 'देवरिया सदर' },
+    { value: 'Salempur', label: 'सलेमपुर' },
+    { value: 'Barhaj', label: 'बरहज' },
+    { value: 'Bhatpar Rani', label: 'भाटपार रानी' },
+    { value: 'Rudrapur', label: 'रुद्रपुर' }
+  ],
+  'Lucknow': [
+    { value: 'None', label: 'सामान्य / पूरा जिला' },
+    { value: 'Lucknow Sadar', label: 'लखनऊ सदर' },
+    { value: 'Bakshi Ka Talab', label: 'बख्शी का तालाब' },
+    { value: 'Malihabad', label: 'मलिहाबाद' },
+    { value: 'Mohanlalganj', label: 'मोहनलालगंज' },
+    { value: 'Sarojini Nagar', label: 'सरोजिनी नगर' }
+  ]
+};
+
 export default function ReporterDashboard() {
-  const { language, t } = useLanguage();
+  const { language } = useLanguage();
   const navigate = useNavigate();
 
   // Route security check
   const token = sessionStorage.getItem('admin_token');
   const userRole = sessionStorage.getItem('user_role');
-  const userName = sessionStorage.getItem('user_name') || 'संवाददाता';
-  const userPhoto = sessionStorage.getItem('user_photo') || '';
-  const userDesignation = sessionStorage.getItem('user_designation') || 'संवाददाता';
+  const [userName, setUserName] = useState(sessionStorage.getItem('user_name') || 'संवाददाता');
+  const [userPhoto, setUserPhoto] = useState(sessionStorage.getItem('user_photo') || '');
+  const [userDesignation, setUserDesignation] = useState(sessionStorage.getItem('user_designation') || 'संवाददाता');
+  const [assignedDistrict, setAssignedDistrict] = useState(sessionStorage.getItem('user_district') || 'Sant Kabir Nagar');
 
   useEffect(() => {
     if (!token) {
@@ -35,16 +116,46 @@ export default function ReporterDashboard() {
     }
   }, [token, userRole, navigate]);
 
+  // Sync latest reporter profile (district, photo, name) from backend
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await fetch('/api/auth/profile', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.district) {
+            setAssignedDistrict(data.district);
+            sessionStorage.setItem('user_district', data.district);
+          }
+          if (data.name) {
+            setUserName(data.name);
+            sessionStorage.setItem('user_name', data.name);
+          }
+          if (data.photoUrl) {
+            setUserPhoto(data.photoUrl);
+            sessionStorage.setItem('user_photo', data.photoUrl);
+          }
+          if (data.designation) {
+            setUserDesignation(data.designation);
+            sessionStorage.setItem('user_designation', data.designation);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching reporter profile:', err);
+      }
+    };
+    if (token) fetchProfile();
+  }, [token]);
+
   // Tab State
   const [activeTab, setActiveTab] = useState('create'); // 'create' | 'myNews'
 
-  // News Form States
+  // News Form States (All Hindi-first, no English fields requested from reporter)
   const [titleHi, setTitleHi] = useState('');
-  const [titleEn, setTitleEn] = useState('');
   const [contentHi, setContentHi] = useState('');
-  const [contentEn, setContentEn] = useState('');
   const [category, setCategory] = useState('');
-  const [district, setDistrict] = useState('Sant Kabir Nagar');
   const [subdivision, setSubdivision] = useState('None');
   const [isBreaking, setIsBreaking] = useState(false);
   const [videoUrl, setVideoUrl] = useState('');
@@ -85,7 +196,7 @@ export default function ReporterDashboard() {
       });
       if (res.ok) {
         const data = await res.json();
-        setMyNewsList(data);
+        setMyNewsList(Array.isArray(data) ? data : []);
       }
     } catch (err) {
       console.error('Error fetching my news:', err);
@@ -116,22 +227,24 @@ export default function ReporterDashboard() {
   const handleSubmitNews = async (e) => {
     e.preventDefault();
     if (!titleHi.trim() || !contentHi.trim()) {
-      Toast.fire({ icon: 'warning', title: 'कृपया समाचार का शीर्षक और विवरण भरें।' });
+      Toast.fire({ icon: 'warning', title: 'कृपया समाचार का शीर्षक और पूरा विवरण भरें।' });
       return;
     }
 
     setIsSubmitting(true);
     try {
       const formData = new FormData();
-      formData.append('titleHi', titleHi);
-      formData.append('titleEn', titleEn || titleHi);
-      formData.append('contentHi', contentHi);
-      formData.append('contentEn', contentEn || contentHi);
+      formData.append('titleHi', titleHi.trim());
+      // Automatically fallback English fields to Hindi so reporter never needs to type English
+      formData.append('titleEn', titleHi.trim());
+      formData.append('contentHi', contentHi.trim());
+      formData.append('contentEn', contentHi.trim());
       formData.append('categories', JSON.stringify([category]));
-      formData.append('district', district);
+      // Strictly send assigned district determined by admin
+      formData.append('district', assignedDistrict);
       formData.append('subdivision', subdivision);
       formData.append('isBreaking', isBreaking);
-      formData.append('videoUrl', videoUrl);
+      formData.append('videoUrl', videoUrl.trim());
 
       imageFiles.forEach(file => {
         formData.append('images', file);
@@ -156,16 +269,15 @@ export default function ReporterDashboard() {
         Swal.fire({
           icon: 'success',
           title: 'समाचार समीक्षा के लिए भेजा गया!',
-          text: 'आपकी खबर सफलतापूर्वक एडमिन को भेज दी गई है। एडमिन द्वारा समीक्षा और स्वीकृति (Approval) के बाद यह वेबसाइट पर लाइव हो जाएगी।',
+          text: `आपकी खबर सफलतापूर्वक मुख्य संपादक (एडमिन) को भेज दी गई है। स्वीकृति के बाद यह ${DISTRICT_LABELS[assignedDistrict] || assignedDistrict} जिले के तहत आपके नाम और फ़ोटो के साथ प्रकाशित हो जाएगी।`,
           confirmButtonColor: 'var(--color-primary)'
         });
 
         // Reset form
         setTitleHi('');
-        setTitleEn('');
         setContentHi('');
-        setContentEn('');
         setVideoUrl('');
+        setSubdivision('None');
         setIsBreaking(false);
         setImageFiles([]);
         setImagePreviews([]);
@@ -190,6 +302,11 @@ export default function ReporterDashboard() {
     window.dispatchEvent(new Event('storage'));
     navigate('/admin/login');
   };
+
+  // Get subdivisions list for this reporter's assigned district
+  const availableSubdivisions = DISTRICT_SUBDIVISIONS[assignedDistrict] || [
+    { value: 'None', label: 'सामान्य / पूरा जिला' }
+  ];
 
   return (
     <div className="container" style={{ padding: '24px 12px 60px 12px', minHeight: '80vh' }}>
@@ -246,6 +363,22 @@ export default function ReporterDashboard() {
                 fontWeight: 700
               }}>
                 {userDesignation}
+              </span>
+
+              {/* Locked District Badge in Profile Header */}
+              <span style={{
+                background: 'rgba(234, 179, 8, 0.15)',
+                color: '#eab308',
+                border: '1px solid rgba(234, 179, 8, 0.4)',
+                padding: '2px 10px',
+                borderRadius: '12px',
+                fontSize: '11px',
+                fontWeight: 700,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}>
+                📍 कार्यक्षेत्र: {DISTRICT_LABELS[assignedDistrict] || assignedDistrict}
               </span>
             </div>
             <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: 'var(--color-text-secondary)' }}>
@@ -349,16 +482,16 @@ export default function ReporterDashboard() {
           }}>
             <AlertCircle size={20} color="var(--color-primary)" style={{ flexShrink: 0 }} />
             <span>
-              <strong>महत्वपूर्ण निर्देश:</strong> आपके द्वारा भेजी गई खबर पहले <strong>मुख्य संपादक (एडमिन)</strong> के पास समीक्षा (Review) के लिए जाएगी। एडमिन द्वारा स्वीकृत होने पर खबर आपके नाम और फोटो के साथ वेबसाइट पर लाइव प्रकाशित होगी।
+              <strong>महत्वपूर्ण निर्देश:</strong> आपके द्वारा भेजी गई खबर पहले <strong>मुख्य संपादक (एडमिन)</strong> के पास समीक्षा के लिए जाएगी। एडमिन द्वारा स्वीकृत होने पर खबर आपके नाम और फोटो के साथ वेबसाइट पर लाइव प्रकाशित होगी।
             </span>
           </div>
 
           <form onSubmit={handleSubmitNews}>
             
-            {/* Title (Hindi) */}
+            {/* Title (Headline) */}
             <div style={{ marginBottom: '18px' }}>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: 700, marginBottom: '6px', color: 'var(--color-text-primary)' }}>
-                समाचार का शीर्षक (Hindi Headline) *
+                समाचार का शीर्षक (Headline) *
               </label>
               <input
                 type="text"
@@ -371,25 +504,13 @@ export default function ReporterDashboard() {
               />
             </div>
 
-            {/* Title (English - Optional) */}
-            <div style={{ marginBottom: '18px' }}>
-              <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px', color: 'var(--color-text-secondary)' }}>
-                शीर्षक अंग्रेज़ी में (English Headline - Optional)
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Review meeting held regarding development works in Sant Kabir Nagar..."
-                value={titleEn}
-                onChange={(e) => setTitleEn(e.target.value)}
-              />
-            </div>
-
             {/* Categories & Area Select Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '18px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '18px' }}>
+              
+              {/* Category */}
               <div>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, marginBottom: '6px', color: 'var(--color-text-primary)' }}>
-                  कैटेगरी (Category) *
+                  श्रेणी (Category) *
                 </label>
                 <select
                   className="form-control"
@@ -403,6 +524,46 @@ export default function ReporterDashboard() {
                 </select>
               </div>
 
+              {/* Locked District: Only Admin-Assigned District */}
+              <div>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 700, marginBottom: '6px', color: 'var(--color-text-primary)' }}>
+                  <Lock size={13} color="#eab308" />
+                  निर्धारित ज़िला (कार्यक्षेत्र)
+                </label>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  background: 'rgba(255, 255, 255, 0.04)',
+                  border: '1px solid rgba(234, 179, 8, 0.35)',
+                  borderRadius: '10px',
+                  padding: '9px 12px',
+                  color: 'var(--color-text-primary)',
+                  fontWeight: 700,
+                  fontSize: '14px',
+                  minHeight: '40px'
+                }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    📍 {DISTRICT_LABELS[assignedDistrict] || assignedDistrict}
+                  </span>
+                  <span style={{
+                    fontSize: '11px',
+                    color: '#eab308',
+                    background: 'rgba(234, 179, 8, 0.15)',
+                    border: '1px solid rgba(234, 179, 8, 0.3)',
+                    padding: '2px 8px',
+                    borderRadius: '6px',
+                    fontWeight: 700
+                  }}>
+                    प्रशासन द्वारा निर्धारित
+                  </span>
+                </div>
+                <small style={{ fontSize: '11px', color: 'var(--color-text-secondary)', marginTop: '4px', display: 'block' }}>
+                  आप केवल अपने निर्धारित जिले ({DISTRICT_LABELS[assignedDistrict] || assignedDistrict}) के लिए ही खबर लगा सकते हैं।
+                </small>
+              </div>
+
+              {/* Subdivision / Tehsil for Reporter's District */}
               <div>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, marginBottom: '6px', color: 'var(--color-text-primary)' }}>
                   तहसील / क्षेत्र (Subdivision)
@@ -412,37 +573,22 @@ export default function ReporterDashboard() {
                   value={subdivision}
                   onChange={(e) => setSubdivision(e.target.value)}
                 >
-                  <option value="None">सामान्य (None)</option>
-                  <option value="Khalilabad">खलीलाबाद (Khalilabad)</option>
-                  <option value="Mehdawal">मेंहदावल (Mehdawal)</option>
-                  <option value="Dhanghata">धनघटा (Dhanghata)</option>
-                  <option value="Basti">बस्ती (Basti)</option>
-                  <option value="Kushinagar">कुशीनगर (Kushinagar)</option>
-                  <option value="Gorakhpur">गोरखपुर (Gorakhpur)</option>
+                  {availableSubdivisions.map(sub => (
+                    <option key={sub.value} value={sub.value}>{sub.label}</option>
+                  ))}
                 </select>
               </div>
 
-              <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, marginBottom: '6px', color: 'var(--color-text-primary)' }}>
-                  ज़िला (District)
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={district}
-                  onChange={(e) => setDistrict(e.target.value)}
-                />
-              </div>
             </div>
 
             {/* Content (Hindi) */}
             <div style={{ marginBottom: '18px' }}>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: 700, marginBottom: '6px', color: 'var(--color-text-primary)' }}>
-                मुख्य समाचार विवरण (Detailed News in Hindi) *
+                समाचार का पूरा विवरण *
               </label>
               <textarea
                 className="form-control"
-                rows="7"
+                rows="8"
                 placeholder="यहाँ खबर का पूरा विवरण लिखें..."
                 value={contentHi}
                 onChange={(e) => setContentHi(e.target.value)}
@@ -454,7 +600,7 @@ export default function ReporterDashboard() {
             {/* Images Upload */}
             <div style={{ marginBottom: '20px' }}>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: 700, marginBottom: '6px', color: 'var(--color-text-primary)' }}>
-                खबर की तस्वीरें (Images - अधिकतम 5)
+                खबर की तस्वीरें (फ़ोटो अपलोड करें - अधिकतम 5)
               </label>
               <input
                 id="reporterImageInput"
@@ -479,7 +625,7 @@ export default function ReporterDashboard() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginBottom: '24px' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px', color: 'var(--color-text-secondary)' }}>
-                  यूट्यूब वीडियो लिंक (YouTube Link - Optional)
+                  यूट्यूब वीडियो लिंक (वैकल्पिक / Optional)
                 </label>
                 <input
                   type="text"
@@ -499,7 +645,7 @@ export default function ReporterDashboard() {
                   style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--color-primary)' }}
                 />
                 <label htmlFor="isBreakingCheck" style={{ fontSize: '14px', fontWeight: 700, color: '#ef4444', cursor: 'pointer' }}>
-                  🔴 ब्रेकिंग न्यूज़ (Breaking Alert)
+                  🔴 ब्रेकिंग न्यूज़ (महत्वपूर्ण ताज़ा खबर)
                 </label>
               </div>
             </div>
@@ -518,7 +664,8 @@ export default function ReporterDashboard() {
                 gap: '10px',
                 background: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)',
                 boxShadow: '0 4px 14px rgba(239,68,68,0.35)',
-                cursor: isSubmitting ? 'wait' : 'pointer'
+                cursor: isSubmitting ? 'wait' : 'pointer',
+                borderRadius: '12px'
               }}
             >
               {isSubmitting ? (
@@ -548,7 +695,7 @@ export default function ReporterDashboard() {
             <button
               onClick={fetchMyNews}
               className="btn btn-secondary"
-              style={{ padding: '8px 14px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              style={{ padding: '8px 14px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px', borderRadius: '10px' }}
             >
               <RefreshCw size={14} />
               रिफ्रेश करें
@@ -573,7 +720,7 @@ export default function ReporterDashboard() {
               <button
                 onClick={() => setActiveTab('create')}
                 className="btn"
-                style={{ marginTop: '16px', padding: '8px 18px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                style={{ marginTop: '16px', padding: '8px 18px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px', borderRadius: '10px' }}
               >
                 <Plus size={14} />
                 पहली खबर लिखें
@@ -622,13 +769,19 @@ export default function ReporterDashboard() {
                           {isPending && (
                             <span style={{ background: 'rgba(234,179,8,0.15)', color: '#eab308', border: '1px solid rgba(234,179,8,0.4)', padding: '2px 8px', borderRadius: '10px', fontSize: '11px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                               <Clock size={12} />
-                              समीक्षाधीन (Pending)
+                              समीक्षाधीन
                             </span>
                           )}
                           {isRejected && (
                             <span style={{ background: 'rgba(239,68,68,0.15)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.4)', padding: '2px 8px', borderRadius: '10px', fontSize: '11px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                               <XCircle size={12} />
-                              अस्वीकृत (Rejected)
+                              अस्वीकृत
+                            </span>
+                          )}
+
+                          {item.district && (
+                            <span style={{ background: 'rgba(255,255,255,0.06)', color: 'var(--color-text-secondary)', padding: '2px 8px', borderRadius: '8px', fontSize: '11px' }}>
+                              📍 {DISTRICT_LABELS[item.district] || item.district}
                             </span>
                           )}
 
@@ -664,7 +817,8 @@ export default function ReporterDashboard() {
                             display: 'inline-flex',
                             alignItems: 'center',
                             gap: '6px',
-                            textDecoration: 'none'
+                            textDecoration: 'none',
+                            borderRadius: '8px'
                           }}
                         >
                           <Eye size={14} />

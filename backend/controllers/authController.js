@@ -91,9 +91,16 @@ const getUserProfile = async (req, res) => {
     const user = await User.findById(req.user._id);
 
     if (user) {
+      const role = user.role || (user.username === 'admin' ? 'admin' : 'reporter');
       res.json({
         _id: user._id,
         username: user.username,
+        name: user.name || (role === 'admin' ? 'सदरे आलम खान' : user.username),
+        role,
+        designation: user.designation || (role === 'admin' ? 'मुख्य संपादक' : 'संवाददाता'),
+        district: user.district || 'Sant Kabir Nagar',
+        photoUrl: user.photoUrl || '',
+        phone: user.phone || ''
       });
     } else {
       res.status(404).json({ message: 'User not found' });

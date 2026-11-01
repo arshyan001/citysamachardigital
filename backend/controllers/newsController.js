@@ -161,6 +161,8 @@ const createNews = async (req, res) => {
   const authorRole = req.user 
     ? (req.user.designation || (isReporter ? 'संवाददाता' : 'मुख्य संपादक')) 
     : 'मुख्य संपादक';
+  // Enforce reporter's assigned district strictly
+  const assignedDistrict = isReporter && req.user.district ? req.user.district : null;
 
   if (global.useJsonDb) {
     try {
@@ -188,16 +190,16 @@ const createNews = async (req, res) => {
       }
 
       const createdNews = jsonDb.createNews({
-        titleEn,
+        titleEn: titleEn || titleHi,
         titleHi,
-        contentEn,
+        contentEn: contentEn || contentHi,
         contentHi,
-        summaryEn: summaryEn || (contentEn ? contentEn.substring(0, 150) + '...' : ''),
+        summaryEn: summaryEn || (contentEn ? contentEn.substring(0, 150) + '...' : (contentHi ? contentHi.substring(0, 150) + '...' : '')),
         summaryHi: summaryHi || (contentHi ? contentHi.substring(0, 150) + '...' : ''),
         images: finalImages,
         videoUrl,
         categories: parsedCategories,
-        district: district || 'Sant Kabir Nagar',
+        district: assignedDistrict || district || 'Sant Kabir Nagar',
         subdivision: subdivision || 'None',
         isBreaking: isBreaking === 'true' || isBreaking === true,
         author: authorId,
@@ -253,16 +255,16 @@ const createNews = async (req, res) => {
     }
 
     const news = new News({
-      titleEn,
+      titleEn: titleEn || titleHi,
       titleHi,
-      contentEn,
+      contentEn: contentEn || contentHi,
       contentHi,
-      summaryEn: summaryEn || (contentEn ? contentEn.substring(0, 150) + '...' : ''),
+      summaryEn: summaryEn || (contentEn ? contentEn.substring(0, 150) + '...' : (contentHi ? contentHi.substring(0, 150) + '...' : '')),
       summaryHi: summaryHi || (contentHi ? contentHi.substring(0, 150) + '...' : ''),
       images: finalImages,
       videoUrl,
       categories: parsedCategories,
-      district: district || 'Sant Kabir Nagar',
+      district: assignedDistrict || district || 'Sant Kabir Nagar',
       subdivision: subdivision || 'None',
       isBreaking: isBreaking === 'true' || isBreaking === true,
       author: authorId,

@@ -60,6 +60,7 @@ export default function AdminLogin() {
         sessionStorage.setItem('user_name', data.name || data.username);
         sessionStorage.setItem('user_photo', data.photoUrl || '');
         sessionStorage.setItem('user_designation', data.designation || '');
+        sessionStorage.setItem('user_district', data.district || 'Sant Kabir Nagar');
         // Force header update
         window.dispatchEvent(new Event('storage'));
 
