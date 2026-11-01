@@ -20,13 +20,23 @@ const loginUser = async (req, res) => {
     try {
       const user = jsonDb.getUser(username);
       if (user && bcrypt.compareSync(password, user.password)) {
+        if (user.isActive === false) {
+          return res.status(403).json({ message: 'आपका खाता निष्क्रिय (Deactivated) कर दिया गया है। एडमिन से संपर्क करें।' });
+        }
+        const role = user.role || (user.username === 'admin' ? 'admin' : 'reporter');
         return res.json({
           _id: user._id,
           username: user.username,
+          name: user.name || (role === 'admin' ? 'सदरे आलम खान' : user.username),
+          role,
+          photoUrl: user.photoUrl || '',
+          designation: user.designation || (role === 'admin' ? 'मुख्य संपादक' : 'संवाददाता'),
+          district: user.district || 'Sant Kabir Nagar',
+          phone: user.phone || '',
           token: generateToken(user._id),
         });
       } else {
-        return res.status(401).json({ message: 'Invalid username or password' });
+        return res.status(401).json({ message: 'गलत यूज़रनेम या पासवर्ड।' });
       }
     } catch (err) {
       return res.status(500).json({ message: err.message });
@@ -37,13 +47,23 @@ const loginUser = async (req, res) => {
     const user = await User.findOne({ username });
 
     if (user && (await user.matchPassword(password))) {
+      if (user.isActive === false) {
+        return res.status(403).json({ message: 'आपका खाता निष्क्रिय (Deactivated) कर दिया गया है। एडमिन से संपर्क करें।' });
+      }
+      const role = user.role || (user.username === 'admin' ? 'admin' : 'reporter');
       res.json({
         _id: user._id,
         username: user.username,
+        name: user.name || (role === 'admin' ? 'सदरे आलम खान' : user.username),
+        role,
+        photoUrl: user.photoUrl || '',
+        designation: user.designation || (role === 'admin' ? 'मुख्य संपादक' : 'संवाददाता'),
+        district: user.district || 'Sant Kabir Nagar',
+        phone: user.phone || '',
         token: generateToken(user._id),
       });
     } else {
-      res.status(401).json({ message: 'Invalid username or password' });
+      res.status(401).json({ message: 'गलत यूज़रनेम या पासवर्ड।' });
     }
   } catch (error) {
     res.status(500).json({ message: error.message });

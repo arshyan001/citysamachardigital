@@ -67,6 +67,34 @@ const newsSchema = new mongoose.Schema({
     text: { type: String, required: true },
     date: { type: String, required: true }
   }],
+  author: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  },
+  authorName: {
+    type: String,
+    default: 'सदरे आलम खान',
+    trim: true,
+  },
+  authorPhoto: {
+    type: String,
+    default: '',
+  },
+  authorRole: {
+    type: String,
+    default: 'मुख्य संपादक',
+    trim: true,
+  },
+  status: {
+    type: String,
+    enum: ['pending', 'approved', 'rejected'],
+    default: 'approved',
+  },
+  rejectionReason: {
+    type: String,
+    default: '',
+    trim: true,
+  },
 }, {
   timestamps: true,
 });

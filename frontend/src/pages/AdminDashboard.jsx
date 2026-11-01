@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
-import { Plus, Edit, Trash2, Mail, FolderPlus, Newspaper, CheckCircle, XCircle, FileText, ChevronRight, Languages, BarChart2, MessageSquare, ChevronDown, LogOut, Settings, Image, Globe, Share2, ThumbsUp, Eye, Bell, BellRing, Send, Radio } from 'lucide-react';
+import { Plus, Edit, Trash2, Mail, FolderPlus, Newspaper, CheckCircle, XCircle, FileText, ChevronRight, Languages, BarChart2, MessageSquare, ChevronDown, LogOut, Settings, Image, Globe, Share2, ThumbsUp, Eye, Bell, BellRing, Send, Radio, Users, UserPlus, CheckSquare, Clock, AlertTriangle } from 'lucide-react';
 import Swal from 'sweetalert2';
 
 export default function AdminDashboard() {
@@ -96,6 +96,261 @@ export default function AdminDashboard() {
   const [customNotifUrl, setCustomNotifUrl] = useState('/');
   const [isSendingNotif, setIsSendingNotif] = useState(false);
   const [isTestingNotif, setIsTestingNotif] = useState(false);
+
+  // Review & Reporter States
+  const [pendingNews, setPendingNews] = useState([]);
+  const [reportersList, setReportersList] = useState([]);
+  const [reporterName, setReporterName] = useState('');
+  const [reporterUsername, setReporterUsername] = useState('');
+  const [reporterPassword, setReporterPassword] = useState('');
+  const [reporterDesignation, setReporterDesignation] = useState('संवाददाता');
+  const [reporterDistrict, setReporterDistrict] = useState('Sant Kabir Nagar');
+  const [reporterPhone, setReporterPhone] = useState('');
+  const [reporterPhotoFile, setReporterPhotoFile] = useState(null);
+  const [reporterPhotoPreview, setReporterPhotoPreview] = useState('');
+  const [editingReporterId, setEditingReporterId] = useState(null);
+  const [isReporterSaving, setIsReporterSaving] = useState(false);
+
+  const fetchPendingNews = async () => {
+    try {
+      const res = await fetch('/api/news/pending', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setPendingNews(Array.isArray(data) ? data : []);
+      }
+    } catch (err) {
+      console.error('Error fetching pending news:', err);
+    }
+  };
+
+  const fetchReporters = async () => {
+    try {
+      const res = await fetch('/api/reporters', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setReportersList(Array.isArray(data) ? data : []);
+      }
+    } catch (err) {
+      console.error('Error fetching reporters:', err);
+    }
+  };
+
+  const handleApproveNews = async (newsItem) => {
+    try {
+      const result = await Swal.fire({
+        title: 'क्या आप यह खबर स्वीकृत करना चाहते हैं?',
+        text: `"${newsItem.titleHi || newsItem.titleEn}" स्वीकृत होते ही तुरंत लाइव प्रकाशित हो जाएगी और सभी सब्सक्राइबर्स को पुश नोटिफिकेशन भेजा जाएगा।`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#22c55e',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'हाँ, स्वीकृत करें (Approve)',
+        cancelButtonText: 'रद्द करें'
+      });
+
+      if (result.isConfirmed) {
+        const res = await fetch(`/api/news/${newsItem._id || newsItem.id}/status`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ status: 'approved' })
+        });
+
+        if (res.ok) {
+          triggerAlert('success', 'समाचार सफलतापूर्वक स्वीकृत और प्रकाशित किया गया!');
+          fetchPendingNews();
+          fetchNews();
+        } else {
+          triggerAlert('error', 'स्वीकृत करने में समस्या हुई।');
+        }
+      }
+    } catch (err) {
+      console.error('Error approving news:', err);
+      triggerAlert('error', 'नेटवर्क त्रुटि।');
+    }
+  };
+
+  const handleRejectNews = async (newsItem) => {
+    try {
+      const { value: reason } = await Swal.fire({
+        title: 'खबर अस्वीकृत करने का कारण दर्ज करें:',
+        input: 'text',
+        inputPlaceholder: 'उदा: अधूरी जानकारी, फ़ोटो स्पष्ट नहीं है...',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'अस्वीकृत करें (Reject)',
+        cancelButtonText: 'रद्द करें',
+        inputValidator: (value) => {
+          if (!value) {
+            return 'कृपया अस्वीकृत करने का कारण अवश्य लिखें!';
+          }
+        }
+      });
+
+      if (reason) {
+        const res = await fetch(`/api/news/${newsItem._id || newsItem.id}/status`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ status: 'rejected', rejectionReason: reason })
+        });
+
+        if (res.ok) {
+          triggerAlert('success', 'समाचार अस्वीकृत कर दिया गया है। रिपोर्टर को कारण दिख जाएगा।');
+          fetchPendingNews();
+          fetchNews();
+        } else {
+          triggerAlert('error', 'अस्वीकृत करने में समस्या हुई।');
+        }
+      }
+    } catch (err) {
+      console.error('Error rejecting news:', err);
+      triggerAlert('error', 'नेटवर्क त्रुटि।');
+    }
+  };
+
+  const resetReporterForm = () => {
+    setEditingReporterId(null);
+    setReporterName('');
+    setReporterUsername('');
+    setReporterPassword('');
+    setReporterDesignation('संवाददाता');
+    setReporterDistrict('Sant Kabir Nagar');
+    setReporterPhone('');
+    setReporterPhotoFile(null);
+    setReporterPhotoPreview('');
+    const fileInput = document.getElementById('reporterPhotoInput');
+    if (fileInput) fileInput.value = '';
+  };
+
+  const handleEditReporter = (reporter) => {
+    setEditingReporterId(reporter._id || reporter.id);
+    setReporterName(reporter.name || '');
+    setReporterUsername(reporter.username || '');
+    setReporterPassword('');
+    setReporterDesignation(reporter.designation || 'संवाददाता');
+    setReporterDistrict(reporter.district || 'Sant Kabir Nagar');
+    setReporterPhone(reporter.phone || '');
+    setReporterPhotoPreview(reporter.photoUrl || '');
+    setReporterPhotoFile(null);
+  };
+
+  const handleSaveReporter = async (e) => {
+    e.preventDefault();
+    if (!reporterUsername.trim()) {
+      triggerAlert('warning', 'उपयोगकर्ता नाम (Username) आवश्यक है।');
+      return;
+    }
+    if (!editingReporterId && !reporterPassword.trim()) {
+      triggerAlert('warning', 'नए रिपोर्टर के लिए पासवर्ड आवश्यक है।');
+      return;
+    }
+
+    setIsReporterSaving(true);
+    try {
+      const formData = new FormData();
+      formData.append('name', reporterName);
+      formData.append('username', reporterUsername);
+      if (reporterPassword) formData.append('password', reporterPassword);
+      formData.append('designation', reporterDesignation);
+      formData.append('district', reporterDistrict);
+      formData.append('phone', reporterPhone);
+      if (reporterPhotoFile) {
+        formData.append('photoFile', reporterPhotoFile);
+      }
+
+      const url = editingReporterId ? `/api/reporters/${editingReporterId}` : '/api/reporters';
+      const method = editingReporterId ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      let data = {};
+      try {
+        data = await res.json();
+      } catch (parseErr) {
+        console.warn('Failed to parse response as JSON:', parseErr);
+      }
+
+      if (res.ok) {
+        triggerAlert('success', editingReporterId ? 'संवाददाता की जानकारी अपडेट हो गई!' : 'नया संवाददाता सफलतापूर्वक जोड़ा गया!');
+        resetReporterForm();
+        fetchReporters();
+      } else {
+        triggerAlert('error', data.message || `सर्वर त्रुटि (${res.status}): कृपया पुनः प्रयास करें।`);
+      }
+    } catch (err) {
+      console.error('Error saving reporter:', err);
+      triggerAlert('error', 'नेटवर्क त्रुटि या कनेक्शन समस्या।');
+    } finally {
+      setIsReporterSaving(false);
+    }
+  };
+
+  const handleToggleReporterActive = async (reporter) => {
+    try {
+      const newStatus = !reporter.isActive;
+      const res = await fetch(`/api/reporters/${reporter._id || reporter.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ isActive: newStatus })
+      });
+
+      if (res.ok) {
+        triggerAlert('success', newStatus ? 'संवाददाता खाता सक्रिय (Active) किया गया।' : 'संवाददाता खाता निष्क्रिय (Deactivated) किया गया।');
+        fetchReporters();
+      }
+    } catch (err) {
+      console.error('Error toggling reporter status:', err);
+    }
+  };
+
+  const handleDeleteReporter = async (id) => {
+    try {
+      const result = await Swal.fire({
+        title: 'क्या आप इस संवाददाता को हटाना चाहते हैं?',
+        text: 'हटाने के बाद यह संवाददाता पोर्टल में लॉग इन नहीं कर पाएगा।',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'हाँ, हटाएं',
+        cancelButtonText: 'रद्द करें'
+      });
+
+      if (result.isConfirmed) {
+        const res = await fetch(`/api/reporters/${id}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.ok) {
+          triggerAlert('success', 'संवाददाता को हटा दिया गया।');
+          fetchReporters();
+        } else {
+          triggerAlert('error', 'हटाने में समस्या हुई।');
+        }
+      }
+    } catch (err) {
+      console.error('Error deleting reporter:', err);
+    }
+  };
 
   const fetchSubscribersCount = async () => {
     try {
@@ -430,6 +685,8 @@ export default function AdminDashboard() {
       fetchAds();
       fetchEditorInfo();
       fetchSubdivisions();
+      fetchPendingNews();
+      fetchReporters();
     }
   }, [token]);
 
@@ -442,6 +699,12 @@ export default function AdminDashboard() {
     }
     if (token && activeTab === 'settings') {
       fetchEditorInfo();
+    }
+    if (token && activeTab === 'review') {
+      fetchPendingNews();
+    }
+    if (token && activeTab === 'reporters') {
+      fetchReporters();
     }
   }, [activeTab, token]);
 
@@ -1261,6 +1524,38 @@ export default function AdminDashboard() {
             <Newspaper size={16} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
             {language === 'en' ? 'News Feed' : 'समाचार सूची'}
           </button>
+
+          {/* Pending Reviews Tab */}
+          <button
+            className={`admin-tab ${activeTab === 'review' ? 'active' : ''}`}
+            onClick={() => { setActiveTab('review'); fetchPendingNews(); setIsEditMenuOpen(false); }}
+            style={{
+              borderColor: activeTab === 'review' ? 'var(--color-primary)' : (pendingNews.length > 0 ? '#eab308' : 'rgba(255,255,255,0.08)')
+            }}
+          >
+            <Clock size={16} style={{ marginRight: '6px', verticalAlign: 'middle', color: pendingNews.length > 0 ? '#eab308' : 'inherit' }} />
+            समीक्षाधीन खबरें
+            {pendingNews.length > 0 && (
+              <span style={{ background: '#eab308', color: '#000', fontSize: '11px', fontWeight: 800, padding: '1px 7px', borderRadius: '10px', marginLeft: '6px' }}>
+                {pendingNews.length}
+              </span>
+            )}
+          </button>
+
+          {/* Reporters Management Tab */}
+          <button
+            className={`admin-tab ${activeTab === 'reporters' ? 'active' : ''}`}
+            onClick={() => { setActiveTab('reporters'); fetchReporters(); setIsEditMenuOpen(false); }}
+          >
+            <Users size={16} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+            संवाददाता प्रबंधन
+            {reportersList.length > 0 && (
+              <span style={{ background: 'var(--color-secondary)', color: '#fff', fontSize: '10px', padding: '2px 6px', borderRadius: '10px', marginLeft: '6px' }}>
+                {reportersList.length}
+              </span>
+            )}
+          </button>
+
           {/* Settings Tab */}
           <button
             className={`admin-tab ${activeTab === 'settings' ? 'active' : ''}`}
@@ -1364,17 +1659,47 @@ export default function AdminDashboard() {
           <div className="admin-mobile-dropdown">
             <div className="dropdown-menu" style={{ position: 'relative' }}>
               <button
-                className={`admin-tab ${['form', 'categories', 'epaper', 'poll', 'ads', 'adForm', 'notifications'].includes(activeTab) ? 'active' : ''}`}
+                className={`admin-tab ${['form', 'categories', 'epaper', 'poll', 'ads', 'adForm', 'notifications', 'review', 'reporters'].includes(activeTab) ? 'active' : ''}`}
                 onClick={() => setIsEditMenuOpen(!isEditMenuOpen)}
                 style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
               >
                 <Edit size={16} style={{ marginRight: '2px', verticalAlign: 'middle' }} />
                 {language === 'en' ? 'Manage / Edits' : 'संपादन एवं प्रबंधन'}
+                {pendingNews.length > 0 && (
+                  <span style={{ background: '#eab308', color: '#000', fontSize: '10px', padding: '1px 5px', borderRadius: '8px', fontWeight: 800 }}>
+                    {pendingNews.length}
+                  </span>
+                )}
                 <ChevronDown size={14} />
               </button>
 
               {isEditMenuOpen && (
                 <div className="admin-dropdown-content">
+                  <button
+                    style={{ background: 'transparent', border: 'none', color: activeTab === 'review' ? 'var(--color-primary)' : 'var(--color-text-primary)', padding: '10px 15px', textAlign: 'left', cursor: 'pointer', fontWeight: 600, fontSize: '14px', width: '100%', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '8px' }}
+                    onClick={() => { setActiveTab('review'); fetchPendingNews(); setIsEditMenuOpen(false); }}
+                  >
+                    <Clock size={14} color="#eab308" />
+                    ⏳ समीक्षाधीन खबरें
+                    {pendingNews.length > 0 && (
+                      <span style={{ background: '#eab308', color: '#000', fontSize: '10px', padding: '1px 6px', borderRadius: '10px', marginLeft: 'auto', fontWeight: 800 }}>
+                        {pendingNews.length}
+                      </span>
+                    )}
+                  </button>
+
+                  <button
+                    style={{ background: 'transparent', border: 'none', color: activeTab === 'reporters' ? 'var(--color-primary)' : 'var(--color-text-primary)', padding: '10px 15px', textAlign: 'left', cursor: 'pointer', fontWeight: 600, fontSize: '14px', width: '100%', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '8px' }}
+                    onClick={() => { setActiveTab('reporters'); fetchReporters(); setIsEditMenuOpen(false); }}
+                  >
+                    <Users size={14} color="#3b82f6" />
+                    👥 संवाददाता प्रबंधन
+                    {reportersList.length > 0 && (
+                      <span style={{ background: '#3b82f6', color: '#fff', fontSize: '10px', padding: '1px 6px', borderRadius: '10px', marginLeft: 'auto', fontWeight: 700 }}>
+                        {reportersList.length}
+                      </span>
+                    )}
+                  </button>
                   <button
                     style={{ background: 'transparent', border: 'none', color: activeTab === 'notifications' ? 'var(--color-primary)' : 'var(--color-text-primary)', padding: '10px 15px', textAlign: 'left', cursor: 'pointer', fontWeight: 600, fontSize: '14px', width: '100%', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '8px' }}
                     onClick={() => { setActiveTab('notifications'); fetchSubscribersCount(); setIsEditMenuOpen(false); }}
@@ -3472,6 +3797,842 @@ export default function AdminDashboard() {
 
           </div>
         )}
+
+        {/* TAB 8: REVIEW PENDING NEWS (समीक्षाधीन समाचार) */}
+        {activeTab === 'review' && (
+          <div style={{ width: '100%' }}>
+            {/* Header Card */}
+            <div style={{
+              background: 'var(--bg-card, #141b2d)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '16px',
+              padding: '20px 24px',
+              marginBottom: '24px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '12px'
+            }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <Clock size={24} color="#eab308" />
+                  <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 800, color: 'var(--color-text-primary)' }}>
+                    समीक्षाधीन समाचार (Pending News Approval)
+                  </h2>
+                  <span style={{
+                    background: pendingNews.length > 0 ? '#eab308' : 'rgba(255,255,255,0.1)',
+                    color: pendingNews.length > 0 ? '#000' : 'var(--color-text-secondary)',
+                    fontWeight: 800,
+                    fontSize: '12px',
+                    padding: '3px 10px',
+                    borderRadius: '12px'
+                  }}>
+                    {pendingNews.length} लंबित
+                  </span>
+                </div>
+                <p style={{ margin: '6px 0 0 0', fontSize: '13px', color: 'var(--color-text-secondary)' }}>
+                  संवाददाताओं (Reporters) द्वारा भेजी गई खबरें। आपके अनुमोदन (Approve) के बाद ही ये पाठकों के लिए लाइव होंगी और स्वचालित पुश नोटिफिकेशन भेजा जाएगा।
+                </p>
+              </div>
+              <button
+                onClick={fetchPendingNews}
+                className="btn-primary"
+                style={{
+                  background: 'transparent',
+                  border: '1px solid var(--border-color)',
+                  color: 'var(--color-text-primary)',
+                  padding: '8px 14px',
+                  borderRadius: '10px',
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                🔄 रिफ्रेश करें
+              </button>
+            </div>
+
+            {/* List or Empty State */}
+            {pendingNews.length === 0 ? (
+              <div style={{
+                background: 'var(--bg-card, #141b2d)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '16px',
+                padding: '60px 20px',
+                textAlign: 'center'
+              }}>
+                <div style={{
+                  width: '64px',
+                  height: '64px',
+                  borderRadius: '50%',
+                  background: 'rgba(34, 197, 94, 0.1)',
+                  color: '#22c55e',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: '16px'
+                }}>
+                  <CheckCircle size={32} />
+                </div>
+                <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                  वर्तमान में कोई खबर समीक्षा के लिए लंबित नहीं है
+                </h3>
+                <p style={{ margin: 0, fontSize: '14px', color: 'var(--color-text-secondary)', maxWidth: '480px', marginInline: 'auto' }}>
+                  सभी संवाददाताओं की खबरें स्वीकृत हो चुकी हैं। जैसे ही कोई संवाददाता नई खबर सबमिट करेगा, वह यहाँ अनुमोदन के लिए दिखाई देगी।
+                </p>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                {pendingNews.map((item) => (
+                  <div
+                    key={item._id || item.id}
+                    style={{
+                      background: 'var(--bg-card, #141b2d)',
+                      border: '1px solid rgba(234, 179, 8, 0.3)',
+                      borderRadius: '16px',
+                      padding: '22px',
+                      boxShadow: 'var(--shadow-sm)'
+                    }}
+                  >
+                    {/* Reporter Info Bar */}
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      flexWrap: 'wrap',
+                      gap: '12px',
+                      paddingBottom: '14px',
+                      borderBottom: '1px solid var(--border-color)',
+                      marginBottom: '16px'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        {item.authorPhoto ? (
+                          <img
+                            src={item.authorPhoto}
+                            alt={item.authorName || 'संवाददाता'}
+                            style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #eab308' }}
+                          />
+                        ) : (
+                          <div style={{
+                            width: '44px',
+                            height: '44px',
+                            borderRadius: '50%',
+                            background: 'rgba(234, 179, 8, 0.15)',
+                            color: '#eab308',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontWeight: 700,
+                            fontSize: '18px',
+                            border: '2px solid rgba(234, 179, 8, 0.4)'
+                          }}>
+                            {(item.authorName || 'र').charAt(0)}
+                          </div>
+                        )}
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                            <span style={{ fontWeight: 700, fontSize: '15px', color: 'var(--color-text-primary)' }}>
+                              {item.authorName || 'संवाददाता'}
+                            </span>
+                            <span style={{
+                              background: 'rgba(59, 130, 246, 0.15)',
+                              color: '#3b82f6',
+                              fontSize: '11px',
+                              padding: '2px 8px',
+                              borderRadius: '6px',
+                              fontWeight: 600
+                            }}>
+                              {item.authorRole || 'संवाददाता'}
+                            </span>
+                            {item.subdivision && item.subdivision !== 'None' && (
+                              <span style={{
+                                background: 'rgba(255, 255, 255, 0.08)',
+                                color: 'var(--color-text-secondary)',
+                                fontSize: '11px',
+                                padding: '2px 8px',
+                                borderRadius: '6px'
+                              }}>
+                                📍 {item.subdivision}
+                              </span>
+                            )}
+                          </div>
+                          <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginTop: '2px' }}>
+                            सबमिट किया गया: {item.createdAt ? new Date(item.createdAt).toLocaleString('hi-IN', { dateStyle: 'medium', timeStyle: 'short' }) : 'हाल ही में'}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {item.isBreaking && (
+                          <span style={{
+                            background: '#ef4444',
+                            color: '#fff',
+                            fontSize: '11px',
+                            padding: '3px 8px',
+                            borderRadius: '6px',
+                            fontWeight: 800,
+                            letterSpacing: '0.5px'
+                          }}>
+                            🔴 ब्रेकिंग न्यूज़
+                          </span>
+                        )}
+                        <span style={{
+                          background: 'rgba(234, 179, 8, 0.15)',
+                          color: '#eab308',
+                          fontSize: '12px',
+                          padding: '4px 10px',
+                          borderRadius: '8px',
+                          fontWeight: 700,
+                          border: '1px solid rgba(234, 179, 8, 0.3)'
+                        }}>
+                          ⏳ समीक्षाधीन
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* News Content Preview */}
+                    <div style={{ marginBottom: '16px' }}>
+                      <h3 style={{
+                        margin: '0 0 10px 0',
+                        fontSize: '18px',
+                        fontWeight: 800,
+                        color: 'var(--color-text-primary)',
+                        lineHeight: 1.4
+                      }}>
+                        {item.titleHi || item.titleEn}
+                      </h3>
+
+                      {item.summaryHi && (
+                        <p style={{
+                          margin: '0 0 12px 0',
+                          fontSize: '13px',
+                          color: 'var(--color-primary)',
+                          fontWeight: 600,
+                          lineHeight: 1.5
+                        }}>
+                          संक्षेप: {item.summaryHi}
+                        </p>
+                      )}
+
+                      {/* Images Gallery */}
+                      {item.images && item.images.length > 0 && (
+                        <div style={{
+                          display: 'flex',
+                          gap: '10px',
+                          overflowX: 'auto',
+                          marginBottom: '14px',
+                          paddingBottom: '6px'
+                        }}>
+                          {item.images.map((img, idx) => (
+                            <a
+                              key={idx}
+                              href={img}
+                              target="_blank"
+                              rel="noreferrer"
+                              style={{ flexShrink: 0, position: 'relative' }}
+                            >
+                              <img
+                                src={img}
+                                alt={`News attachment ${idx + 1}`}
+                                style={{
+                                  width: '140px',
+                                  height: '95px',
+                                  objectFit: 'cover',
+                                  borderRadius: '10px',
+                                  border: '1px solid var(--border-color)'
+                                }}
+                              />
+                            </a>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Content excerpt */}
+                      <div style={{
+                        background: 'rgba(0,0,0,0.2)',
+                        padding: '12px 14px',
+                        borderRadius: '10px',
+                        fontSize: '13px',
+                        color: 'var(--color-text-secondary)',
+                        lineHeight: 1.6,
+                        maxHeight: '140px',
+                        overflowY: 'auto',
+                        whiteSpace: 'pre-line'
+                      }}>
+                        {item.contentHi || item.contentEn}
+                      </div>
+
+                      {item.videoUrl && (
+                        <div style={{ marginTop: '8px', fontSize: '12px', color: 'var(--color-primary)' }}>
+                          ▶️ वीडियो लिंक: <a href={item.videoUrl} target="_blank" rel="noreferrer" style={{ color: 'inherit', textDecoration: 'underline' }}>{item.videoUrl}</a>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Actions Row */}
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'flex-end',
+                      gap: '10px',
+                      flexWrap: 'wrap',
+                      paddingTop: '12px',
+                      borderTop: '1px solid var(--border-color)'
+                    }}>
+                      <button
+                        onClick={() => handleEditClick(item)}
+                        style={{
+                          background: 'transparent',
+                          border: '1px solid var(--border-color)',
+                          color: 'var(--color-text-primary)',
+                          padding: '9px 16px',
+                          borderRadius: '10px',
+                          fontSize: '13px',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px'
+                        }}
+                      >
+                        <Edit size={14} />
+                        संपादित करें (Edit)
+                      </button>
+
+                      <button
+                        onClick={() => handleRejectNews(item)}
+                        style={{
+                          background: 'rgba(239, 68, 68, 0.1)',
+                          border: '1px solid rgba(239, 68, 68, 0.4)',
+                          color: '#ef4444',
+                          padding: '9px 18px',
+                          borderRadius: '10px',
+                          fontSize: '13px',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px'
+                        }}
+                      >
+                        <XCircle size={15} />
+                        अस्वीकृत करें (Reject)
+                      </button>
+
+                      <button
+                        onClick={() => handleApproveNews(item)}
+                        style={{
+                          background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+                          border: 'none',
+                          color: '#fff',
+                          padding: '9px 20px',
+                          borderRadius: '10px',
+                          fontSize: '13px',
+                          fontWeight: 800,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          boxShadow: '0 4px 12px rgba(34, 197, 94, 0.35)'
+                        }}
+                      >
+                        <CheckCircle size={15} />
+                        स्वीकृत व लाइव करें (Approve)
+                      </button>
+                    </div>
+
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB 9: REPORTER MANAGEMENT (संवाददाता प्रबंधन) */}
+        {activeTab === 'reporters' && (
+          <div style={{ width: '100%' }}>
+            {/* Header Card */}
+            <div style={{
+              background: 'var(--bg-card, #141b2d)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '16px',
+              padding: '20px 24px',
+              marginBottom: '24px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '12px'
+            }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <Users size={24} color="#3b82f6" />
+                  <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 800, color: 'var(--color-text-primary)' }}>
+                    संवाददाता प्रबंधन (Reporters Management)
+                  </h2>
+                  <span style={{
+                    background: '#3b82f6',
+                    color: '#fff',
+                    fontWeight: 800,
+                    fontSize: '12px',
+                    padding: '3px 10px',
+                    borderRadius: '12px'
+                  }}>
+                    {reportersList.length} संवाददाता
+                  </span>
+                </div>
+                <p style={{ margin: '6px 0 0 0', fontSize: '13px', color: 'var(--color-text-secondary)' }}>
+                  पोर्टल के लिए नए संवाददाताओं की आईडी/पासवर्ड बनाएं, फ़ोटो व कार्यक्षेत्र जोड़ें और उनकी गतिविधि प्रबंधित करें।
+                </p>
+              </div>
+            </div>
+
+            {/* Add / Edit Reporter Form Card */}
+            <div style={{
+              background: 'var(--bg-card, #141b2d)',
+              border: editingReporterId ? '2px solid var(--color-primary)' : '1px solid var(--border-color)',
+              borderRadius: '18px',
+              padding: '22px',
+              marginBottom: '30px',
+              boxShadow: 'var(--shadow-sm)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px', flexWrap: 'wrap', gap: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <UserPlus size={20} color="var(--color-primary)" />
+                  <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                    {editingReporterId ? 'संवाददाता विवरण संपादित करें (Edit Reporter)' : 'नया संवाददाता जोड़ें (Add New Reporter)'}
+                  </h3>
+                </div>
+                {editingReporterId && (
+                  <button
+                    type="button"
+                    onClick={resetReporterForm}
+                    style={{
+                      background: 'transparent',
+                      border: '1px solid var(--border-color)',
+                      color: 'var(--color-text-secondary)',
+                      padding: '5px 12px',
+                      borderRadius: '8px',
+                      fontSize: '12px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    संपादित करना रद्द करें
+                  </button>
+                )}
+              </div>
+
+              <form onSubmit={handleSaveReporter}>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+                  gap: '16px',
+                  marginBottom: '18px'
+                }}>
+                  {/* Name */}
+                  <div>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px', color: 'var(--color-text-primary)' }}>
+                      पूरा नाम (Full Name) *
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="उदा: रमेश कुमार वर्मा"
+                      value={reporterName}
+                      onChange={(e) => setReporterName(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  {/* Username */}
+                  <div>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px', color: 'var(--color-text-primary)' }}>
+                      लॉगिन आईडी / यूज़रनेम (Login Username) *
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="उदा: ramesh_reporter"
+                      value={reporterUsername}
+                      onChange={(e) => setReporterUsername(e.target.value.toLowerCase().replace(/\s+/g, ''))}
+                      required
+                    />
+                    <small style={{ fontSize: '11px', color: 'var(--color-text-secondary)' }}>बिना स्पेस का यूज़रनेम</small>
+                  </div>
+
+                  {/* Password */}
+                  <div>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px', color: 'var(--color-text-primary)' }}>
+                      पासवर्ड (Password) {editingReporterId ? '(बदलना हो तो ही लिखें)' : '*'}
+                    </label>
+                    <input
+                      type="password"
+                      className="form-control"
+                      placeholder={editingReporterId ? 'नया पासवर्ड (खाली छोड़ें यदि नहीं बदलना)' : 'मजबूत पासवर्ड दर्ज करें'}
+                      value={reporterPassword}
+                      onChange={(e) => setReporterPassword(e.target.value)}
+                      required={!editingReporterId}
+                    />
+                  </div>
+
+                  {/* Designation */}
+                  <div>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px', color: 'var(--color-text-primary)' }}>
+                      पद / डिजिग्नेशन (Designation)
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="उदा: संवाददाता, तहसील प्रभारी, विशेष संवाददाता"
+                      value={reporterDesignation}
+                      onChange={(e) => setReporterDesignation(e.target.value)}
+                    />
+                  </div>
+
+                  {/* District / Work Area */}
+                  <div>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px', color: 'var(--color-text-primary)' }}>
+                      कार्यक्षेत्र / जिला (District / Area)
+                    </label>
+                    <select
+                      className="form-control"
+                      value={reporterDistrict}
+                      onChange={(e) => setReporterDistrict(e.target.value)}
+                    >
+                      <option value="Sant Kabir Nagar">संतकबीरनगर (Sant Kabir Nagar)</option>
+                      <option value="Kushinagar">कुशीनगर (Kushinagar)</option>
+                      <option value="Basti">बस्ती (Basti)</option>
+                      <option value="Gorakhpur">गोरखपुर (Gorakhpur)</option>
+                      <option value="Siddharthnagar">सिद्धार्थnagar (Siddharthnagar)</option>
+                      <option value="Maharajganj">महराजगंज (Maharajganj)</option>
+                      <option value="Deoria">देवरिया (Deoria)</option>
+                      <option value="Lucknow">लखनऊ (Lucknow)</option>
+                      <option value="Other">अन्य (Other)</option>
+                    </select>
+                  </div>
+
+                  {/* Phone */}
+                  <div>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px', color: 'var(--color-text-primary)' }}>
+                      मोबाइल नंबर (Phone Number)
+                    </label>
+                    <input
+                      type="tel"
+                      className="form-control"
+                      placeholder="उदा: 9876543210"
+                      value={reporterPhone}
+                      onChange={(e) => setReporterPhone(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                {/* Photo Upload Row */}
+                <div style={{
+                  marginBottom: '20px',
+                  padding: '14px',
+                  borderRadius: '12px',
+                  background: 'rgba(0,0,0,0.15)',
+                  border: '1px solid var(--border-color)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '16px',
+                  flexWrap: 'wrap'
+                }}>
+                  <div style={{ flexShrink: 0 }}>
+                    {reporterPhotoPreview ? (
+                      <img
+                        src={reporterPhotoPreview}
+                        alt="Reporter preview"
+                        style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--color-primary)' }}
+                      />
+                    ) : (
+                      <div style={{
+                        width: '60px',
+                        height: '60px',
+                        borderRadius: '50%',
+                        background: 'rgba(255,255,255,0.06)',
+                        border: '2px dashed var(--border-color)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'var(--color-text-secondary)',
+                        fontSize: '11px',
+                        textAlign: 'center'
+                      }}>
+                        फ़ोटो नहीं
+                      </div>
+                    )}
+                  </div>
+                  <div style={{ flex: 1, minWidth: '200px' }}>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '4px', color: 'var(--color-text-primary)' }}>
+                      संवाददाता की फ़ोटो (Profile Photo)
+                    </label>
+                    <input
+                      id="reporterPhotoInput"
+                      type="file"
+                      accept="image/*"
+                      className="form-control"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          setReporterPhotoFile(file);
+                          setReporterPhotoPreview(URL.createObjectURL(file));
+                        }
+                      }}
+                    />
+                    <small style={{ fontSize: '11px', color: 'var(--color-text-secondary)', marginTop: '4px', display: 'block' }}>
+                      यह फ़ोटो रिपोर्टर द्वारा प्रकाशित खबरों के नीचे उनके नाम के साथ दिखेगी।
+                    </small>
+                  </div>
+                </div>
+
+                {/* Form Submit Buttons */}
+                <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                  {editingReporterId && (
+                    <button
+                      type="button"
+                      onClick={resetReporterForm}
+                      style={{
+                        background: 'transparent',
+                        border: '1px solid var(--border-color)',
+                        color: 'var(--color-text-primary)',
+                        padding: '10px 20px',
+                        borderRadius: '10px',
+                        fontWeight: 600,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      रद्द करें
+                    </button>
+                  )}
+                  <button
+                    type="submit"
+                    className="btn-primary"
+                    disabled={isReporterSaving}
+                    style={{
+                      padding: '10px 24px',
+                      borderRadius: '10px',
+                      fontWeight: 700,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}
+                  >
+                    {isReporterSaving ? 'सहेजा जा रहा है...' : (editingReporterId ? 'अपडेट करें (Update)' : '➕ नया संवाददाता जोड़ें')}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Registered Reporters List */}
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
+                <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                  पंजीकृत संवाददाताओं की सूची ({reportersList.length})
+                </h3>
+                <button
+                  onClick={fetchReporters}
+                  style={{
+                    background: 'transparent',
+                    border: '1px solid var(--border-color)',
+                    color: 'var(--color-text-secondary)',
+                    padding: '6px 12px',
+                    borderRadius: '8px',
+                    fontSize: '12px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  🔄 सूची रिफ्रेश करें
+                </button>
+              </div>
+
+              {reportersList.length === 0 ? (
+                <div style={{
+                  background: 'var(--bg-card, #141b2d)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '16px',
+                  padding: '40px 20px',
+                  textAlign: 'center',
+                  color: 'var(--color-text-secondary)'
+                }}>
+                  अभी तक कोई संवाददाता नहीं जोड़ा गया है। ऊपर दिए गए फ़ॉर्म से पहला संवाददाता जोड़ें।
+                </div>
+              ) : (
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(310px, 1fr))',
+                  gap: '18px'
+                }}>
+                  {reportersList.map((reporter) => (
+                    <div
+                      key={reporter._id || reporter.id}
+                      style={{
+                        background: 'var(--bg-card, #141b2d)',
+                        border: reporter.isActive === false ? '1px dashed rgba(239, 68, 68, 0.4)' : '1px solid var(--border-color)',
+                        borderRadius: '16px',
+                        padding: '18px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        gap: '14px',
+                        opacity: reporter.isActive === false ? 0.75 : 1
+                      }}
+                    >
+                      {/* Top Row: Photo + Name + Status */}
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            {reporter.photoUrl ? (
+                              <img
+                                src={reporter.photoUrl}
+                                alt={reporter.name}
+                                style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #3b82f6' }}
+                              />
+                            ) : (
+                              <div style={{
+                                width: '48px',
+                                height: '48px',
+                                borderRadius: '50%',
+                                background: 'rgba(59, 130, 246, 0.15)',
+                                color: '#3b82f6',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontWeight: 700,
+                                fontSize: '20px'
+                              }}>
+                                {(reporter.name || reporter.username || 'र').charAt(0)}
+                              </div>
+                            )}
+                            <div>
+                              <div style={{ fontWeight: 700, fontSize: '15px', color: 'var(--color-text-primary)' }}>
+                                {reporter.name || reporter.username}
+                              </div>
+                              <div style={{ fontSize: '12px', color: '#3b82f6', fontWeight: 600 }}>
+                                {reporter.designation || 'संवाददाता'}
+                              </div>
+                            </div>
+                          </div>
+
+                          <span style={{
+                            background: reporter.isActive === false ? 'rgba(239, 68, 68, 0.15)' : 'rgba(34, 197, 94, 0.15)',
+                            color: reporter.isActive === false ? '#ef4444' : '#22c55e',
+                            fontSize: '11px',
+                            padding: '3px 8px',
+                            borderRadius: '6px',
+                            fontWeight: 700
+                          }}>
+                            {reporter.isActive === false ? 'निष्क्रिय' : 'सक्रिय'}
+                          </span>
+                        </div>
+
+                        {/* Details */}
+                        <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', lineHeight: 1.6, padding: '8px 10px', background: 'rgba(0,0,0,0.15)', borderRadius: '8px', marginBottom: '12px' }}>
+                          <div>🔑 <strong>आईडी:</strong> {reporter.username}</div>
+                          <div>📍 <strong>जिला / क्षेत्र:</strong> {reporter.district || 'अनिर्दिष्ट'}</div>
+                          {reporter.phone && <div>📞 <strong>फ़ोन:</strong> {reporter.phone}</div>}
+                        </div>
+
+                        {/* Article Counts */}
+                        <div style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(3, 1fr)',
+                          gap: '6px',
+                          textAlign: 'center'
+                        }}>
+                          <div style={{ background: 'rgba(255,255,255,0.04)', padding: '6px 4px', borderRadius: '8px' }}>
+                            <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--color-text-primary)' }}>{reporter.totalArticles || 0}</div>
+                            <div style={{ fontSize: '10px', color: 'var(--color-text-secondary)' }}>कुल खबरें</div>
+                          </div>
+                          <div style={{ background: 'rgba(34, 197, 94, 0.08)', padding: '6px 4px', borderRadius: '8px' }}>
+                            <div style={{ fontSize: '14px', fontWeight: 700, color: '#22c55e' }}>{reporter.approvedArticles || 0}</div>
+                            <div style={{ fontSize: '10px', color: 'var(--color-text-secondary)' }}>लाइव / स्वीकृत</div>
+                          </div>
+                          <div style={{ background: 'rgba(234, 179, 8, 0.08)', padding: '6px 4px', borderRadius: '8px' }}>
+                            <div style={{ fontSize: '14px', fontWeight: 700, color: '#eab308' }}>{reporter.pendingArticles || 0}</div>
+                            <div style={{ fontSize: '10px', color: 'var(--color-text-secondary)' }}>समीक्षाधीन</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Card Actions */}
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '6px',
+                        paddingTop: '10px',
+                        borderTop: '1px solid var(--border-color)',
+                        flexWrap: 'wrap'
+                      }}>
+                        <button
+                          onClick={() => handleToggleReporterActive(reporter)}
+                          style={{
+                            background: 'transparent',
+                            border: `1px solid ${reporter.isActive === false ? '#22c55e' : '#ef4444'}`,
+                            color: reporter.isActive === false ? '#22c55e' : '#ef4444',
+                            fontSize: '11px',
+                            padding: '5px 9px',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontWeight: 600
+                          }}
+                        >
+                          {reporter.isActive === false ? 'सक्रिय करें' : 'निष्क्रिय करें'}
+                        </button>
+
+                        <div style={{ display: 'flex', gap: '6px' }}>
+                          <button
+                            onClick={() => {
+                              handleEditReporter(reporter);
+                              window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }}
+                            style={{
+                              background: 'transparent',
+                              border: '1px solid var(--border-color)',
+                              color: 'var(--color-text-primary)',
+                              fontSize: '11px',
+                              padding: '5px 10px',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}
+                          >
+                            <Edit size={12} />
+                            संपादित
+                          </button>
+
+                          <button
+                            onClick={() => handleDeleteReporter(reporter._id || reporter.id)}
+                            style={{
+                              background: 'rgba(239, 68, 68, 0.1)',
+                              border: '1px solid rgba(239, 68, 68, 0.3)',
+                              color: '#ef4444',
+                              fontSize: '11px',
+                              padding: '5px 8px',
+                              borderRadius: '6px',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                      </div>
+
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+          </div>
+        )}
+
 
       </div>
     </div>

@@ -18,8 +18,11 @@ const {
   deleteComment,
   likeNews,
   shareNews,
+  getPendingNews,
+  updateNewsStatus,
+  getMyNews,
 } = require('../controllers/newsController');
-const { protect } = require('../middleware/authMiddleware');
+const { protect, adminOnly } = require('../middleware/authMiddleware');
 
 // Ensure uploads folder exists
 const uploadsDir = path.join(__dirname, '../uploads');
@@ -64,6 +67,16 @@ router.route('/comments/all')
 
 router.route('/:id/comments/:commentId')
   .delete(protect, deleteComment);
+
+// Review and Reporter News routes (Declared before /:id)
+router.route('/pending')
+  .get(protect, adminOnly, getPendingNews);
+
+router.route('/my-news')
+  .get(protect, getMyNews);
+
+router.route('/:id/status')
+  .put(protect, adminOnly, updateNewsStatus);
 
 // News routes
 router.route('/')

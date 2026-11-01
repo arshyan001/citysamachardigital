@@ -17,6 +17,7 @@ const analyticsRoutes = require('./routes/analyticsRoutes');
 const editorRoutes = require('./routes/editorRoutes');
 const subdivisionRoutes = require('./routes/subdivisionRoutes');
 const pushRoutes = require('./routes/pushRoutes');
+const reporterRoutes = require('./routes/reporterRoutes');
 
 const User = require('./models/User');
 const Category = require('./models/Category');
@@ -62,6 +63,7 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/editor', editorRoutes);
 app.use('/api/subdivisions', subdivisionRoutes);
 app.use('/api/push', pushRoutes);
+app.use('/api/reporters', reporterRoutes);
 
 // Simple status route
 app.get('/', (req, res) => {

@@ -35,6 +35,10 @@ const protect = async (req, res, next) => {
         return res.status(401).json({ message: 'Not authorized, user not found' });
       }
 
+      if (req.user.isActive === false) {
+        return res.status(403).json({ message: 'आपका खाता निष्क्रिय (Deactivated) कर दिया गया है। एडमिन से संपर्क करें।' });
+      }
+
       next();
     } catch (error) {
       console.error(error);
@@ -47,4 +51,12 @@ const protect = async (req, res, next) => {
   }
 };
 
-module.exports = { protect };
+const adminOnly = (req, res, next) => {
+  if (req.user && (req.user.role === 'admin' || !req.user.role || req.user.role !== 'reporter')) {
+    next();
+  } else {
+    res.status(403).json({ message: 'केवल मुख्य एडमिन को यह कार्य करने की अनुमति है।' });
+  }
+};
+
+module.exports = { protect, adminOnly };

@@ -14,6 +14,7 @@ import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import EPaper from './pages/EPaper';
 import NewspaperGenerator from './pages/NewspaperGenerator';
+import ReporterDashboard from './pages/ReporterDashboard';
 
 // Custom Scroll Restoration Component for React Router DOM v6
 function ScrollRestoration() {
@@ -83,6 +84,7 @@ export default function App() {
               <Route path="/contact" element={<ContactUs />} />
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/reporter/dashboard" element={<ReporterDashboard />} />
               <Route path="/epaper" element={<EPaper />} />
               <Route path="/newspaper" element={<NewspaperGenerator />} />
             </Routes>

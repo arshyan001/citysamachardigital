@@ -95,10 +95,16 @@ export default function Navbar() {
     });
   };
 
-  const isAdminLoggedIn = !!sessionStorage.getItem('admin_token');
+  const token = sessionStorage.getItem('admin_token');
+  const userRole = sessionStorage.getItem('user_role') || 'admin';
+  const userName = sessionStorage.getItem('user_name') || 'एडमिन';
+  const isLoggedIn = !!token;
+  const isReporter = userRole === 'reporter';
+  const isAdminLoggedIn = isLoggedIn && !isReporter;
 
   const handleLogout = () => {
-    sessionStorage.removeItem('admin_token');
+    sessionStorage.clear();
+    window.dispatchEvent(new Event('storage'));
     navigate('/admin/login');
   };
 
@@ -241,12 +247,12 @@ export default function Navbar() {
         </NavLink>
       </li>
 
-      {isAdminLoggedIn ? (
+      {isLoggedIn ? (
         <li>
-          <NavLink to="/admin/dashboard" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => isMobile && setIsOpen(false)}>
+          <NavLink to={isReporter ? "/reporter/dashboard" : "/admin/dashboard"} className={({ isActive }) => isActive ? 'active' : ''} onClick={() => isMobile && setIsOpen(false)}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-success)', fontWeight: 700 }}>
               <UserCheck size={17} />
-              {t('adminDashboard')}
+              {isReporter ? `${userName} (पैनल)` : t('adminDashboard')}
             </span>
           </NavLink>
         </li>
@@ -256,7 +262,7 @@ export default function Navbar() {
             <Link to="/admin/login" onClick={() => setIsOpen(false)}>
               <span style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-text-secondary)', fontSize: '14px' }}>
                 <UserCheck size={16} />
-                एडमिन लॉगिन
+                पोर्टल लॉगिन
               </span>
             </Link>
           </li>
@@ -283,12 +289,15 @@ export default function Navbar() {
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              {isAdminLoggedIn ? (
+              {isLoggedIn ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', color: 'var(--color-success)' }}>
+                  <Link 
+                    to={isReporter ? "/reporter/dashboard" : "/admin/dashboard"}
+                    style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', color: 'var(--color-success)', textDecoration: 'none', fontWeight: 600 }}
+                  >
                     <UserCheck size={14} />
-                    एडमिन
-                  </span>
+                    {isReporter ? `${userName} (संवाददाता)` : 'एडमिन'}
+                  </Link>
                   <button 
                     onClick={handleLogout}
                     style={{ 
@@ -305,7 +314,7 @@ export default function Navbar() {
                 </div>
               ) : (
                 <Link to="/admin/login" className="desktop-only-link" style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px' }}>
-                  एडमिन लॉगिन
+                  पोर्टल लॉगिन
                 </Link>
               )}
 

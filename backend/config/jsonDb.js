@@ -137,7 +137,7 @@ const saveDb = (data) => {
 };
 
 const jsonDb = {
-  // Auth Operations
+  // Auth & Reporter Operations
   getUser: (username) => {
     const db = getDb();
     return db.users.find(u => u.username === username);
@@ -148,7 +148,10 @@ const jsonDb = {
     const user = db.users.find(u => u._id === id);
     if (user) {
       const { password, ...userWithoutPassword } = user;
-      return userWithoutPassword;
+      return {
+        role: userWithoutPassword.role || (user.username === 'admin' ? 'admin' : 'reporter'),
+        ...userWithoutPassword
+      };
     }
     return null;
   },
@@ -170,16 +173,97 @@ const jsonDb = {
     return null;
   },
 
+  getReporters: () => {
+    const db = getDb();
+    return (db.users || [])
+      .filter(u => u.role === 'reporter')
+      .map(({ password, ...u }) => {
+        const reporterNews = (db.news || []).filter(n => String(n.author) === String(u._id));
+        return {
+          ...u,
+          totalArticles: reporterNews.length,
+          approvedArticles: reporterNews.filter(n => n.status === 'approved').length,
+          pendingArticles: reporterNews.filter(n => n.status === 'pending').length
+        };
+      });
+  },
+
+  createReporter: (reporterData) => {
+    const db = getDb();
+    const salt = bcrypt.genSaltSync(10);
+    const newReporter = {
+      _id: 'user_' + Date.now() + Math.random().toString(36).substr(2, 5),
+      username: reporterData.username,
+      password: bcrypt.hashSync(reporterData.password, salt),
+      role: 'reporter',
+      name: reporterData.name || '',
+      photoUrl: reporterData.photoUrl || '',
+      designation: reporterData.designation || 'संवाददाता',
+      district: reporterData.district || 'Sant Kabir Nagar',
+      phone: reporterData.phone || '',
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    db.users.push(newReporter);
+    saveDb(db);
+    const { password: _, ...reporterWithoutPassword } = newReporter;
+    return reporterWithoutPassword;
+  },
+
+  updateReporter: (id, updateData) => {
+    const db = getDb();
+    const index = db.users.findIndex(u => u._id === id);
+    if (index !== -1) {
+      if (updateData.name !== undefined) db.users[index].name = updateData.name;
+      if (updateData.username !== undefined) db.users[index].username = updateData.username;
+      if (updateData.designation !== undefined) db.users[index].designation = updateData.designation;
+      if (updateData.district !== undefined) db.users[index].district = updateData.district;
+      if (updateData.phone !== undefined) db.users[index].phone = updateData.phone;
+      if (updateData.photoUrl !== undefined) db.users[index].photoUrl = updateData.photoUrl;
+      if (updateData.isActive !== undefined) db.users[index].isActive = updateData.isActive;
+      if (updateData.password) {
+        const salt = bcrypt.genSaltSync(10);
+        db.users[index].password = bcrypt.hashSync(updateData.password, salt);
+      }
+      db.users[index].updatedAt = new Date().toISOString();
+      saveDb(db);
+      const { password: _, ...reporterWithoutPassword } = db.users[index];
+      return reporterWithoutPassword;
+    }
+    return null;
+  },
+
+  deleteReporter: (id) => {
+    const db = getDb();
+    const initialLen = db.users.length;
+    db.users = db.users.filter(u => u._id !== id);
+    saveDb(db);
+    return db.users.length !== initialLen;
+  },
+
   // News Operations
-  getNews: (filters) => {
+  getNews: (filters = {}) => {
     const db = getDb();
     let list = [...db.news];
 
     // Populate categories full details
     list = list.map(item => ({
       ...item,
-      categories: item.categories.map(catId => db.categories.find(c => c._id === catId)).filter(Boolean)
+      categories: (item.categories || []).map(catId => db.categories.find(c => c._id === catId || c.id === catId)).filter(Boolean)
     }));
+
+    // Status filter
+    if (filters.status && filters.status !== 'all') {
+      list = list.filter(n => n.status === filters.status);
+    } else if (!filters.status) {
+      list = list.filter(n => n.status === 'approved' || !n.status);
+    }
+
+    // Author filter
+    if (filters.author) {
+      list = list.filter(n => String(n.author) === String(filters.author));
+    }
 
     if (filters.category) {
       list = list.filter(n => n.categories.some(c => c._id === filters.category));

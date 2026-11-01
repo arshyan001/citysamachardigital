@@ -4,6 +4,7 @@
       "_id": "admin_user_id_1",
       "username": "admin",
       "password": "$2a$10$rA2dt8V0RwGhNDgIbDJBuuZq0w/7A7Sbg4GLOikcjh.Fqaej.HsUi",
+      "role": "admin",
       "createdAt": "2026-06-05T17:53:42.505Z",
       "updatedAt": "2026-06-20T18:23:47.243Z"
     }
@@ -249,5 +250,18 @@
   ],
   "stats": {
     "totalWebsiteViews": 0
-  }
+  },
+  "editorInfo": {
+    "_id": "editor_default",
+    "nameEn": "Admin Editor",
+    "nameHi": "एडमिन संपादक",
+    "roleEn": "Editor-in-Chief",
+    "roleHi": "मुख्य संपादक",
+    "descriptionEn": "Passionate journalist dedicated to delivering accurate and timely news to the local community.",
+    "descriptionHi": "स्थानीय समुदाय तक सटीक और समय पर समाचार पहुंचाने के लिए समर्पित पत्रकार।",
+    "photoUrl": "",
+    "createdAt": "2026-11-01T15:19:07.047Z",
+    "updatedAt": "2026-11-01T15:19:07.047Z"
+  },
+  "subdivisions": []
 }

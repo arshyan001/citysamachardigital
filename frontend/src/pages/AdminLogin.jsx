@@ -26,9 +26,15 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // If already logged in, redirect to dashboard
-    if (sessionStorage.getItem('admin_token')) {
-      navigate('/admin/dashboard');
+    // If already logged in, redirect to appropriate dashboard
+    const token = sessionStorage.getItem('admin_token');
+    const role = sessionStorage.getItem('user_role');
+    if (token) {
+      if (role === 'reporter') {
+        navigate('/reporter/dashboard');
+      } else {
+        navigate('/admin/dashboard');
+      }
     }
   }, [navigate]);
 
@@ -50,15 +56,23 @@ export default function AdminLogin() {
       if (res.ok) {
         sessionStorage.setItem('admin_token', data.token);
         sessionStorage.setItem('admin_username', data.username);
+        sessionStorage.setItem('user_role', data.role || 'admin');
+        sessionStorage.setItem('user_name', data.name || data.username);
+        sessionStorage.setItem('user_photo', data.photoUrl || '');
+        sessionStorage.setItem('user_designation', data.designation || '');
         // Force header update
         window.dispatchEvent(new Event('storage'));
 
         Toast.fire({
           icon: 'success',
-          title: 'सफलतापूर्वक लॉग इन किया गया!'
+          title: `स्वागत है, ${data.name || data.username}!`
         });
 
-        navigate('/admin/dashboard');
+        if (data.role === 'reporter') {
+          navigate('/reporter/dashboard');
+        } else {
+          navigate('/admin/dashboard');
+        }
       } else {
         Toast.fire({
           icon: 'error',
@@ -81,10 +95,10 @@ export default function AdminLogin() {
       <div className="auth-wrapper glass">
         <div style={{ textAlign: 'center', marginBottom: '25px' }}>
           <h2 style={{ fontSize: '24px', color: 'var(--color-text-primary)' }}>
-            {'व्यवस्थापक पोर्टल'}
+            {'पोर्टल लॉगिन (एडमिन / संवाददाता)'}
           </h2>
           <p style={{ color: 'var(--color-text-secondary)', fontSize: '13px', marginTop: '6px' }}>
-            {'समाचार अपडेट लिखने और प्रबंधित करने के लिए लॉग इन करें।'}
+            {'समाचार लिखने, समीक्षा करने और प्रबंधित करने के लिए अपने आईडी पासवर्ड से लॉग इन करें।'}
           </p>
         </div>
 

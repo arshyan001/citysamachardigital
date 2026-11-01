@@ -348,6 +348,10 @@ export default function NewsDetail() {
     { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }
   );
 
+  const authorName = news.authorName || 'सदरे आलम खान';
+  const authorPhoto = news.authorPhoto || '';
+  const authorRole = news.authorRole || 'मुख्य संपादक';
+
   return (
     <div className="container" style={{ marginTop: '30px' }}>
       <SEO
@@ -396,6 +400,23 @@ export default function NewsDetail() {
                 )}
               </div>
               <h1 className="article-title">{title}</h1>
+
+              {/* Author Badge Under Title */}
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginBottom: '14px', background: 'rgba(255, 255, 255, 0.04)', border: '1px solid var(--border-color)', borderRadius: '20px', padding: '4px 12px 4px 5px' }}>
+                {authorPhoto ? (
+                  <img src={authorPhoto} alt={authorName} style={{ width: '26px', height: '26px', borderRadius: '50%', objectFit: 'cover' }} />
+                ) : (
+                  <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'var(--color-primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 800 }}>
+                    {authorName.charAt(0)}
+                  </div>
+                )}
+                <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                  {authorName}
+                </span>
+                <span style={{ fontSize: '11px', color: 'var(--color-primary)', fontWeight: 600 }}>
+                  ({authorRole})
+                </span>
+              </div>
               <div className="article-meta-info" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
                 <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', alignItems: 'center' }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -487,6 +508,56 @@ export default function NewsDetail() {
                 </div>
               </div>
             )}
+
+            {/* Author Attribution Box (Below Article) */}
+            <div style={{
+              background: 'var(--bg-card, #141b2d)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '16px',
+              padding: '18px 20px',
+              marginTop: '32px',
+              marginBottom: '32px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '16px',
+              boxShadow: 'var(--shadow-sm)',
+              flexWrap: 'wrap'
+            }}>
+              {authorPhoto ? (
+                <img
+                  src={authorPhoto}
+                  alt={authorName}
+                  style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover', border: '2.5px solid var(--color-primary)', flexShrink: 0 }}
+                />
+              ) : (
+                <div style={{
+                  width: '64px',
+                  height: '64px',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, var(--color-primary), #b91c1c)',
+                  color: '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 800,
+                  fontSize: '24px',
+                  flexShrink: 0
+                }}>
+                  {authorName.charAt(0)}
+                </div>
+              )}
+              <div style={{ flex: '1 1 200px' }}>
+                <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.6px', color: 'var(--color-primary)', fontWeight: 800 }}>
+                  संवाददाता / खबर लेखक
+                </div>
+                <div style={{ fontSize: '18px', fontWeight: 800, color: 'var(--color-text-primary)', marginTop: '2px' }}>
+                  {authorName}
+                </div>
+                <div style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '2px' }}>
+                  {authorRole} {news.district ? `• ${news.district}` : ''}
+                </div>
+              </div>
+            </div>
 
             {/* Facebook Style Likes and Comments Widget */}
             <div className="fb-comments-container">

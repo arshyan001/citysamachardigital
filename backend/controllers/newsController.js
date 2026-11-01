@@ -34,8 +34,26 @@ const getNews = async (req, res) => {
   }
 
   try {
-    const { category, subdivision, isBreaking, search, limit } = req.query;
+    const { category, subdivision, isBreaking, search, limit, status, author } = req.query;
     let query = {};
+
+    // Filter by status:
+    // If specific status requested (e.g. pending, approved, all)
+    if (status && status !== 'all') {
+      query.status = status;
+    } else if (!status) {
+      // Public website only sees approved or legacy news (where status is null/undefined)
+      query.$or = [
+        { status: 'approved' },
+        { status: { $exists: false } },
+        { status: null }
+      ];
+    }
+
+    // Filter by author
+    if (author) {
+      query.author = author;
+    }
 
     // Filter by category
     if (category) {
@@ -133,6 +151,17 @@ const createNews = async (req, res) => {
     return res.status(500).json({ message: 'Image upload failed: ' + err.message });
   }
 
+  const isReporter = req.user && req.user.role === 'reporter';
+  const newsStatus = isReporter ? 'pending' : 'approved';
+  const authorId = req.user ? req.user._id : null;
+  const authorName = req.user 
+    ? (req.user.name || (isReporter ? req.user.username : 'सदरे आलम खान')) 
+    : 'सदरे आलम खान';
+  const authorPhoto = req.user ? (req.user.photoUrl || '') : '';
+  const authorRole = req.user 
+    ? (req.user.designation || (isReporter ? 'संवाददाता' : 'मुख्य संपादक')) 
+    : 'मुख्य संपादक';
+
   if (global.useJsonDb) {
     try {
       const {
@@ -171,14 +200,29 @@ const createNews = async (req, res) => {
         district: district || 'Sant Kabir Nagar',
         subdivision: subdivision || 'None',
         isBreaking: isBreaking === 'true' || isBreaking === true,
+        author: authorId,
+        authorName,
+        authorPhoto,
+        authorRole,
+        status: newsStatus,
+        rejectionReason: '',
       });
-      // Send push notification to all subscribers
-      sendPushToAll(
-        '🔴 ' + (titleHi || titleEn || 'नई खबर'),
-        summaryHi || summaryEn || 'सिटी समाचार डिजिटल पर नई खबर पढ़ें।',
-        `/news/${createdNews._id || createdNews.id}`
-      );
-      return res.status(201).json(createdNews);
+
+      // Send push notification to all subscribers ONLY if approved
+      if (newsStatus === 'approved') {
+        sendPushToAll(
+          '🔴 ' + (titleHi || titleEn || 'नई खबर'),
+          summaryHi || summaryEn || 'सिटी समाचार डिजिटल पर नई खबर पढ़ें।',
+          `/news/${createdNews._id || createdNews.id}`
+        );
+      }
+
+      return res.status(201).json({
+        ...createdNews,
+        message: isReporter 
+          ? 'समाचार समीक्षा (Approval) के लिए भेज दिया गया है। एडमिन द्वारा स्वीकृत होने पर यह प्रकाशित होगा।' 
+          : 'समाचार सफलतापूर्वक प्रकाशित कर दिया गया है।'
+      });
     } catch (error) {
       return res.status(500).json({ message: error.message });
     }
@@ -221,16 +265,31 @@ const createNews = async (req, res) => {
       district: district || 'Sant Kabir Nagar',
       subdivision: subdivision || 'None',
       isBreaking: isBreaking === 'true' || isBreaking === true,
+      author: authorId,
+      authorName,
+      authorPhoto,
+      authorRole,
+      status: newsStatus,
+      rejectionReason: '',
     });
 
     const createdNews = await news.save();
-    // Send push notification to all subscribers
-    sendPushToAll(
-      '🔴 ' + (titleHi || titleEn || 'नई खबर'),
-      summaryHi || summaryEn || 'सिटी समाचार डिजिटल पर नई खबर पढ़ें।',
-      `/news/${createdNews._id}`
-    );
-    res.status(201).json(createdNews);
+
+    // Send push notification to all subscribers ONLY if approved
+    if (newsStatus === 'approved') {
+      sendPushToAll(
+        '🔴 ' + (titleHi || titleEn || 'नई खबर'),
+        summaryHi || summaryEn || 'सिटी समाचार डिजिटल पर नई खबर पढ़ें।',
+        `/news/${createdNews._id}`
+      );
+    }
+
+    res.status(201).json({
+      ...(createdNews.toObject ? createdNews.toObject() : createdNews),
+      message: isReporter 
+        ? 'समाचार समीक्षा (Approval) के लिए भेज दिया गया है। एडमिन द्वारा स्वीकृत होने पर यह प्रकाशित होगा।' 
+        : 'समाचार सफलतापूर्वक प्रकाशित कर दिया गया है।'
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -748,6 +807,110 @@ const shareNews = async (req, res) => {
   }
 };
 
+// @desc    Get all pending news articles for review
+// @route   GET /api/news/pending
+// @access  Private/Admin
+const getPendingNews = async (req, res) => {
+  if (global.useJsonDb) {
+    try {
+      const list = jsonDb.getNews({ status: 'pending' });
+      return res.json(list);
+    } catch (err) {
+      return res.status(500).json({ message: err.message });
+    }
+  }
+
+  try {
+    const pendingList = await News.find({ status: 'pending' })
+      .populate('categories')
+      .populate('author', 'name username photoUrl designation phone')
+      .sort({ createdAt: -1 });
+    res.json(pendingList);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Approve or reject a news article
+// @route   PUT /api/news/:id/status
+// @access  Private/Admin
+const updateNewsStatus = async (req, res) => {
+  const { status, rejectionReason } = req.body;
+  if (!['approved', 'rejected', 'pending'].includes(status)) {
+    return res.status(400).json({ message: 'अमान्य स्टेटस (Invalid status)' });
+  }
+
+  if (global.useJsonDb) {
+    try {
+      const updated = jsonDb.updateNews(req.params.id, {
+        status,
+        rejectionReason: status === 'rejected' ? (rejectionReason || 'अस्वीकृत') : ''
+      });
+      if (updated && status === 'approved') {
+        sendPushToAll(
+          '🔴 ' + (updated.titleHi || updated.titleEn || 'नई खबर'),
+          updated.summaryHi || updated.summaryEn || 'सिटी समाचार डिजिटल पर नई खबर पढ़ें।',
+          `/news/${updated._id || updated.id}`
+        );
+      }
+      return res.json(updated);
+    } catch (err) {
+      return res.status(500).json({ message: err.message });
+    }
+  }
+
+  try {
+    const news = await News.findById(req.params.id);
+    if (!news) {
+      return res.status(404).json({ message: 'News article not found' });
+    }
+
+    news.status = status;
+    if (status === 'rejected') {
+      news.rejectionReason = rejectionReason || 'अस्वीकृत';
+    } else if (status === 'approved') {
+      news.rejectionReason = '';
+    }
+
+    const savedNews = await news.save();
+
+    if (status === 'approved') {
+      sendPushToAll(
+        '🔴 ' + (savedNews.titleHi || savedNews.titleEn || 'नई खबर'),
+        savedNews.summaryHi || savedNews.summaryEn || 'सिटी समाचार डिजिटल पर नई खबर पढ़ें।',
+        `/news/${savedNews._id}`
+      );
+    }
+
+    res.json(savedNews);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Get articles submitted by currently logged in user
+// @route   GET /api/news/my-news
+// @access  Private
+const getMyNews = async (req, res) => {
+  if (global.useJsonDb) {
+    try {
+      const list = jsonDb.getNews({ author: req.user._id, status: 'all' });
+      return res.json(list);
+    } catch (err) {
+      return res.status(500).json({ message: err.message });
+    }
+  }
+
+  try {
+    const list = await News.find({ author: req.user._id })
+      .populate('categories')
+      .sort({ createdAt: -1 });
+    res.json(list);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getNews,
   getNewsById,
@@ -762,4 +925,7 @@ module.exports = {
   deleteComment,
   likeNews,
   shareNews,
+  getPendingNews,
+  updateNewsStatus,
+  getMyNews,
 };

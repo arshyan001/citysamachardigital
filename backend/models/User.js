@@ -12,6 +12,39 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  role: {
+    type: String,
+    enum: ['admin', 'reporter'],
+    default: 'reporter',
+  },
+  name: {
+    type: String,
+    default: '',
+    trim: true,
+  },
+  photoUrl: {
+    type: String,
+    default: '',
+  },
+  designation: {
+    type: String,
+    default: 'संवाददाता',
+    trim: true,
+  },
+  district: {
+    type: String,
+    default: 'Sant Kabir Nagar',
+    trim: true,
+  },
+  phone: {
+    type: String,
+    default: '',
+    trim: true,
+  },
+  isActive: {
+    type: Boolean,
+    default: true,
+  },
 }, {
   timestamps: true,
 });
