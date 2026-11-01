@@ -3225,69 +3225,71 @@ export default function AdminDashboard() {
 
         {/* TAB: PUSH NOTIFICATIONS MANAGEMENT */}
         {activeTab === 'notifications' && (
-          <div style={{ maxWidth: '850px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          <div style={{ maxWidth: '850px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '20px', width: '100%' }}>
             
             {/* Top Stat Cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
               <div style={{
-                background: 'var(--card-bg, #ffffff)',
+                background: 'var(--bg-card, #141b2d)',
                 border: '1px solid var(--border-color)',
                 borderRadius: '16px',
-                padding: '20px',
+                padding: '18px 20px',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '16px',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.04)'
+                boxShadow: 'var(--shadow-sm)'
               }}>
                 <div style={{
-                  width: '50px',
-                  height: '50px',
+                  width: '48px',
+                  height: '48px',
                   borderRadius: '12px',
-                  background: 'linear-gradient(135deg, rgba(34,197,94,0.15) 0%, rgba(21,128,61,0.2) 100%)',
+                  background: 'linear-gradient(135deg, rgba(34,197,94,0.18) 0%, rgba(21,128,61,0.25) 100%)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: '#16a34a'
+                  color: '#22c55e',
+                  flexShrink: 0
                 }}>
-                  <BellRing size={26} />
+                  <BellRing size={24} />
                 </div>
                 <div>
                   <div style={{ fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 600 }}>
                     कुल सक्रिय सब्सक्राइबर्स
                   </div>
-                  <div style={{ fontSize: '28px', fontWeight: 800, color: 'var(--color-text-primary)', marginTop: '2px' }}>
+                  <div style={{ fontSize: '28px', fontWeight: 800, color: 'var(--color-text-primary)', marginTop: '2px', lineHeight: 1.2 }}>
                     {subscribersCount}
                   </div>
                 </div>
               </div>
 
               <div style={{
-                background: 'var(--card-bg, #ffffff)',
+                background: 'var(--bg-card, #141b2d)',
                 border: '1px solid var(--border-color)',
                 borderRadius: '16px',
-                padding: '20px',
+                padding: '18px 20px',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '16px',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.04)'
+                boxShadow: 'var(--shadow-sm)'
               }}>
                 <div style={{
-                  width: '50px',
-                  height: '50px',
+                  width: '48px',
+                  height: '48px',
                   borderRadius: '12px',
-                  background: 'linear-gradient(135deg, rgba(239,68,68,0.15) 0%, rgba(185,28,28,0.2) 100%)',
+                  background: 'linear-gradient(135deg, rgba(239,68,68,0.18) 0%, rgba(185,28,28,0.25) 100%)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: '#ef4444'
+                  color: '#ef4444',
+                  flexShrink: 0
                 }}>
-                  <Radio size={26} />
+                  <Radio size={24} />
                 </div>
                 <div>
                   <div style={{ fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 600 }}>
                     ऑटो-नोटिफिकेशन स्थिति
                   </div>
-                  <div style={{ fontSize: '15px', fontWeight: 700, color: '#16a34a', marginTop: '4px' }}>
+                  <div style={{ fontSize: '15px', fontWeight: 700, color: '#22c55e', marginTop: '4px' }}>
                     ✅ नई खबर पर सक्रिय
                   </div>
                 </div>
@@ -3296,17 +3298,17 @@ export default function AdminDashboard() {
 
             {/* Quick Test Box */}
             <div style={{
-              background: 'linear-gradient(135deg, rgba(239,68,68,0.08) 0%, rgba(59,130,246,0.05) 100%)',
-              border: '1.5px dashed rgba(239,68,68,0.35)',
+              background: 'linear-gradient(135deg, rgba(239,68,68,0.1) 0%, rgba(59,130,246,0.06) 100%)',
+              border: '1.5px dashed rgba(239,68,68,0.4)',
               borderRadius: '16px',
-              padding: '22px',
+              padding: '18px 20px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               flexWrap: 'wrap',
-              gap: '16px'
+              gap: '14px'
             }}>
-              <div>
+              <div style={{ flex: '1 1 240px' }}>
                 <h4 style={{ margin: '0 0 4px 0', fontSize: '16px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
                   🔔 नोटिफिकेशन टेस्ट करें
                 </h4>
@@ -3321,12 +3323,14 @@ export default function AdminDashboard() {
                 disabled={isTestingNotif}
                 style={{
                   width: 'auto',
-                  display: 'flex',
+                  display: 'inline-flex',
                   alignItems: 'center',
+                  justifyContent: 'center',
                   gap: '8px',
                   background: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)',
-                  boxShadow: '0 4px 12px rgba(239,68,68,0.3)',
-                  whiteSpace: 'nowrap'
+                  boxShadow: '0 4px 14px rgba(239,68,68,0.35)',
+                  whiteSpace: 'nowrap',
+                  padding: '10px 18px'
                 }}
               >
                 {isTestingNotif ? (
@@ -3345,19 +3349,19 @@ export default function AdminDashboard() {
 
             {/* Manual Broadcast Form */}
             <div style={{
-              background: 'var(--card-bg, #ffffff)',
+              background: 'var(--bg-card, #141b2d)',
               border: '1px solid var(--border-color)',
               borderRadius: '18px',
-              padding: '28px',
-              boxShadow: '0 6px 20px rgba(0,0,0,0.05)'
+              padding: '22px',
+              boxShadow: 'var(--shadow-sm)'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
                 <Send size={20} color="var(--color-primary)" />
-                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
                   कस्टम सूचना भेजें (Broadcast to All Readers)
                 </h3>
               </div>
-              <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: '20px', lineHeight: 1.5 }}>
+              <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: '18px', lineHeight: 1.5 }}>
                 यहाँ से आप सभी सब्सक्राइबर्स को ब्रेकिंग न्यूज़, महत्वपूर्ण घोषणा या किसी विशेष खबर का नोटिफिकेशन तुरंत भेज सकते हैं।
               </p>
 
@@ -3390,7 +3394,7 @@ export default function AdminDashboard() {
                   />
                 </div>
 
-                <div style={{ marginBottom: '22px' }}>
+                <div style={{ marginBottom: '20px' }}>
                   <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px', color: 'var(--color-text-primary)' }}>
                     क्लिक करने पर खुलने वाला लिंक (URL)
                   </label>
@@ -3401,21 +3405,22 @@ export default function AdminDashboard() {
                     value={customNotifUrl}
                     onChange={(e) => setCustomNotifUrl(e.target.value)}
                   />
-                  <small style={{ color: 'var(--color-text-secondary)', fontSize: '12px' }}>
+                  <small style={{ color: 'var(--color-text-secondary)', fontSize: '12px', marginTop: '4px', display: 'block' }}>
                     डिफ़ॉल्ट रूप से होमपेज ('/') खुलेगा। किसी खास खबर के लिए उसका लिंक डालें।
                   </small>
                 </div>
 
-                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
                   <button
                     type="submit"
                     className="btn"
                     disabled={isSendingNotif}
                     style={{
-                      width: 'auto',
-                      padding: '12px 24px',
-                      display: 'flex',
+                      flex: '1 1 220px',
+                      padding: '12px 20px',
+                      display: 'inline-flex',
                       alignItems: 'center',
+                      justifyContent: 'center',
                       gap: '8px',
                       fontWeight: 700
                     }}
@@ -3436,7 +3441,7 @@ export default function AdminDashboard() {
                     type="button"
                     className="btn btn-secondary"
                     onClick={fetchSubscribersCount}
-                    style={{ width: 'auto', padding: '12px 18px', fontSize: '13px' }}
+                    style={{ flex: '0 1 auto', padding: '12px 18px', fontSize: '13px', whiteSpace: 'nowrap' }}
                   >
                     🔄 संख्या रिफ्रेश करें
                   </button>
@@ -3446,9 +3451,10 @@ export default function AdminDashboard() {
 
             {/* Help / Guide Box */}
             <div style={{
-              background: 'var(--fb-hover-bg, #f3f4f6)',
+              background: 'var(--bg-card, #141b2d)',
+              border: '1px solid var(--border-color)',
               borderRadius: '16px',
-              padding: '20px',
+              padding: '18px 20px',
               fontSize: '13px',
               color: 'var(--color-text-secondary)',
               lineHeight: 1.6

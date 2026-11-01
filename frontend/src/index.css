@@ -6,6 +6,7 @@
   /* Color Palette (Dark Theme / High Tech News Channel vibe) */
   --bg-main: #0b0f19;
   --bg-card: #141b2d;
+  --card-bg: #141b2d;
   --bg-nav: rgba(11, 15, 25, 0.85);
   --border-color: rgba(255, 255, 255, 0.08);
   --border-glow: rgba(239, 68, 68, 0.15);
@@ -37,6 +38,7 @@
 .light-theme {
   --bg-main: #f8fafc;
   --bg-card: #ffffff;
+  --card-bg: #ffffff;
   --bg-nav: rgba(255, 255, 255, 0.9);
   --border-color: #e2e8f0;
   --border-glow: rgba(239, 68, 68, 0.08);
@@ -251,6 +253,7 @@ select {
   letter-spacing: 0.5px;
   color: var(--color-primary);
   transition: var(--transition-smooth);
+  white-space: nowrap;
 }
 
 .live-badge {
@@ -268,22 +271,45 @@ select {
 
 @media (max-width: 768px) {
   .brand {
+    display: inline-flex !important;
+    align-items: center !important;
     gap: 6px !important;
+    min-width: 0 !important;
+    flex-shrink: 1 !important;
+    text-decoration: none !important;
+    overflow: visible !important;
   }
 
   .brand-logo {
-    height: 42px;
+    height: 36px !important;
+    width: auto !important;
+    max-width: 40px !important;
+    object-fit: contain !important;
+    flex-shrink: 0 !important;
+    border-radius: 4px;
   }
 
   .brand-text {
     font-family: 'Yatra One', 'Rozha One', 'Tiro Devanagari Hindi', serif;
-    font-size: 20px;
+    font-size: clamp(13px, 3.8vw, 17px) !important;
     font-weight: 700;
+    white-space: nowrap !important;
+    line-height: 1.4 !important;
+    color: var(--color-primary) !important;
+    letter-spacing: 0.2px;
+    flex-shrink: 1 !important;
+    overflow: visible !important;
+    padding: 2px 0;
   }
 
   .live-badge {
-    font-size: 8px;
-    padding: 2px 6px;
+    font-size: 8px !important;
+    padding: 2px 5px !important;
+    letter-spacing: 0.5px !important;
+    flex-shrink: 0 !important;
+    line-height: 1 !important;
+    display: inline-flex !important;
+    align-items: center !important;
   }
 }
 
@@ -936,16 +962,18 @@ select {
   transition: var(--transition-smooth);
 }
 
-/* Light‑theme version of input fields */
-.light-theme .form-control {
-  background: rgba(255, 255, 255, 0.6);
-  color: #000;
+.form-control::placeholder {
+  color: rgba(255, 255, 255, 0.45);
 }
 
-.form-control:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 8px var(--border-glow);
+/* Light‑theme version of input fields */
+.light-theme .form-control {
+  background: rgba(255, 255, 255, 0.8);
+  color: #0f172a;
+}
+
+.light-theme .form-control::placeholder {
+  color: rgba(15, 23, 42, 0.45);
 }
 
 .form-control:focus {
@@ -1860,7 +1888,7 @@ footer {
   .mobile-header-actions {
     display: flex !important;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     flex-shrink: 0;
   }
 
@@ -1883,7 +1911,12 @@ footer {
   }
 
   .nav-main {
-    height: 64px;
+    height: 58px;
+  }
+
+  .nav-main .container {
+    padding: 0 10px;
+    gap: 8px;
   }
 
   .top-bar {
@@ -1988,21 +2021,38 @@ footer {
     display: none !important;
   }
 
+  .admin-navbar .mobile-header-actions {
+    display: none !important;
+  }
+
+  .admin-navbar .mobile-notif-btn {
+    display: none !important;
+  }
+
   .admin-navbar .nav-main {
     height: auto;
-    padding: 12px 0;
+    padding: 10px 0;
   }
 
   .admin-navbar .nav-main .container {
     justify-content: center !important;
+    align-items: center !important;
     text-align: center;
   }
 
   .admin-navbar .nav-main .brand {
-    justify-content: center;
-    width: 100%;
-    margin: 0;
-    /* Make brand label static on admin mobile view */
+    justify-content: center !important;
+    width: auto !important;
+    margin: 0 auto;
+    gap: 8px !important;
+  }
+
+  .admin-navbar .nav-main .brand-text {
+    white-space: nowrap !important;
+    font-size: clamp(14px, 4vw, 19px) !important;
+    line-height: 1.4 !important;
+    overflow: visible !important;
+    padding: 2px 0;
   }
 
   .admin-ticker {

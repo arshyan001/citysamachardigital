@@ -113,18 +113,7 @@ export default function Navbar() {
         </NavLink>
       </li>
 
-      {/* Explicit Notification Button in Menu */}
-      {isMobile && (
-        <li style={{ padding: '8px 0', borderBottom: '1px solid var(--border-color)' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--color-primary)', textTransform: 'uppercase', letterSpacing: '0.4px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <BellRing size={13} />
-              सूचनाएं (Notification Alert):
-            </span>
-            <NotificationBell fullWidth={true} />
-          </div>
-        </li>
-      )}
+
 
       {/* Dropdown for Sant Kabir Nagar locations */}
       <li className={`dropdown-menu ${isMobile ? 'mobile-dropdown-item' : ''}`}>
@@ -355,33 +344,39 @@ export default function Navbar() {
               {renderNavLinks(false)}
             </ul>
 
-            {/* Mobile Controls: Bell + Hamburger side-by-side */}
-            <div className="mobile-header-actions">
-              {/* Direct Quick Bell for mobile header */}
-              <div className="mobile-notif-btn">
-                <NotificationBell />
-              </div>
+            {/* Mobile Controls: Bell + Hamburger side-by-side (Non-admin only) */}
+            {!isAdminPage && (
+              <div className="mobile-header-actions">
+                {/* Direct Quick Bell for mobile header */}
+                <div className="mobile-notif-btn">
+                  <NotificationBell compact={true} />
+                </div>
 
-              {/* Mobile Menu Hamburger Button */}
-              <button 
-                className="menu-toggle-btn" 
-                onClick={() => setIsOpen(true)}
-                aria-label="Open mobile menu"
-                style={{
-                  background: 'rgba(239, 68, 68, 0.12)',
-                  border: '1.5px solid rgba(239, 68, 68, 0.35)',
-                  borderRadius: '10px',
-                  color: 'var(--color-text-primary)',
-                  padding: '7px 9px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer'
-                }}
-              >
-                <Menu size={22} color="var(--color-primary)" />
-              </button>
-            </div>
+                {/* Mobile Menu Hamburger Button */}
+                <button 
+                  className="menu-toggle-btn" 
+                  onClick={() => setIsOpen(true)}
+                  aria-label="Open mobile menu"
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    minWidth: '36px',
+                    background: 'rgba(239, 68, 68, 0.12)',
+                    border: '1.5px solid rgba(239, 68, 68, 0.35)',
+                    borderRadius: '10px',
+                    color: 'var(--color-primary)',
+                    padding: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    flexShrink: 0
+                  }}
+                >
+                  <Menu size={20} color="var(--color-primary)" />
+                </button>
+              </div>
+            )}
           </div>
         </nav>
 

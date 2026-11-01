@@ -17,7 +17,7 @@ function urlBase64ToUint8Array(base64String) {
   return outputArray;
 }
 
-export default function NotificationBell({ fullWidth = false }) {
+export default function NotificationBell({ fullWidth = false, compact = false }) {
   const [permission, setPermission] = useState(() => {
     if (typeof window !== 'undefined' && 'Notification' in window) {
       return Notification.permission;
@@ -670,6 +670,35 @@ export default function NotificationBell({ fullWidth = false }) {
           boxShadow: isSubscribed || permission === 'denied' ? 'none' : '0 4px 14px rgba(239,68,68,0.35)',
           transition: 'all 0.2s ease',
           opacity: loading ? 0.7 : 1,
+        } : compact ? {
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '36px',
+          height: '36px',
+          minWidth: '36px',
+          background: isSubscribed
+            ? 'rgba(34,197,94,0.14)'
+            : permission === 'denied'
+            ? 'rgba(239,68,68,0.1)'
+            : 'rgba(239,68,68,0.12)',
+          border: isSubscribed
+            ? '1.5px solid rgba(34,197,94,0.6)'
+            : permission === 'denied'
+            ? '1.5px solid rgba(239,68,68,0.5)'
+            : '1.5px solid rgba(239,68,68,0.35)',
+          borderRadius: '10px',
+          padding: 0,
+          cursor: loading ? 'wait' : 'pointer',
+          color: isSubscribed 
+            ? '#16a34a' 
+            : permission === 'denied' 
+            ? '#ef4444' 
+            : 'var(--color-primary)',
+          transition: 'all 0.2s ease',
+          opacity: loading ? 0.7 : 1,
+          position: 'relative',
+          flexShrink: 0
         } : {
           display: 'flex',
           alignItems: 'center',
@@ -703,36 +732,38 @@ export default function NotificationBell({ fullWidth = false }) {
         {loading ? (
           <span style={{ width: '13px', height: '13px', border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.6s linear infinite' }} />
         ) : permission === 'denied' ? (
-          <BellOff size={fullWidth ? 16 : 15} color="#ef4444" />
+          <BellOff size={compact ? 17 : (fullWidth ? 16 : 15)} color="#ef4444" />
         ) : isSubscribed ? (
-          <BellRing size={fullWidth ? 16 : 15} color="#16a34a" style={{ animation: 'bellRing 1s ease-in-out' }} />
+          <BellRing size={compact ? 17 : (fullWidth ? 16 : 15)} color="#16a34a" style={{ animation: 'bellRing 1s ease-in-out' }} />
         ) : (
-          <Bell size={fullWidth ? 16 : 15} />
+          <Bell size={compact ? 17 : (fullWidth ? 16 : 15)} />
         )}
-        <span>
-          {fullWidth ? (
-            isSubscribed 
-              ? '✅ सूचना चालू है (टैप कर बंद करें)' 
-              : permission === 'denied' 
-              ? '⚠️ सूचना ब्लॉक है (चालू करें)' 
-              : '🔔 सूचना चालू करें'
-          ) : (
-            isSubscribed 
-              ? 'सूचना चालू' 
-              : permission === 'denied' 
-              ? 'सूचना ब्लॉक' 
-              : 'सूचना चालू करें'
-          )}
-        </span>
+        {!compact && (
+          <span>
+            {fullWidth ? (
+              isSubscribed 
+                ? '✅ सूचना चालू है (टैप कर बंद करें)' 
+                : permission === 'denied' 
+                ? '⚠️ सूचना ब्लॉक है (चालू करें)' 
+                : '🔔 सूचना चालू करें'
+            ) : (
+              isSubscribed 
+                ? 'सूचना चालू' 
+                : permission === 'denied' 
+                ? 'सूचना ब्लॉक' 
+                : 'सूचना चालू करें'
+            )}
+          </span>
+        )}
 
         {/* Pulsing alert dot for not subscribed */}
         {!isSubscribed && permission !== 'denied' && !fullWidth && (
           <span style={{
             position: 'absolute',
-            top: '-2px',
-            right: '-2px',
-            width: '8px',
-            height: '8px',
+            top: compact ? '4px' : '-2px',
+            right: compact ? '4px' : '-2px',
+            width: '7px',
+            height: '7px',
             borderRadius: '50%',
             background: '#ef4444',
             boxShadow: '0 0 6px #ef4444',
